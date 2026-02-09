@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGEF | Importar Dados - Caruaru</title>
+  <link rel="icon" type="image/png" href="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/portal-transparencia.css">
+  <!-- SheetJS para ler Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- Pipeline de transformação (para importação de planilhas brutas) -->
+  <script src="pipeline-dados/js/utils-transformacao.js?v=20260208"></script>
+  <script src="pipeline-dados/js/transformar-credores.js?v=20260208"></script>
+  <script src="pipeline-dados/js/transformar-a-pagar.js?v=20260208"></script>
+  <script src="pipeline-dados/js/transformar-pagos.js?v=20260208"></script>
+  <script src="pipeline-dados/js/transformar-emitidos.js?v=20260208"></script>
+  <script src="pipeline-dados/js/transformar-liquidados.js?v=20260208"></script>
+  <script src="pipeline-dados/js/transformar-consignados.js?v=20260208"></script>
+  <script src="pipeline-dados/js/transformar-detalhamento.js?v=20260208"></script>
+  <script src="pipeline-dados/js/cruzar-dados.js?v=20260208"></script>
+  <!-- V2: Substituir alvos para usar consignados em vez de retidos -->
+  <script>
+    _CRUZAR_ALVOS = [
+      { role: 'liquidados', label: 'Emp. Liquidados', gruposFortes: [['liquidados']], palavras: ['relacao','empenhos','liquidados','movimento','mensal','completo','final'], obrigatorio: true },
+      { role: 'pagos', label: 'Emp. Pagos', gruposFortes: [['pagos','sintetico'],['empenhos','pagos']], palavras: ['empenhos','pagos','sintetico','relacao'], obrigatorio: true },
+      { role: 'emitidos', label: 'Emp. Emitidos', gruposFortes: [['empenhos','emitidos']], palavras: ['empenhos','emitidos','relacao','mensal'], obrigatorio: true },
+      { role: 'aPagar', label: 'Empenhos a pagar', gruposFortes: [['empenhos','pagar']], palavras: ['relacao','empenhos','pagar','a'], obrigatorio: true },
+      { role: 'consignados', label: 'Consignados Analítico', gruposFortes: [['retidos','consignados'],['consignados','analitico']], palavras: ['retidos','consignados','analitico','movimento','consignacoes'], obrigatorio: true },
+      { role: 'credores', label: 'Credores', gruposFortes: [['credores'],['fornecedores']], palavras: ['relacao','credores','fornecedores','credor'], obrigatorio: true },
+      { role: 'simples', label: 'Simples Nacional (opcional)', gruposFortes: [['simples','nacional'],['simples']], palavras: ['simples','nacional','resultado','planilha'], obrigatorio: false },
+      { role: 'balancete', label: 'Balancete', gruposFortes: [['balancete','despesa'],['balancete']], palavras: ['balancete','despesa'], obrigatorio: true },
+      { role: 'detalhamento', label: 'Detalhamento', gruposFortes: [['natureza','consolidado'],['despesa','natureza']], palavras: ['relatorio','despesa','natureza','consolidado'], obrigatorio: true }
+    ];
+  </script>
+  <style>
+    .upload-area {
+      border: 3px dashed #e2e8f0;
+      border-radius: 16px;
+      padding: 60px 40px;
+      text-align: center;
+      background: #f8fafc;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      margin-bottom: 30px;
+    }
+    .upload-area:hover, .upload-area.dragover {
+      border-color: var(--color-primary);
+      background: rgba(45, 152, 70, 0.05);
+    }
+    .upload-area i {
+      font-size: 64px;
+      color: #cbd5e1;
+      margin-bottom: 20px;
+    }
+    .upload-area:hover i {
+      color: var(--color-primary);
+    }
+    .upload-area h3 {
+      font-size: 20px;
+      color: var(--text-dark);
+      margin-bottom: 10px;
+    }
+    .upload-area p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .upload-area input[type="file"] {
+      display: none;
+    }
+    .tipo-dados-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    .tipo-dado-card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    .tipo-dado-card:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-2px);
+    }
+    .tipo-dado-card.selected {
+      border-color: var(--color-primary);
+      background: rgba(45, 152, 70, 0.05);
+    }
+    .tipo-dado-card i {
+      font-size: 32px;
+      margin-bottom: 12px;
+      color: var(--color-primary);
+    }
+    .tipo-dado-card h4 {
+      font-size: 14px;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+    }
+    .tipo-dado-card p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .preview-section {
+      display: none;
+      margin-top: 30px;
+    }
+    .preview-section.show {
+      display: block;
+    }
+    .preview-info {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .preview-info i {
+      font-size: 24px;
+      color: var(--color-primary);
+    }
+    .preview-info .info-text h4 {
+      font-size: 14px;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+    }
+    .preview-info .info-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+    .btn-lg {
+      padding: 14px 32px;
+      font-size: 15px;
+    }
+    .status-message {
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: none;
+    }
+    .status-message.success {
+      display: block;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #166534;
+    }
+    .status-message.error {
+      display: block;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+    }
+    .status-message.info {
+      display: block;
+      background: #eff6ff;
+      border: 1px solid #93c5fd;
+      color: #1d4ed8;
+    }
+    /* Sub-opções de despesas */
+    .sub-opcoes { display: none; margin-top: 20px; }
+    .sub-opcoes.show { display: block; }
+    .sub-opcoes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 800px; margin: 0 auto; }
+    .sub-opcao-card {
+      border: 2px solid #e2e8f0; border-radius: 12px; padding: 24px; cursor: pointer;
+      transition: all 0.3s; text-align: center; background: white;
+    }
+    .sub-opcao-card:hover { border-color: #059669; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .sub-opcao-card.selected { border-color: #059669; background: rgba(5,150,105,.05); box-shadow: 0 0 0 3px rgba(5,150,105,.2); }
+    .sub-opcao-card i { font-size: 36px; margin-bottom: 12px; color: #059669; }
+    .sub-opcao-card h4 { font-size: 15px; color: var(--text-dark); margin-bottom: 6px; }
+    .sub-opcao-card p { font-size: 12px; color: var(--text-muted); margin: 0; }
+    /* Upload de pasta (planilhas brutas) */
+    .upload-brutos { display: none; margin-top: 24px; }
+    .upload-brutos.show { display: block; }
+    .upload-brutos .folder-input-wrap { position: relative; display: inline-block; }
+    .upload-brutos .folder-input-wrap input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .file-grid-detect { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0; }
+    .file-slot { display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+      border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; background: #f8fafc; }
+    .file-slot .role { font-weight: 600; color: #475569; min-width: 140px; }
+    .file-slot .fname { color: #059669; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-slot .missing { color: #dc2626; font-style: italic; }
+    .file-slot.ok { border-color: #86efac; background: #f0fdf4; }
+    .file-slot.err { border-color: #fca5a5; background: #fef2f2; }
+    .file-slot.warn { border-color: #fcd34d; background: #fefce8; }
+    .progress-bar-pipe { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin: 12px 0; }
+    .progress-bar-pipe .fill { height: 100%; background: #059669; border-radius: 4px; transition: width .3s; }
+    .phase-log-pipe { font-size: 12px; color: #64748b; margin: 8px 0; max-height: 200px; overflow-y: auto;
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; }
+    .phase-line-pipe { margin: 2px 0; }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <img src="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png" alt="Brasão Caruaru">
+      </div>
+      <h1 class="sidebar-title">Secretaria da Fazenda</h1>
+      <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    <nav class="sidebar-menu">
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)">
+          <i class="fas fa-hand-holding-usd"></i>
+          <span>Receitas</span>
+          <i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="receitas-previsao.html" class="menu-link"><i class="fas fa-chart-line"></i><span>Previsão</span></a></li>
+          <li class="menu-item"><a href="receitas-arrecadacao.html" class="menu-link"><i class="fas fa-money-bill-wave"></i><span>Arrecadação</span></a></li>
+          <li class="menu-item"><a href="receitas-retencoes.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retenções</span></a></li>
+          <li class="menu-item"><a href="receitas-deducoes.html" class="menu-link"><i class="fas fa-minus-circle"></i><span>Deduções</span></a></li>
+          <li class="menu-item"><a href="receitas-gerencial.html" class="menu-link"><i class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="receitas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)">
+          <i class="fas fa-file-invoice-dollar"></i>
+          <span>Despesas</span>
+          <i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="despesas-empenhados.html" class="menu-link"><i class="fas fa-file-invoice"></i><span>Empenhados</span></a></li>
+          <li class="menu-item"><a href="despesas-liquidados.html" class="menu-link"><i class="fas fa-check-circle"></i><span>Liquidados</span></a></li>
+          <li class="menu-item"><a href="despesas-retidos.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retidos</span></a></li>
+          <li class="menu-item"><a href="despesas-pagos.html" class="menu-link"><i class="fas fa-money-check-alt"></i><span>Pagos</span></a></li>
+          <li class="menu-item"><a href="despesas-a-pagar.html" class="menu-link"><i class="fas fa-clock"></i><span>A Pagar</span></a></li>
+          <li class="menu-item"><a href="despesas-gerencial.html" class="menu-link"><i class="fas fa-chart-line"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="despesas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section expanded">
+        <div class="menu-section-title" onclick="toggleSection(this)">
+          <i class="fas fa-database"></i>
+          <span>Banco de Dados</span>
+          <i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="banco-importar-dados.html" class="menu-link active"><i class="fas fa-file-import"></i><span>Importar Dados</span></a></li>
+          <li class="menu-item"><a href="banco-historico.html" class="menu-link"><i class="fas fa-history"></i><span>Histórico</span></a></li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <nav class="breadcrumb">
+          <span>Banco de Dados</span>
+          <i class="fas fa-chevron-right"></i>
+          <span>Importar Dados</span>
+        </nav>
+      </div>
+      <div class="header-actions">
+        <div class="user-menu">
+          <div class="user-avatar">AD</div>
+          <div class="user-info"><span class="user-name">Administrador</span><span class="user-role">SIGEF</span></div>
+        </div>
+      </div>
+    </header>
+    <section class="page-header">
+      <div class="page-header-content">
+        <h1 class="page-title"><i class="fas fa-file-import"></i> Importar Dados</h1>
+        <p class="page-subtitle">Importe planilhas Excel para atualizar os dados de receitas e despesas</p>
+      </div>
+    </section>
+    <main class="content-area">
+
+      <!-- Card Principal -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-upload"></i> Enviar Planilha</h2>
+        </div>
+        <div class="card-body">
+          
+          <!-- Seleção do Tipo de Dado -->
+          <h3 style="font-size: 15px; margin-bottom: 16px; color: var(--text-dark);">
+            <i class="fas fa-list" style="color: var(--color-primary); margin-right: 8px;"></i>
+            Selecione o modo de importação:
+          </h3>
+          
+          <!-- Opções de Importação -->
+          <div class="tipo-dados-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 800px; margin: 0 auto 30px;">
+            
+            <!-- Importar Despesas -->
+            <div style="padding: 24px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-radius: 16px; cursor: pointer; transition: all 0.3s;" onclick="selecionarTipoDespesas()" id="importacaoDespesas">
+              <div style="text-align: center; color: white;">
+                <i class="fas fa-file-invoice-dollar" style="font-size: 48px; margin-bottom: 16px;"></i>
+                <h4 style="font-size: 18px; margin: 0 0 8px 0;">Importar Despesas</h4>
+                <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 13px;">
+                  Documento completo ou planilhas brutas do SIGEF
+                </p>
+              </div>
+            </div>
+            
+            <!-- Importar Receitas -->
+            <div style="padding: 24px; background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); border-radius: 16px; cursor: pointer; transition: all 0.3s;" onclick="selecionarTipo(this)" id="importacaoReceitas">
+              <div class="tipo-dado-card" data-tipo="receitas-completo" style="background: transparent; border: none; color: white; margin: 0; padding: 0;">
+                <i class="fas fa-coins" style="font-size: 48px; color: white; margin-bottom: 16px;"></i>
+                <h4 style="font-size: 18px; margin: 0 0 8px 0; color: white;">Importar Receitas</h4>
+                <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 13px;">
+                  Planilha Movimentacoes_da_Receita.xlsx<br>
+                  Separa automaticamente por: Previsão, Arrecadação, Retenções, Deduções.
+                </p>
+              </div>
+            </div>
+            
+          </div>
+
+          <!-- Sub-opções de Despesas (aparece ao clicar em Despesas) -->
+          <div class="sub-opcoes" id="subOpcoesDespesas">
+            <h3 style="font-size: 15px; margin-bottom: 16px; color: var(--text-dark); text-align: center;">
+              <i class="fas fa-exchange-alt" style="color: #059669; margin-right: 8px;"></i>
+              Como deseja importar as despesas?
+            </h3>
+            <div class="sub-opcoes-grid">
+              <div class="sub-opcao-card" id="subDocCompleto" onclick="selecionarSubOpcao('completo')">
+                <i class="fas fa-file-excel"></i>
+                <h4>Documento Completo</h4>
+                <p>Arquivo Excel já processado com múltiplas abas (Empenhados, Liquidados, Pagos, A Pagar, Retidos).</p>
+              </div>
+              <div class="sub-opcao-card" id="subBrutos" onclick="selecionarSubOpcao('brutos')">
+                <i class="fas fa-cogs"></i>
+                <h4>Planilhas Brutas (SIGEF)</h4>
+                <p>9 arquivos Excel brutos do SIGEF. Serão transformados e cruzados automaticamente antes da importação.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Área de Upload (documento completo / receitas) -->
+          <div class="upload-area" id="uploadArea" style="display: none;">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <h3>Arraste a planilha aqui ou clique para selecionar</h3>
+            <p>Formatos aceitos: .xlsx, .xls (Excel)</p>
+            <input type="file" id="fileInput" accept=".xlsx,.xls">
+          </div>
+
+          <!-- Área de Upload (planilhas brutas) -->
+          <div class="upload-brutos" id="uploadBrutos">
+            <div style="background: #eff6ff; border: 1px solid #93c5fd; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px; color: #1d4ed8;">
+              <i class="fas fa-info-circle" style="margin-right: 6px;"></i>
+              Selecione a <strong>pasta</strong> contendo os 9 arquivos brutos do SIGEF, ou selecione os <strong>arquivos individualmente</strong>.<br>
+              <strong>SIGEF (6):</strong> Emitidos, Liquidados, Pagos, A Pagar, <strong>Consignados Analítico</strong>, Credores<br>
+              <strong>Externos (3):</strong> Balancete, Detalhamento, Simples Nacional <em>(opcional)</em>
+            </div>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+              <div class="folder-input-wrap">
+                <button class="btn btn-primary"><i class="fas fa-folder-open"></i> Selecionar Pasta...</button>
+                <input type="file" id="brutosFolder" webkitdirectory multiple>
+              </div>
+              <span style="color:#94a3b8; font-size:13px; padding-top:10px;">ou</span>
+              <div class="folder-input-wrap">
+                <button class="btn btn-secondary"><i class="fas fa-files"></i> Selecionar Arquivos...</button>
+                <input type="file" id="brutosFiles" multiple accept=".xlsx,.xls,.xlsm">
+              </div>
+            </div>
+            <div id="brutosDeteccao"></div>
+            <div class="progress-bar-pipe" id="brutosProgressBar" style="display: none;">
+              <div class="fill" id="brutosProgressFill" style="width:0%"></div>
+            </div>
+            <div id="brutosPhaseLog" class="phase-log-pipe" style="display: none;"></div>
+            <div id="brutosBotaoProcessar" style="display: none; text-align: center; margin-top: 16px;">
+              <button class="btn btn-primary btn-lg" id="btnProcessarBrutos" onclick="processarBrutos()">
+                <i class="fas fa-play"></i> Transformar e Importar
+              </button>
+            </div>
+          </div>
+
+          <!-- Preview dos Dados -->
+          <div class="preview-section" id="previewSection">
+            <div class="preview-info">
+              <i class="fas fa-check-circle"></i>
+              <div class="info-text">
+                <h4 id="fileName">Arquivo carregado</h4>
+                <p id="fileInfo">0 registros encontrados</p>
+              </div>
+            </div>
+            
+            <h3 style="font-size: 15px; margin-bottom: 16px; color: var(--text-dark);">
+              <i class="fas fa-eye" style="color: var(--color-primary); margin-right: 8px;"></i>
+              Pré-visualização dos dados (primeiros 5 registros):
+            </h3>
+            
+            <div class="table-container">
+              <table class="data-table" id="previewTable">
+                <thead id="previewHeader"></thead>
+                <tbody id="previewBody"></tbody>
+              </table>
+            </div>
+
+            <div class="action-buttons">
+              <button class="btn btn-secondary btn-lg" onclick="cancelarImportacao()">
+                <i class="fas fa-times"></i> Cancelar
+              </button>
+              <button class="btn btn-primary btn-lg" onclick="confirmarImportacao()">
+                <i class="fas fa-check"></i> Confirmar Importação
+              </button>
+            </div>
+          </div>
+
+          <!-- Mensagem de Status -->
+          <div class="status-message" id="statusMessage"></div>
+
+        </div>
+      </div>
+
+    </main>
+    <footer class="main-footer">
+      <div class="footer-content">
+        <p class="footer-text">© 2026 Prefeitura Municipal de Caruaru - SIGEF. Todos os direitos reservados.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="js/portal-transparencia.js"></script>
+  <script>
+    // =====================================================
+    // IndexedDB - Banco de dados local para grandes volumes
+    // =====================================================
+    const DB_NAME = 'PortalTransparenciaDB';
+    const DB_VERSION = 2; // Versão aumentada para criar novos stores
+    let db = null;
+    let dbReady = false;
+
+    // Inicializar IndexedDB
+    function initDB() {
+      return new Promise((resolve, reject) => {
+        console.log('Iniciando IndexedDB...');
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        
+        request.onerror = (event) => {
+          console.error('Erro ao abrir IndexedDB:', event.target.error);
+          reject(event.target.error);
+        };
+        
+        request.onsuccess = (event) => {
+          db = event.target.result;
+          dbReady = true;
+          console.log('IndexedDB inicializado com sucesso! Versão:', db.version);
+          console.log('Stores disponíveis:', Array.from(db.objectStoreNames));
+          resolve(db);
+        };
+        
+        request.onupgradeneeded = (event) => {
+          console.log('Atualizando schema do IndexedDB...');
+          const database = event.target.result;
+          
+          // Criar stores para cada tipo de despesa e receita
+          const stores = [
+            'despesas-empenhados',
+            'despesas-liquidados', 
+            'despesas-pagos',
+            'despesas-retidos',
+            'despesas-a-pagar',
+            // Stores de Receitas
+            'receitas-previsao',
+            'receitas-arrecadacao',
+            'receitas-retencoes',
+            'receitas-deducoes'
+          ];
+          
+          stores.forEach(storeName => {
+            if (!database.objectStoreNames.contains(storeName)) {
+              database.createObjectStore(storeName, { keyPath: 'id', autoIncrement: true });
+              console.log(`Store ${storeName} criado`);
+            }
+          });
+        };
+        
+        request.onblocked = () => {
+          console.warn('IndexedDB bloqueado! Feche outras abas do sistema.');
+          alert('O banco de dados está bloqueado. Por favor, feche outras abas do SIGEF e recarregue a página.');
+        };
+      });
+    }
+
+    // Garantir que o DB está pronto antes de salvar
+    async function garantirDBPronto() {
+      if (dbReady && db) return true;
+      try {
+        await initDB();
+        return true;
+      } catch (e) {
+        console.error('Falha ao inicializar DB:', e);
+        return false;
+      }
+    }
+
+    // Abrir conexão fresca ao IndexedDB (para operações após processamento longo)
+    function abrirConexaoFresca() {
+      return new Promise((resolve, reject) => {
+        var request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onsuccess = (e) => resolve(e.target.result);
+        request.onerror = (e) => reject(e.target.error);
+        request.onupgradeneeded = (event) => {
+          var database = event.target.result;
+          ['despesas-empenhados','despesas-liquidados','despesas-pagos','despesas-retidos','despesas-a-pagar',
+           'receitas-previsao','receitas-arrecadacao','receitas-retencoes','receitas-deducoes'].forEach(s => {
+            if (!database.objectStoreNames.contains(s)) database.createObjectStore(s, { keyPath: 'id', autoIncrement: true });
+          });
+        };
+      });
+    }
+
+    // Salvar dados no IndexedDB — conexão fresca + lotes para robustez
+    async function salvarDadosDB(storeName, dados) {
+      console.log(`Salvando ${dados.length} registros em ${storeName}...`);
+
+      // Abrir conexão fresca (evita "connection is closing" após processamento longo)
+      var freshDb = await abrirConexaoFresca();
+
+      try {
+        // 1. Limpar store
+        await new Promise((resolve, reject) => {
+          var tx = freshDb.transaction([storeName], 'readwrite');
+          tx.objectStore(storeName).clear();
+          tx.oncomplete = () => resolve();
+          tx.onerror = (e) => reject(e.target.error);
+          tx.onabort = () => reject(new Error('Limpeza abortada em ' + storeName));
+        });
+
+        // 2. Inserir em lotes de 5000
+        var BATCH = 5000;
+        var totalAdicionados = 0;
+
+        for (var offset = 0; offset < dados.length; offset += BATCH) {
+          var fim = Math.min(offset + BATCH, dados.length);
+          await new Promise((resolve, reject) => {
+            var tx = freshDb.transaction([storeName], 'readwrite');
+            var store = tx.objectStore(storeName);
+            for (var i = offset; i < fim; i++) {
+              store.put(Object.assign({}, dados[i], { id: i + 1 }));
+            }
+            tx.oncomplete = () => { totalAdicionados += (fim - offset); resolve(); };
+            tx.onerror = (e) => reject(e.target.error);
+            tx.onabort = () => reject(new Error('Lote ' + offset + '-' + fim + ' abortado'));
+          });
+        }
+
+        console.log(`${totalAdicionados} registros salvos em ${storeName}`);
+        return totalAdicionados;
+      } finally {
+        // Fechar a conexão fresca após uso
+        freshDb.close();
+      }
+    }
+
+    // Carregar dados do IndexedDB
+    async function carregarDadosDB(storeName) {
+      const pronto = await garantirDBPronto();
+      if (!pronto) {
+        throw new Error('Banco de dados não disponível');
+      }
+      
+      return new Promise((resolve, reject) => {
+        try {
+          const transaction = db.transaction([storeName], 'readonly');
+          const store = transaction.objectStore(storeName);
+          const request = store.getAll();
+          
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        } catch (e) {
+          console.error('Erro ao carregar dados:', e);
+          reject(e);
+        }
+      });
+    }
+
+    // Inicializar DB ao carregar página
+    initDB()
+      .then(() => {
+        console.log('DB pronto para uso!');
+        // Mostrar status de sucesso brevemente
+        const statusEl = document.getElementById('statusMessage');
+        if (statusEl) {
+          statusEl.textContent = '✓ Sistema pronto para importação';
+          statusEl.className = 'status-message success';
+          setTimeout(() => {
+            statusEl.className = 'status-message';
+          }, 3000);
+        }
+      })
+      .catch(err => {
+        console.error('Erro ao inicializar IndexedDB:', err);
+        mostrarStatus('ERRO: Banco de dados não pôde ser inicializado. Recarregue a página (F5).', 'error');
+        alert('Erro ao inicializar o sistema!\n\nPor favor, feche todas as outras abas do SIGEF e recarregue esta página (F5).');
+      });
+
+    // =====================================================
+    // Variáveis globais
+    // =====================================================
+    let tipoSelecionado = null;
+    let dadosImportados = null;
+    let dadosMultiplasAbas = null; // Para importação automática
+
+    // Mapeamento das abas do Excel para chaves do localStorage
+    // Mapeamento flexível de abas - aceita várias variações dos nomes
+    const mapeamentoAbas = {
+      // Empenhados - várias formas
+      'empenhados': 'despesas-empenhados',
+      'empenhado': 'despesas-empenhados',
+      'empenhos': 'despesas-empenhados',
+      'empenho': 'despesas-empenhados',
+      'emp': 'despesas-empenhados',
+      // Liquidados - várias formas
+      'liquidados': 'despesas-liquidados',
+      'liquidado': 'despesas-liquidados',
+      'liquidacoes': 'despesas-liquidados',
+      'liquidações': 'despesas-liquidados',
+      'liquidacao': 'despesas-liquidados',
+      'liquidação': 'despesas-liquidados',
+      'liq': 'despesas-liquidados',
+      // Pagos - várias formas
+      'pagos': 'despesas-pagos',
+      'pago': 'despesas-pagos',
+      'pagamentos': 'despesas-pagos',
+      'pagamento': 'despesas-pagos',
+      'pag': 'despesas-pagos',
+      // A Pagar - várias formas
+      'a pagar': 'despesas-a-pagar',
+      'apagar': 'despesas-a-pagar',
+      'a_pagar': 'despesas-a-pagar',
+      'a-pagar': 'despesas-a-pagar',
+      'restos': 'despesas-a-pagar',
+      'restos a pagar': 'despesas-a-pagar',
+      'rap': 'despesas-a-pagar',
+      // Retidos - várias formas
+      'retidos': 'despesas-retidos',
+      'retido': 'despesas-retidos',
+      'retencoes': 'despesas-retidos',
+      'retenções': 'despesas-retidos',
+      'retencao': 'despesas-retidos',
+      'retenção': 'despesas-retidos',
+      'ret': 'despesas-retidos'
+    };
+    
+    // Mapeamento do campo "Histórico" da planilha de receitas para stores
+    const mapeamentoHistoricoReceitas = {
+      'previsão da receita orçamentária': 'receitas-previsao',
+      'previsao da receita orcamentaria': 'receitas-previsao',
+      'arrecadação de receita': 'receitas-arrecadacao',
+      'arrecadacao de receita': 'receitas-arrecadacao',
+      'apropriação de retenção/consignação': 'receitas-retencoes',
+      'apropriacao de retencao/consignacao': 'receitas-retencoes',
+      'dedução de receita': 'receitas-deducoes',
+      'deducao de receita': 'receitas-deducoes'
+    };
+
+    // =====================================================
+    // Função para converter data serial do Excel para DD/MM/AAAA
+    // =====================================================
+    function converterDataExcel(valor) {
+      // Se já for string no formato de data, retorna
+      if (typeof valor === 'string') {
+        // Já está no formato DD/MM/AAAA
+        if (valor.match(/^\d{2}\/\d{2}\/\d{4}$/)) return valor;
+        // Formato AAAA-MM-DD (ISO)
+        if (valor.match(/^\d{4}-\d{2}-\d{2}/)) {
+          const partes = valor.split('T')[0].split('-');
+          return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        }
+        return valor;
+      }
+      
+      // Se for número (serial do Excel)
+      if (typeof valor === 'number' && valor > 0) {
+        // Excel usa 1/1/1900 como dia 1 (com bug do ano bissexto 1900)
+        // JavaScript usa 1/1/1970 como epoch
+        // Diferença: 25569 dias entre 1/1/1900 e 1/1/1970
+        const diasDesde1900 = valor;
+        const milissegundosPorDia = 24 * 60 * 60 * 1000;
+        
+        // Ajuste: Excel considera 1/1/1900 = 1, então subtraímos 1
+        // Também há o bug do Excel que considera 1900 como bissexto
+        const ajuste = diasDesde1900 > 60 ? 25567 : 25568;
+        
+        const data = new Date((diasDesde1900 - ajuste) * milissegundosPorDia);
+        
+        if (isNaN(data.getTime())) return valor;
+        
+        const dia = String(data.getUTCDate()).padStart(2, '0');
+        const mes = String(data.getUTCMonth() + 1).padStart(2, '0');
+        const ano = data.getUTCFullYear();
+        
+        return `${dia}/${mes}/${ano}`;
+      }
+      
+      return valor;
+    }
+    
+    // Converter todas as colunas de data em um registro
+    function converterDatasRegistro(registro) {
+      const colunasData = ['Data', 'data', 'DATA', 'Dt.', 'dt.'];
+      const novoRegistro = { ...registro };
+      
+      for (const coluna of Object.keys(novoRegistro)) {
+        // Verificar se é coluna de data pelo nome
+        const isDataCol = colunasData.some(d => coluna.toLowerCase().includes(d.toLowerCase()));
+        
+        if (isDataCol || (typeof novoRegistro[coluna] === 'number' && novoRegistro[coluna] > 40000 && novoRegistro[coluna] < 60000)) {
+          novoRegistro[coluna] = converterDataExcel(novoRegistro[coluna]);
+        }
+      }
+      
+      return novoRegistro;
+    }
+    
+    // Converter datas em um array de registros
+    function converterDatasArray(dados) {
+      return dados.map(registro => converterDatasRegistro(registro));
+    }
+
+    // Modelos de colunas para cada tipo de dado
+    const modelosColunas = {
+      'despesas-empenhados': ['Nr emp.', 'Data', 'Credor/Fornecedor', 'Espécie', 'Unidade orçamentária', 'Valor (R$)'],
+      'despesas-liquidados': ['Seq. liq.', 'Nr emp.', 'Data', 'Credor/Fornecedor', 'Espécie', 'Valor (R$)'],
+      'despesas-pagos': ['Nr Emp.', 'Seq. Liq.', 'Data', 'Credor/Fornecedor', 'Valor (R$)'],
+      'despesas-retidos': ['Sequência', 'Nr emp.', 'Data', 'Credor/Fornecedor', 'Retenção', 'Valor retido'],
+      'despesas-a-pagar': ['Nr emp.', 'Av. liquid.', 'Data', 'Credor/Fornecedor', 'Valor(R$)']
+    };
+
+    // =====================================================
+    // Selecionar modo de importação
+    // =====================================================
+    let modoImportacao = null; // 'completo', 'brutos', 'receitas'
+    // brutosDetectados removido — agora usa brutosPorAno/brutosAnos
+
+    function resetSelecao() {
+      document.getElementById('importacaoDespesas').style.boxShadow = 'none';
+      document.getElementById('importacaoDespesas').style.transform = 'scale(1)';
+      document.getElementById('importacaoReceitas').style.boxShadow = 'none';
+      document.getElementById('importacaoReceitas').style.transform = 'scale(1)';
+      document.getElementById('subOpcoesDespesas').classList.remove('show');
+      document.getElementById('uploadArea').style.display = 'none';
+      document.getElementById('uploadBrutos').classList.remove('show');
+      document.getElementById('previewSection').classList.remove('show');
+      document.querySelectorAll('.sub-opcao-card').forEach(c => c.classList.remove('selected'));
+      modoImportacao = null;
+      brutosPorAno = {};
+      brutosAnos = [];
+      esconderStatus();
+    }
+
+    // Clicar em "Importar Despesas" → mostra sub-opções
+    function selecionarTipoDespesas() {
+      resetSelecao();
+      tipoSelecionado = 'despesas-completo';
+      document.getElementById('importacaoDespesas').style.boxShadow = '0 0 0 4px rgba(5, 150, 105, 0.5)';
+      document.getElementById('importacaoDespesas').style.transform = 'scale(1.02)';
+      document.getElementById('subOpcoesDespesas').classList.add('show');
+      document.getElementById('subOpcoesDespesas').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Sub-opção de despesas: completo ou brutos
+    function selecionarSubOpcao(modo) {
+      document.querySelectorAll('.sub-opcao-card').forEach(c => c.classList.remove('selected'));
+      modoImportacao = modo;
+
+      if (modo === 'completo') {
+        document.getElementById('subDocCompleto').classList.add('selected');
+        document.getElementById('uploadArea').style.display = '';
+        document.getElementById('uploadBrutos').classList.remove('show');
+        mostrarStatus('Faça upload do arquivo Excel já processado com as abas: Empenhados, Liquidados, Pagos, A Pagar, Retidos.', 'success');
+        document.getElementById('uploadArea').scrollIntoView({ behavior: 'smooth' });
+      } else if (modo === 'brutos') {
+        document.getElementById('subBrutos').classList.add('selected');
+        document.getElementById('uploadArea').style.display = 'none';
+        document.getElementById('uploadBrutos').classList.add('show');
+        mostrarStatus('Selecione a pasta ou os arquivos brutos do SIGEF para transformação automática.', 'success');
+        document.getElementById('uploadBrutos').scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    // Clicar em "Importar Receitas" (mantém comportamento original)
+    function selecionarTipo(elemento) {
+      resetSelecao();
+      const card = elemento.querySelector('.tipo-dado-card') || elemento;
+      tipoSelecionado = card.getAttribute('data-tipo');
+
+      if (tipoSelecionado === 'receitas-completo') {
+        modoImportacao = 'receitas';
+        document.getElementById('importacaoReceitas').style.boxShadow = '0 0 0 4px rgba(37, 99, 235, 0.5)';
+        document.getElementById('importacaoReceitas').style.transform = 'scale(1.02)';
+        document.getElementById('uploadArea').style.display = '';
+        mostrarStatus('Receitas selecionadas! Faça upload da planilha "Movimentacoes_da_Receita.xlsx".', 'success');
+        document.getElementById('uploadArea').scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    // Configurar área de upload quando a página carregar
+    document.addEventListener('DOMContentLoaded', function() {
+      const uploadArea = document.getElementById('uploadArea');
+      const fileInput = document.getElementById('fileInput');
+      
+      console.log('Configurando área de upload...');
+      console.log('uploadArea encontrado:', !!uploadArea);
+      console.log('fileInput encontrado:', !!fileInput);
+      
+      if (!uploadArea || !fileInput) {
+        console.error('Elementos de upload não encontrados!');
+        return;
+      }
+      
+      // Drag and drop
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadArea.classList.add('dragover');
+      });
+      
+      uploadArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadArea.classList.remove('dragover');
+      });
+      
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadArea.classList.remove('dragover');
+        console.log('Arquivo solto via drag and drop');
+        const file = e.dataTransfer.files[0];
+        if (file) handleFile(file);
+      });
+      
+      // Click para selecionar
+      uploadArea.addEventListener('click', function(e) {
+        console.log('Área de upload clicada');
+        fileInput.click();
+      });
+      
+      // Quando arquivo é selecionado
+      fileInput.addEventListener('change', function(e) {
+        console.log('Arquivo selecionado via input');
+        const file = this.files[0];
+        if (file) {
+          console.log('Arquivo:', file.name, 'Tamanho:', file.size);
+          handleFile(file);
+        }
+      });
+      
+      console.log('Área de upload configurada com sucesso!');
+    });
+
+    // Processar arquivo Excel
+    function handleFile(file) {
+      console.log('=== handleFile chamado ===');
+      console.log('Arquivo:', file);
+      console.log('tipoSelecionado:', tipoSelecionado);
+      console.log('XLSX disponível:', typeof XLSX !== 'undefined');
+      
+      // Verificar se SheetJS está carregado
+      if (typeof XLSX === 'undefined') {
+        mostrarStatus('ERRO: Biblioteca de leitura de Excel não carregou. Recarregue a página.', 'error');
+        alert('Erro: Biblioteca SheetJS não carregou.\n\nPor favor, recarregue a página (F5).');
+        return;
+      }
+      
+      if (!tipoSelecionado) {
+        mostrarStatus('ATENÇÃO: Primeiro selecione o modo de importação (Despesas ou Receitas)!', 'error');
+        alert('Por favor, selecione o modo de importação primeiro!\n\nClique em "Importar Despesas" ou "Importar Receitas".');
+        return;
+      }
+
+      if (!file || !file.name) {
+        mostrarStatus('Nenhum arquivo selecionado.', 'error');
+        return;
+      }
+
+      if (!file.name.match(/\.(xlsx|xls)$/i)) {
+        mostrarStatus('Por favor, envie um arquivo Excel (.xlsx ou .xls)', 'error');
+        alert('Formato inválido!\n\nEnvie um arquivo Excel com extensão .xlsx ou .xls');
+        return;
+      }
+
+      mostrarStatus('Processando arquivo "' + file.name + '"...', 'info');
+      console.log('Iniciando leitura do arquivo...');
+
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        try {
+          console.log('Arquivo lido com sucesso! Tamanho:', e.target.result.byteLength, 'bytes');
+          mostrarStatus('Arquivo lido! Processando planilha...', 'info');
+          
+          const data = new Uint8Array(e.target.result);
+          console.log('Convertido para Uint8Array. Chamando XLSX.read...');
+          
+          const workbook = XLSX.read(data, { type: 'array' });
+          console.log('Planilha processada! Abas encontradas:', workbook.SheetNames);
+          
+          // Modo de importação automática (todas as despesas)
+          if (tipoSelecionado === 'despesas-completo') {
+            processarMultiplasAbas(workbook, file.name);
+            return;
+          }
+          
+          // Modo de importação de receitas (filtra por campo Histórico)
+          if (tipoSelecionado === 'receitas-completo') {
+            processarReceitasPorHistorico(workbook, file.name);
+            return;
+          }
+          
+          // Modo individual (uma aba)
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          let jsonData = XLSX.utils.sheet_to_json(firstSheet);
+          
+          // Converter datas do formato serial do Excel para DD/MM/AAAA
+          jsonData = converterDatasArray(jsonData);
+          
+          console.log('Dados extraídos:', jsonData.length, 'registros');
+          
+          if (jsonData.length === 0) {
+            mostrarStatus('A planilha está vazia ou não tem dados válidos.', 'error');
+            alert('Planilha vazia!\n\nA planilha não contém dados. Verifique se preencheu corretamente.');
+            return;
+          }
+
+          dadosImportados = jsonData;
+          dadosMultiplasAbas = null;
+          console.log('dadosImportados definido:', dadosImportados);
+          
+          // Mostrar preview
+          document.getElementById('fileName').textContent = file.name;
+          document.getElementById('fileInfo').textContent = `${jsonData.length} registros encontrados - Pronto para importar!`;
+          
+          // Criar cabeçalho da tabela
+          const headers = Object.keys(jsonData[0]);
+          const headerRow = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+          document.getElementById('previewHeader').innerHTML = headerRow;
+          
+          // Criar linhas da tabela (máximo 5)
+          const previewData = jsonData.slice(0, 5);
+          const bodyRows = previewData.map(row => {
+            return '<tr>' + headers.map(h => `<td>${row[h] || ''}</td>`).join('') + '</tr>';
+          }).join('');
+          document.getElementById('previewBody').innerHTML = bodyRows;
+          
+          // Mostrar seção de preview
+          document.getElementById('previewSection').classList.add('show');
+          
+          mostrarStatus(`Arquivo carregado! ${jsonData.length} registros prontos. Clique em "Confirmar Importação" abaixo.`, 'success');
+          
+          // Scroll para a seção de preview
+          document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
+          
+        } catch (error) {
+          console.error('ERRO ao processar planilha:', error);
+          mostrarStatus('Erro ao processar a planilha: ' + error.message, 'error');
+          alert('Erro ao processar o arquivo!\n\n' + error.message + '\n\nVerifique se o arquivo é um Excel válido.');
+        }
+      };
+      
+      reader.onerror = function(error) {
+        console.error('ERRO de leitura do arquivo:', error);
+        mostrarStatus('Erro ao ler o arquivo. Tente novamente.', 'error');
+        alert('Erro ao ler o arquivo!\n\nTente selecionar o arquivo novamente.');
+      };
+      
+      reader.onprogress = function(e) {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          console.log('Progresso de leitura:', percent + '%');
+        }
+      };
+      
+      console.log('Iniciando readAsArrayBuffer...');
+      reader.readAsArrayBuffer(file);
+    }
+    
+    // Processar múltiplas abas (modo automático)
+    function processarMultiplasAbas(workbook, fileName) {
+      console.log('Processando múltiplas abas...');
+      console.log('Abas encontradas:', workbook.SheetNames);
+      
+      dadosMultiplasAbas = {};
+      let totalRegistros = 0;
+      let abasProcessadas = [];
+      
+      workbook.SheetNames.forEach(nomeAba => {
+        // Normalizar nome: lowercase, sem acentos, sem espaços extras
+        const nomeNormalizado = nomeAba
+          .toLowerCase()
+          .trim()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+          .replace(/\s+/g, ' '); // Múltiplos espaços → um espaço
+        
+        console.log(`Processando aba: "${nomeAba}" → normalizado: "${nomeNormalizado}"`);
+        
+        let tipoDestino = null;
+        
+        // Mapear nome da aba para tipo de despesa
+        for (const [chave, valor] of Object.entries(mapeamentoAbas)) {
+          const chaveNormalizada = chave
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+          
+          // Verificar se contém a chave ou se é igual
+          if (nomeNormalizado.includes(chaveNormalizada) || nomeNormalizado === chaveNormalizada) {
+            tipoDestino = valor;
+            console.log(`  → Match encontrado: "${chave}" → "${valor}"`);
+            break;
+          }
+        }
+        
+        if (tipoDestino) {
+          const sheet = workbook.Sheets[nomeAba];
+          let dados = XLSX.utils.sheet_to_json(sheet);
+          
+          // Converter datas do formato serial do Excel
+          dados = converterDatasArray(dados);
+          
+          if (dados.length > 0) {
+            // Se já existe dados para esse tipo, mesclar
+            if (dadosMultiplasAbas[tipoDestino]) {
+              console.log(`  → Mesclando com dados existentes de ${tipoDestino}`);
+              dadosMultiplasAbas[tipoDestino] = [...dadosMultiplasAbas[tipoDestino], ...dados];
+            } else {
+              dadosMultiplasAbas[tipoDestino] = dados;
+            }
+            totalRegistros += dados.length;
+            abasProcessadas.push(`${nomeAba} (${dados.length} registros) → ${tipoDestino}`);
+            console.log(`  ✓ Aba "${nomeAba}" mapeada para "${tipoDestino}" com ${dados.length} registros`);
+          } else {
+            console.log(`  ✗ Aba "${nomeAba}" está vazia`);
+          }
+        } else {
+          console.log(`  ✗ Aba "${nomeAba}" não reconhecida, ignorada.`);
+          console.log(`    Nomes aceitos: empenhados, liquidados, pagos, a pagar, retidos (e variações)`);
+        }
+      });
+      
+      if (Object.keys(dadosMultiplasAbas).length === 0) {
+        const abasEncontradas = workbook.SheetNames.join(', ');
+        mostrarStatus(`Nenhuma aba válida encontrada! Abas na planilha: ${abasEncontradas}`, 'error');
+        alert(`Nenhuma aba reconhecida!\n\nAbas encontradas na planilha:\n${workbook.SheetNames.map(a => '• ' + a).join('\n')}\n\nAs abas devem ter nomes como:\n- Empenhados\n- Liquidados\n- Pagos\n- A Pagar\n- Retidos`);
+        return;
+      }
+      
+      // Mostrar resumo no console
+      console.log('=== RESUMO DA IMPORTAÇÃO ===');
+      console.log('Total de categorias detectadas:', Object.keys(dadosMultiplasAbas).length);
+      Object.entries(dadosMultiplasAbas).forEach(([tipo, dados]) => {
+        console.log(`  - ${tipo}: ${dados.length} registros`);
+      });
+      
+      dadosImportados = null; // Usar dadosMultiplasAbas ao invés
+      
+      // Mostrar preview resumido
+      document.getElementById('fileName').textContent = fileName;
+      document.getElementById('fileInfo').innerHTML = `
+        <strong style="color: #059669; font-size: 18px;">${totalRegistros.toLocaleString()} registros encontrados em ${Object.keys(dadosMultiplasAbas).length} categorias!</strong><br><br>
+        <div style="text-align: left; padding: 10px; background: #f8fafc; border-radius: 8px; margin-top: 10px;">
+          ${abasProcessadas.map(a => `<div style="padding: 4px 0;">✓ ${a}</div>`).join('')}
+        </div>
+      `;
+      
+      // Preview da primeira aba encontrada
+      const primeiroTipo = Object.keys(dadosMultiplasAbas)[0];
+      const primeiroDados = dadosMultiplasAbas[primeiroTipo];
+      const headers = Object.keys(primeiroDados[0]);
+      const headerRow = '<tr>' + headers.slice(0, 8).map(h => `<th>${h}</th>`).join('') + '</tr>';
+      document.getElementById('previewHeader').innerHTML = headerRow;
+      
+      const previewData = primeiroDados.slice(0, 3);
+      const bodyRows = previewData.map(row => {
+        return '<tr>' + headers.slice(0, 8).map(h => `<td>${String(row[h] || '').substring(0, 20)}</td>`).join('') + '</tr>';
+      }).join('');
+      document.getElementById('previewBody').innerHTML = bodyRows + `<tr><td colspan="${Math.min(8, headers.length)}" style="text-align:center; color:#64748b; padding:10px;">... e mais ${totalRegistros - 3} registros</td></tr>`;
+      
+      // Mostrar seção de preview
+      document.getElementById('previewSection').classList.add('show');
+      
+      mostrarStatus(`Arquivo processado! ${totalRegistros.toLocaleString()} registros em ${Object.keys(dadosMultiplasAbas).length} categorias. Clique em "Confirmar Importação".`, 'success');
+      
+      document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Processar planilha de receitas filtrando pelo campo "Histórico"
+    function processarReceitasPorHistorico(workbook, fileName) {
+      console.log('Processando receitas por campo Histórico...');
+      console.log('Abas encontradas:', workbook.SheetNames);
+      
+      // Ler primeira aba (ou aba com dados)
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      let todosOsDados = XLSX.utils.sheet_to_json(firstSheet);
+      
+      // Converter datas do formato serial do Excel para DD/MM/AAAA
+      todosOsDados = converterDatasArray(todosOsDados);
+      
+      console.log('Total de registros na planilha:', todosOsDados.length);
+      
+      if (todosOsDados.length === 0) {
+        mostrarStatus('A planilha está vazia ou não tem dados válidos.', 'error');
+        alert('Planilha vazia!\n\nA planilha não contém dados.');
+        return;
+      }
+      
+      // Identificar a coluna de Histórico (pode ter encoding diferente)
+      const primeiroRegistro = todosOsDados[0];
+      const colunas = Object.keys(primeiroRegistro);
+      let colunaHistorico = colunas.find(c => 
+        c.toLowerCase().includes('histor') || 
+        c.toLowerCase().includes('histórico') ||
+        c.toLowerCase() === 'historico'
+      );
+      
+      if (!colunaHistorico) {
+        mostrarStatus('Coluna "Histórico" não encontrada na planilha! Colunas disponíveis: ' + colunas.join(', '), 'error');
+        alert('Coluna "Histórico" não encontrada!\n\nAs colunas disponíveis são:\n' + colunas.join('\n'));
+        return;
+      }
+      
+      console.log('Coluna de Histórico identificada:', colunaHistorico);
+      
+      // Separar dados por tipo de histórico
+      dadosMultiplasAbas = {
+        'receitas-previsao': [],
+        'receitas-arrecadacao': [],
+        'receitas-retencoes': [],
+        'receitas-deducoes': []
+      };
+      
+      let naoMapeados = 0;
+      
+      todosOsDados.forEach(registro => {
+        const valorHistorico = registro[colunaHistorico];
+        if (!valorHistorico) {
+          naoMapeados++;
+          return;
+        }
+        
+        // Normalizar o valor do histórico
+        const historicoNormalizado = String(valorHistorico)
+          .toLowerCase()
+          .trim()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, ''); // Remove acentos
+        
+        // Encontrar o store correspondente
+        let storeDestino = null;
+        for (const [chave, valor] of Object.entries(mapeamentoHistoricoReceitas)) {
+          const chaveNormalizada = chave
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+          if (historicoNormalizado.includes(chaveNormalizada) || chaveNormalizada.includes(historicoNormalizado)) {
+            storeDestino = valor;
+            break;
+          }
+        }
+        
+        if (storeDestino && dadosMultiplasAbas[storeDestino]) {
+          dadosMultiplasAbas[storeDestino].push(registro);
+        } else {
+          naoMapeados++;
+          console.log('Histórico não mapeado:', valorHistorico);
+        }
+      });
+      
+      // Remover categorias vazias
+      Object.keys(dadosMultiplasAbas).forEach(key => {
+        if (dadosMultiplasAbas[key].length === 0) {
+          delete dadosMultiplasAbas[key];
+        }
+      });
+      
+      if (Object.keys(dadosMultiplasAbas).length === 0) {
+        mostrarStatus('Nenhum registro reconhecido! Verifique se a coluna "Histórico" contém valores como: Previsão da Receita, Arrecadação, Retenção, Dedução.', 'error');
+        return;
+      }
+      
+      // Calcular totais
+      let totalRegistros = 0;
+      let resumoCategoria = [];
+      
+      const nomesAmigaveis = {
+        'receitas-previsao': 'Previsão Orçamentária',
+        'receitas-arrecadacao': 'Arrecadação',
+        'receitas-retencoes': 'Retenções/Consignações',
+        'receitas-deducoes': 'Deduções'
+      };
+      
+      Object.entries(dadosMultiplasAbas).forEach(([tipo, dados]) => {
+        totalRegistros += dados.length;
+        
+        // Calcular valor total da categoria
+        const colunaValor = colunas.find(c => c.toLowerCase().includes('valor'));
+        let valorTotal = 0;
+        if (colunaValor) {
+          dados.forEach(d => {
+            const val = parseFloat(d[colunaValor]) || 0;
+            valorTotal += val;
+          });
+        }
+        
+        resumoCategoria.push({
+          tipo: tipo,
+          nome: nomesAmigaveis[tipo] || tipo,
+          quantidade: dados.length,
+          valor: valorTotal
+        });
+      });
+      
+      dadosImportados = null; // Usar dadosMultiplasAbas
+      
+      // Mostrar preview
+      document.getElementById('fileName').textContent = fileName;
+      document.getElementById('fileInfo').innerHTML = `
+        <strong style="color: #2563eb; font-size: 18px;">${totalRegistros.toLocaleString()} registros de receitas encontrados em ${Object.keys(dadosMultiplasAbas).length} categorias!</strong><br><br>
+        <div style="text-align: left; padding: 10px; background: #f8fafc; border-radius: 8px; margin-top: 10px;">
+          ${resumoCategoria.map(r => `
+            <div style="padding: 6px 0; border-bottom: 1px solid #e2e8f0;">
+              <span style="color: #22c55e; margin-right: 8px;">✓</span>
+              <strong>${r.nome}:</strong> ${r.quantidade.toLocaleString()} registros
+              ${r.valor !== 0 ? `<span style="color: #64748b; float: right;">R$ ${r.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>` : ''}
+            </div>
+          `).join('')}
+          ${naoMapeados > 0 ? `<div style="padding: 6px 0; color: #f59e0b;"><i class="fas fa-exclamation-triangle"></i> ${naoMapeados} registros sem categoria identificada</div>` : ''}
+        </div>
+      `;
+      
+      // Preview da primeira categoria
+      const primeiroTipo = Object.keys(dadosMultiplasAbas)[0];
+      const primeiroDados = dadosMultiplasAbas[primeiroTipo];
+      const headers = Object.keys(primeiroDados[0]).slice(0, 6);
+      const headerRow = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+      document.getElementById('previewHeader').innerHTML = headerRow;
+      
+      const previewData = primeiroDados.slice(0, 3);
+      const bodyRows = previewData.map(row => {
+        return '<tr>' + headers.map(h => `<td>${String(row[h] || '').substring(0, 30)}</td>`).join('') + '</tr>';
+      }).join('');
+      document.getElementById('previewBody').innerHTML = bodyRows + `<tr><td colspan="${headers.length}" style="text-align:center; color:#64748b; padding:10px;">... e mais ${totalRegistros - 3} registros</td></tr>`;
+      
+      // Mostrar seção de preview
+      document.getElementById('previewSection').classList.add('show');
+      
+      mostrarStatus(`Planilha de receitas processada! ${totalRegistros.toLocaleString()} registros em ${Object.keys(dadosMultiplasAbas).length} categorias. Clique em "Confirmar Importação".`, 'success');
+      
+      document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Baixar modelo de planilha
+    function baixarModelo(tipo) {
+      const colunas = modelosColunas[tipo];
+      if (!colunas) return;
+
+      // Criar planilha com cabeçalhos e uma linha de exemplo
+      const ws_data = [colunas];
+      
+      // Adicionar linha de exemplo baseada no tipo
+      const exemplos = {
+        'receitas-empenhados': ['2026NE00001', '02/01/2026', 'EMPRESA EXEMPLO LTDA', '12.345.678/0001-90', '3.3.90.39 - Outros Serviços', '125000.00', 'Empenhado'],
+        'receitas-liquidados': ['2026LQ00001', '15/01/2026', '2026NE00001', 'EMPRESA EXEMPLO LTDA', '125000.00', 'Liquidado'],
+        'despesas-empenhados': ['2026NE00001', '05/01/2026', 'EMPRESA EXEMPLO LTDA', '12.345.678/0001-90', 'Sec. Educação', '4.4.90.51 - Obras', '250000.00', 'Empenhado'],
+        'despesas-liquidados': ['2026LQ00001', '20/01/2026', '2026NE00001', 'EMPRESA EXEMPLO LTDA', 'Sec. Educação', '250000.00', 'Liquidado'],
+        'despesas-pagos': ['2026OP00001', '25/01/2026', 'EMPRESA EXEMPLO LTDA', 'Banco do Brasil', '1234-5', '250000.00', 'Confirmado'],
+        'retencoes': ['2026NE00001', '15/01/2026', 'EMPRESA EXEMPLO LTDA', 'INSS', '11%', '13750.00', 'Recolhido']
+      };
+      
+      ws_data.push(exemplos[tipo] || []);
+
+      const ws = XLSX.utils.aoa_to_sheet(ws_data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Dados');
+      
+      // Ajustar largura das colunas
+      ws['!cols'] = colunas.map(() => ({ wch: 20 }));
+      
+      XLSX.writeFile(wb, `modelo_${tipo}.xlsx`);
+      
+      mostrarStatus(`Modelo "${tipo}" baixado com sucesso! Preencha e faça o upload.`, 'success');
+    }
+
+    // Confirmar importação
+    async function confirmarImportacao() {
+      // Modo automático (múltiplas abas) - Despesas
+      if (tipoSelecionado === 'despesas-completo' && dadosMultiplasAbas) {
+        confirmarImportacaoMultipla();
+        return;
+      }
+      
+      // Modo automático - Receitas (filtradas por Histórico)
+      if (tipoSelecionado === 'receitas-completo' && dadosMultiplasAbas) {
+        confirmarImportacaoReceitas();
+        return;
+      }
+      
+      // Modo individual
+      if (!dadosImportados || !tipoSelecionado) {
+        mostrarStatus('Erro: Selecione um tipo de dados e faça upload de um arquivo primeiro.', 'error');
+        return;
+      }
+
+      try {
+        mostrarStatus('Salvando dados no banco de dados...', 'info');
+        
+        const totalRegistros = dadosImportados.length;
+        const nomeArquivo = document.getElementById('fileName').textContent;
+        
+        // Salvar no IndexedDB
+        await salvarDadosDB(tipoSelecionado, dadosImportados);
+        
+        // Registrar no histórico
+        registrarImportacao(
+          tipoSelecionado,
+          tipoSelecionado.replace('despesas-', 'Despesas ').replace('receitas-', 'Receitas ').replace('-', ' '),
+          totalRegistros,
+          nomeArquivo
+        );
+        
+        mostrarStatus(`${totalRegistros.toLocaleString()} registros importados com sucesso!`, 'success');
+        
+        // Limpar
+        document.getElementById('previewSection').classList.remove('show');
+        document.getElementById('fileInput').value = '';
+        dadosImportados = null;
+        
+        // Mostrar alerta de sucesso
+        alert(`Importação concluída!\n\n${totalRegistros} registros salvos.\n\nAgora você pode acessar a página de ${tipoSelecionado.replace('despesas-', 'Despesas ').replace('-', ' ')} para ver os dados.`);
+        
+      } catch (erro) {
+        console.error('Erro ao salvar:', erro);
+        mostrarStatus('Erro ao salvar os dados: ' + erro.message, 'error');
+      }
+    }
+    
+    // Confirmar importação de múltiplas abas (modo automático)
+    async function confirmarImportacaoMultipla() {
+      try {
+        mostrarStatus('Salvando dados no banco de dados... Por favor aguarde.', 'info');
+        
+        let resumoImportacao = [];
+        let totalGeral = 0;
+        const tipos = Object.keys(dadosMultiplasAbas);
+        const nomeArquivo = document.getElementById('fileName').textContent;
+        
+        for (let i = 0; i < tipos.length; i++) {
+          const tipo = tipos[i];
+          const dados = dadosMultiplasAbas[tipo];
+          
+          mostrarStatus(`Salvando ${tipo}... (${i + 1}/${tipos.length})`, 'info');
+          
+          // Salvar no IndexedDB
+          await salvarDadosDB(tipo, dados);
+          
+          const nomeTipo = tipo.replace('despesas-', 'Despesas ').replace('-', ' ');
+          resumoImportacao.push(`✓ ${nomeTipo}: ${dados.length.toLocaleString()} registros`);
+          totalGeral += dados.length;
+          
+          console.log(`Salvos ${dados.length} registros em ${tipo}`);
+        }
+        
+        // Registrar no histórico
+        registrarImportacao(
+          'despesas-completo',
+          `Importação Completa de Despesas (${tipos.length} categorias)`,
+          totalGeral,
+          nomeArquivo
+        );
+        
+        mostrarStatus(`Importação completa! ${totalGeral.toLocaleString()} registros importados em ${tipos.length} categorias.`, 'success');
+        
+        // Limpar
+        document.getElementById('previewSection').classList.remove('show');
+        document.getElementById('fileInput').value = '';
+        dadosImportados = null;
+        dadosMultiplasAbas = null;
+        
+        // Mostrar alerta de sucesso detalhado
+        alert(`IMPORTAÇÃO CONCLUÍDA COM SUCESSO!\n\n${totalGeral.toLocaleString()} registros importados:\n\n${resumoImportacao.join('\n')}\n\nAgora você pode acessar as páginas de despesas para visualizar os dados.`);
+        
+      } catch (erro) {
+        console.error('Erro ao salvar:', erro);
+        mostrarStatus('Erro ao salvar os dados: ' + erro.message, 'error');
+        alert('Erro ao salvar os dados!\n\n' + erro.message);
+      }
+    }
+
+    // Confirmar importação de receitas (filtradas por Histórico)
+    async function confirmarImportacaoReceitas() {
+      try {
+        mostrarStatus('Salvando dados de receitas no banco de dados... Por favor aguarde.', 'info');
+        
+        let resumoImportacao = [];
+        let totalGeral = 0;
+        const tipos = Object.keys(dadosMultiplasAbas);
+        const nomeArquivo = document.getElementById('fileName').textContent;
+        
+        const nomesAmigaveis = {
+          'receitas-previsao': 'Previsão Orçamentária',
+          'receitas-arrecadacao': 'Arrecadação',
+          'receitas-retencoes': 'Retenções/Consignações',
+          'receitas-deducoes': 'Deduções'
+        };
+        
+        for (let i = 0; i < tipos.length; i++) {
+          const tipo = tipos[i];
+          const dados = dadosMultiplasAbas[tipo];
+          
+          mostrarStatus(`Salvando ${nomesAmigaveis[tipo] || tipo}... (${i + 1}/${tipos.length})`, 'info');
+          
+          // Salvar no IndexedDB
+          await salvarDadosDB(tipo, dados);
+          
+          resumoImportacao.push(`✓ ${nomesAmigaveis[tipo]}: ${dados.length.toLocaleString()} registros`);
+          totalGeral += dados.length;
+          
+          console.log(`Salvos ${dados.length} registros em ${tipo}`);
+        }
+        
+        // Registrar no histórico
+        registrarImportacao(
+          'receitas-completo',
+          `Importação Completa de Receitas (${tipos.length} categorias)`,
+          totalGeral,
+          nomeArquivo
+        );
+        
+        mostrarStatus(`Importação de receitas completa! ${totalGeral.toLocaleString()} registros importados em ${tipos.length} categorias.`, 'success');
+        
+        // Limpar
+        document.getElementById('previewSection').classList.remove('show');
+        document.getElementById('fileInput').value = '';
+        dadosImportados = null;
+        dadosMultiplasAbas = null;
+        
+        // Mostrar alerta de sucesso detalhado
+        alert(`IMPORTAÇÃO DE RECEITAS CONCLUÍDA!\n\n${totalGeral.toLocaleString()} registros importados:\n\n${resumoImportacao.join('\n')}\n\nAgora você pode acessar as páginas de receitas para visualizar os dados.`);
+        
+      } catch (erro) {
+        console.error('Erro ao salvar:', erro);
+        mostrarStatus('Erro ao salvar os dados: ' + erro.message, 'error');
+        alert('Erro ao salvar os dados!\n\n' + erro.message);
+      }
+    }
+
+    // Cancelar importação
+    function cancelarImportacao() {
+      document.getElementById('previewSection').classList.remove('show');
+      document.getElementById('fileInput').value = '';
+      dadosImportados = null;
+      dadosMultiplasAbas = null;
+      esconderStatus();
+    }
+
+    // Mostrar mensagem de status
+    function mostrarStatus(mensagem, tipo) {
+      const el = document.getElementById('statusMessage');
+      el.textContent = mensagem;
+      el.className = 'status-message ' + tipo;
+    }
+
+    // Esconder mensagem de status
+    function esconderStatus() {
+      document.getElementById('statusMessage').className = 'status-message';
+    }
+
+    // =====================================================
+    // Registro de Histórico de Importações
+    // =====================================================
+    
+    // Função para salvar no histórico - usa chave fixa
+    function salvarHistorico(historico) {
+      localStorage.setItem('historico-importacoes', JSON.stringify(historico));
+    }
+    
+    // Função para carregar histórico - usa chave fixa
+    function carregarHistorico() {
+      try {
+        const dados = localStorage.getItem('historico-importacoes');
+        return dados ? JSON.parse(dados) : [];
+      } catch (e) {
+        console.error('Erro ao carregar histórico:', e);
+        return [];
+      }
+    }
+
+    // Função para registrar importação no histórico
+    function registrarImportacao(tipo, descricao, registros, arquivo) {
+      console.log('=== REGISTRANDO IMPORTAÇÃO ===');
+      console.log('Tipo:', tipo);
+      console.log('Descrição:', descricao);
+      console.log('Registros:', registros);
+      console.log('Arquivo:', arquivo);
+      
+      try {
+        // Carregar histórico existente
+        const historico = carregarHistorico();
+        console.log('Histórico atual tem', historico.length, 'registros');
+        
+        // Criar novo registro
+        const novoRegistro = {
+          id: Date.now(),
+          tipo: tipo,
+          descricao: descricao,
+          registros: registros,
+          arquivo: arquivo || 'Arquivo não especificado',
+          dataHora: new Date().toISOString()
+        };
+        
+        // Adicionar no início (mais recente primeiro)
+        historico.unshift(novoRegistro);
+        
+        // Manter apenas os últimos 100 registros
+        while (historico.length > 100) {
+          historico.pop();
+        }
+        
+        // Salvar no localStorage
+        salvarHistorico(historico);
+        
+        // Verificar se foi salvo
+        const verificacao = carregarHistorico();
+        console.log('Histórico após salvar:', verificacao.length, 'registros');
+        console.log('Último registro:', verificacao[0]);
+        
+        if (verificacao.length > 0 && verificacao[0].id === novoRegistro.id) {
+          console.log('✓ Registro salvo com sucesso!');
+        } else {
+          console.error('✗ ERRO: Registro não foi salvo corretamente!');
+          alert('ERRO: Não foi possível salvar no histórico. Verifique se o localStorage está habilitado no navegador.');
+        }
+        
+        return novoRegistro;
+      } catch (e) {
+        console.error('ERRO ao registrar histórico:', e);
+        alert('Erro ao registrar no histórico: ' + e.message + '\n\nVerifique o console do navegador (F12) para mais detalhes.');
+        return null;
+      }
+    }
+    
+    // Função para verificar histórico (debug)
+    function verificarHistorico() {
+      const historico = carregarHistorico();
+      console.log('=== VERIFICAÇÃO DO HISTÓRICO ===');
+      console.log('Total de registros:', historico.length);
+      if (historico.length > 0) {
+        console.log('Últimos 5 registros:');
+        historico.slice(0, 5).forEach((h, i) => {
+          console.log(`${i + 1}. ${h.descricao} - ${h.registros} registros - ${new Date(h.dataHora).toLocaleString()}`);
+        });
+      }
+      return historico;
+    }
+    
+    // Verificar histórico ao carregar a página (debug)
+    console.log('Página de importação carregada. Verificando histórico...');
+    verificarHistorico();
+
+    // =====================================================
+    // Pipeline: Upload e detecção de planilhas brutas
+    // =====================================================
+    // =====================================================
+    // Pipeline: Detecção com suporte a múltiplos anos
+    // =====================================================
+    var brutosPorAno = {};   // { '2024': { matches, missing }, '2025': {...} }
+    var brutosAnos = [];     // ['2024', '2025'] ou ['_unico']
+
+    document.getElementById('brutosFolder').addEventListener('change', function(e) {
+      var files = Array.from(e.target.files).filter(function(f) {
+        var n = f.name.toLowerCase();
+        return (n.endsWith('.xlsx') || n.endsWith('.xls') || n.endsWith('.xlsm')) && !n.startsWith('~$');
+      });
+      detectarArquivosBrutos(files, true);
+    });
+
+    document.getElementById('brutosFiles').addEventListener('change', function(e) {
+      var files = Array.from(e.target.files);
+      detectarArquivosBrutos(files, false);
+    });
+
+    function agruparArquivosPorAno(files) {
+      var porAno = {};
+      var semAno = [];
+      for (var i = 0; i < files.length; i++) {
+        var f = files[i];
+        var relPath = f.webkitRelativePath || '';
+        var parts = relPath.split('/');
+        var subFolder = parts.length >= 3 ? parts[1] : null;
+        if (subFolder && /^\d{4}$/.test(subFolder)) {
+          if (!porAno[subFolder]) porAno[subFolder] = [];
+          porAno[subFolder].push(f);
+        } else {
+          semAno.push(f);
+        }
+      }
+      var anos = Object.keys(porAno).sort();
+      if (anos.length === 0) return { '_unico': semAno };
+      return porAno;
+    }
+
+    function detectarArquivosBrutos(files, isPasta) {
+      if (!files || files.length === 0) {
+        mostrarStatus('Nenhum arquivo selecionado.', 'error');
+        return;
+      }
+      if (typeof autoDetectarArquivos !== 'function') {
+        mostrarStatus('ERRO: Scripts do pipeline não carregaram. Recarregue a página.', 'error');
+        return;
+      }
+
+      brutosPorAno = {};
+      if (isPasta) {
+        var grupos = agruparArquivosPorAno(files);
+        var anos = Object.keys(grupos).sort();
+        for (var i = 0; i < anos.length; i++) {
+          brutosPorAno[anos[i]] = autoDetectarArquivos(grupos[anos[i]]);
+        }
+        brutosAnos = anos;
+      } else {
+        brutosPorAno['_unico'] = autoDetectarArquivos(files);
+        brutosAnos = ['_unico'];
+      }
+
+      renderDeteccaoMultiAno();
+    }
+
+    function renderDeteccaoMultiAno() {
+      var container = document.getElementById('brutosDeteccao');
+      var html = '';
+      var todosOk = true;
+      var errosGlobal = [];
+
+      // Tags de ano
+      if (brutosAnos.length > 1 || (brutosAnos.length === 1 && brutosAnos[0] !== '_unico')) {
+        html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;">';
+        for (var a = 0; a < brutosAnos.length; a++) {
+          var label = brutosAnos[a] === '_unico' ? 'Ano único' : brutosAnos[a];
+          html += '<span style="background:#ede9fe;color:#6d28d9;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;border:1px solid #c4b5fd;">' + label + '</span>';
+        }
+        html += '</div>';
+      }
+
+      for (var a = 0; a < brutosAnos.length; a++) {
+        var ano = brutosAnos[a];
+        var result = brutosPorAno[ano];
+        var anoLabel = ano === '_unico' ? 'Ano único' : ano;
+
+        if (brutosAnos.length > 1) {
+          html += '<div style="margin:12px 0;padding:12px;border:1px solid #e2e8f0;border-radius:10px;background:#fafbfc;">';
+          html += '<div style="font-size:14px;font-weight:700;color:#334155;margin-bottom:8px;">';
+          html += '<span style="background:#7c3aed;color:white;font-size:12px;padding:2px 10px;border-radius:10px;margin-right:8px;">' + anoLabel + '</span>';
+          var okCount = Object.keys(result.matches).length;
+          html += okCount + '/' + _CRUZAR_ALVOS.length + ' arquivos</div>';
+        }
+
+        html += '<div class="file-grid-detect">';
+        for (var i = 0; i < _CRUZAR_ALVOS.length; i++) {
+          var alvo = _CRUZAR_ALVOS[i];
+          var file = result.matches[alvo.role];
+          var ok = !!file;
+          var cls = ok ? 'ok' : (alvo.obrigatorio ? 'err' : 'warn');
+          html += '<div class="file-slot ' + cls + '">';
+          html += '<span class="role">' + alvo.label + ':</span>';
+          if (ok) {
+            html += '<span class="fname">' + file.name + '</span>';
+          } else {
+            html += '<span class="missing">' + (alvo.obrigatorio ? 'não encontrado' : 'opcional') + '</span>';
+          }
+          html += '</div>';
+        }
+        html += '</div>';
+
+        if (brutosAnos.length > 1) html += '</div>';
+
+        if (result.missing && result.missing.length > 0) {
+          todosOk = false;
+          errosGlobal.push(anoLabel + ': ' + result.missing.join(', '));
+        }
+      }
+
+      container.innerHTML = html;
+
+      var btnArea = document.getElementById('brutosBotaoProcessar');
+      if (todosOk) {
+        btnArea.style.display = '';
+        var msg = 'Todos os arquivos obrigatórios detectados!';
+        if (brutosAnos.length > 1) msg += ' Anos: ' + brutosAnos.join(', ') + '.';
+        mostrarStatus(msg, 'success');
+      } else {
+        btnArea.style.display = 'none';
+        mostrarStatus('Faltando: ' + errosGlobal.join(' | '), 'error');
+      }
+    }
+
+    // =====================================================
+    // Pipeline: Transformação + Cruzamento + Importação
+    // =====================================================
+    // Mapeamento de roles do pipeline para transformações V2 (lazy — avalia na hora de usar)
+    function getPipelineTransformacao(role) {
+      var mapa = {
+        'liquidados':   { fn: window.transformarLiquidados,   label: 'Liquidados' },
+        'pagos':        { fn: window.transformarPagos,         label: 'Pagos' },
+        'emitidos':     { fn: window.transformarEmitidos,      label: 'Emitidos' },
+        'aPagar':       { fn: window.transformarAPagar,        label: 'A Pagar' },
+        'consignados':  { fn: window.transformarConsignados,   label: 'Consignados' },
+        'credores':     { fn: window.transformarCredores,      label: 'Credores' },
+        'detalhamento': { fn: window.transformarDetalhamento,  label: 'Detalhamento' }
+      };
+      return mapa[role] || null;
+    }
+
+    // Mapeamento: nome da aba do cruzamento → store do IndexedDB
+    var MAPA_ABA_STORE = {
+      'Emp. Liquidados':  'despesas-liquidados',
+      'Emp. Pagos':       'despesas-pagos',
+      'Emp. Emitidos':    'despesas-empenhados',
+      'Empenhos a pagar': 'despesas-a-pagar',
+      'Empenhos retidos': 'despesas-retidos'
+    };
+
+    function pipelineSleep(ms) {
+      return new Promise(function(r) { setTimeout(r, ms); });
+    }
+
+    function logPipeline(msg) {
+      var el = document.getElementById('brutosPhaseLog');
+      el.style.display = '';
+      var line = document.createElement('div');
+      line.className = 'phase-line-pipe';
+      line.textContent = msg;
+      el.appendChild(line);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function setPipelineProgress(pct) {
+      document.getElementById('brutosProgressBar').style.display = '';
+      document.getElementById('brutosProgressFill').style.width = pct + '%';
+    }
+
+    // Converter matrix (2D array com header) → array de objetos
+    function matrixParaObjetos(matrix) {
+      if (!matrix || matrix.length < 2) return [];
+      var headers = matrix[0];
+      var objetos = [];
+      for (var r = 1; r < matrix.length; r++) {
+        var row = matrix[r];
+        var obj = {};
+        for (var c = 0; c < headers.length; c++) {
+          var key = headers[c];
+          if (key != null && String(key).trim()) {
+            obj[key] = c < row.length ? row[c] : '';
+          }
+        }
+        objetos.push(obj);
+      }
+      return objetos;
+    }
+
+    // =====================================================
+    // Processar um ano: ler, transformar, cruzar → retorna matrizes
+    // Otimizado: leitura paralela + yield entre operações pesadas
+    // =====================================================
+    async function processarUmAnoPipeline(anoLabel, arquivos) {
+      var matrices = {};
+      var roles = ['liquidados', 'pagos', 'emitidos', 'aPagar', 'consignados', 'credores', 'simples', 'balancete', 'detalhamento'];
+
+      // --- Leitura paralela de todos os arquivos ---
+      logPipeline('  Lendo todos os arquivos em paralelo...');
+      var buffers = {};
+      var promises = [];
+      for (var i = 0; i < roles.length; i++) {
+        var role = roles[i];
+        var file = arquivos[role];
+        if (!file && role === 'simples') {
+          buffers[role] = null;
+          continue;
+        }
+        if (!file) throw new Error('[' + anoLabel + '] Arquivo não encontrado: ' + role);
+        (function(r, f) {
+          promises.push(f.arrayBuffer().then(function(buf) { buffers[r] = buf; }));
+        })(role, file);
+      }
+      await Promise.all(promises);
+      logPipeline('    → Todos os arquivos lidos!');
+
+      // --- Transformar sequencialmente, com yield entre cada para evitar "Página sem resposta" ---
+      for (var i = 0; i < roles.length; i++) {
+        var role = roles[i];
+        if (role === 'simples' && !buffers[role]) {
+          matrices[role] = null;
+          logPipeline('  Simples Nacional não fornecido — será pulado.');
+          continue;
+        }
+
+        // Yield ao navegador ANTES de cada XLSX.read (operação pesada)
+        await pipelineSleep(0);
+
+        logPipeline('  Parseando ' + role + '...');
+        var wb = XLSX.read(buffers[role], { type: 'array' });
+        buffers[role] = null;
+
+        // Yield ao navegador ANTES de cada transformação (operação pesada)
+        await pipelineSleep(0);
+
+        var transf = getPipelineTransformacao(role);
+        if (transf && transf.fn) {
+          logPipeline('  Transformando ' + transf.label + '...');
+          var resultado = transf.fn(wb);
+          matrices[role] = resultado.matrix;
+          var stats = resultado.stats || {};
+          logPipeline('    → ' + transf.label + ': ' + (stats.linhasFinal || (matrices[role] ? matrices[role].length - 1 : '?')) + ' linhas');
+          wb = null; resultado = null;
+        } else {
+          var sheet = wb.Sheets[wb.SheetNames[0]];
+          matrices[role] = sheetToMatrix(sheet, { raw: false, defval: '' });
+          logPipeline('    → ' + role + ': ' + (matrices[role].length - 1) + ' linhas');
+          wb = null;
+        }
+      }
+      buffers = null;
+
+      // Yield ao navegador ANTES do cruzamento (operação mais pesada de todas)
+      logPipeline('  Executando cruzamentos V2...');
+      await pipelineSleep(50);
+
+      // V2: retorna matrizes leves
+      var result = executarCruzamento(matrices, null, function(fase, msg) {
+        logPipeline('    [Fase ' + fase + '] ' + msg);
+      }, { skipRetidos: true, returnMatricesOnly: true });
+
+      for (var k in matrices) matrices[k] = null;
+      matrices = null;
+
+      return result.abas; // Array de { nome, matrix }
+    }
+
+    // Empilhar matrizes de múltiplos anos
+    function empilharAbas(acumulado, novasAbas) {
+      if (!acumulado) return novasAbas;
+      for (var s = 0; s < acumulado.length; s++) {
+        var nova = novasAbas[s];
+        if (!nova || !nova.matrix || nova.matrix.length < 2) continue;
+        for (var r = 1; r < nova.matrix.length; r++) {
+          acumulado[s].matrix.push(nova.matrix[r]);
+        }
+        nova.matrix = null;
+      }
+      return acumulado;
+    }
+
+    // =====================================================
+    // Processar Brutos: itera sobre anos, empilha, salva
+    // =====================================================
+    async function processarBrutos() {
+      if (brutosAnos.length === 0) return;
+
+      document.getElementById('btnProcessarBrutos').disabled = true;
+      document.getElementById('brutosPhaseLog').innerHTML = '';
+      setPipelineProgress(2);
+
+      try {
+        logPipeline('=== Iniciando Pipeline V2 ===');
+        var t0 = performance.now();
+        var abasAcumuladas = null;
+        var totalAnos = brutosAnos.length;
+
+        for (var a = 0; a < totalAnos; a++) {
+          var ano = brutosAnos[a];
+          var anoLabel = ano === '_unico' ? 'Ano único' : ano;
+          var arquivos = brutosPorAno[ano].matches;
+
+          var pctBase = Math.round((a / totalAnos) * 80);
+          setPipelineProgress(2 + pctBase);
+
+          logPipeline('');
+          logPipeline('========================================');
+          logPipeline('  ANO: ' + anoLabel + ' (' + (a + 1) + '/' + totalAnos + ')');
+          logPipeline('========================================');
+
+          var abasAno = await processarUmAnoPipeline(anoLabel, arquivos);
+
+          abasAcumuladas = empilharAbas(abasAcumuladas, abasAno);
+          abasAno = null;
+
+          logPipeline('  → ' + anoLabel + ' concluído!');
+          await pipelineSleep(20);
+        }
+
+        setPipelineProgress(85);
+        logPipeline('');
+        logPipeline('=== Salvando no Banco de Dados ===');
+
+        // Converter matrizes acumuladas → objetos → IndexedDB
+        var resumoImportacao = [];
+        var totalGeral = 0;
+        var anosStr = totalAnos > 1 ? ' (' + brutosAnos.join(', ') + ')' : '';
+        var nomeArquivo = 'Pipeline V2 Automático' + anosStr;
+
+        for (var s = 0; s < abasAcumuladas.length; s++) {
+          var aba = abasAcumuladas[s];
+          var storeName = MAPA_ABA_STORE[aba.nome];
+
+          if (!storeName) {
+            logPipeline('  Aba "' + aba.nome + '" sem store, pulando.');
+            continue;
+          }
+
+          logPipeline('  Salvando ' + aba.nome + ' → ' + storeName + '...');
+          setPipelineProgress(85 + Math.round(((s + 1) / abasAcumuladas.length) * 13));
+
+          // Yield ao navegador antes da conversão pesada
+          await pipelineSleep(50);
+
+          // Converter matrix → array de objetos
+          // NÃO aplicar converterDatasArray: o pipeline V2 já retorna datas formatadas como strings.
+          // converterDatasArray corrompe valores monetários entre 40000-60000 convertendo-os em datas.
+          var dados = matrixParaObjetos(aba.matrix);
+          aba.matrix = null; // liberar matrix original após converter
+
+          // Yield antes de salvar no DB
+          await pipelineSleep(50);
+
+          await salvarDadosDB(storeName, dados);
+
+          var nomeTipo = storeName.replace('despesas-', 'Despesas ').replace('-', ' ');
+          resumoImportacao.push('✓ ' + nomeTipo + ': ' + dados.length.toLocaleString() + ' registros');
+          totalGeral += dados.length;
+
+          logPipeline('    → ' + dados.length.toLocaleString() + ' registros salvos');
+          dados = null;
+        }
+
+        abasAcumuladas = null;
+
+        // Registrar no histórico
+        registrarImportacao(
+          'despesas-pipeline-v2',
+          'Pipeline V2 (brutas → transformação → cruzamento)' + anosStr,
+          totalGeral,
+          nomeArquivo
+        );
+
+        var tempoSeg = ((performance.now() - t0) / 1000).toFixed(1);
+        setPipelineProgress(100);
+        logPipeline('');
+        logPipeline('=== Pipeline concluído em ' + tempoSeg + 's! ===');
+        logPipeline('Total: ' + totalGeral.toLocaleString() + ' registros importados.' + anosStr);
+
+        mostrarStatus(
+          'Importação via Pipeline V2 concluída! ' + totalGeral.toLocaleString() + ' registros em ' + tempoSeg + 's.' + anosStr,
+          'success'
+        );
+
+        alert(
+          'IMPORTAÇÃO VIA PIPELINE V2 CONCLUÍDA!\n\n' +
+          totalGeral.toLocaleString() + ' registros importados' + anosStr + ':\n\n' +
+          resumoImportacao.join('\n') +
+          '\n\nAgora você pode acessar as páginas de despesas para visualizar os dados.'
+        );
+
+      } catch (e) {
+        console.error('Erro no pipeline:', e);
+        logPipeline('ERRO: ' + e.message);
+        mostrarStatus('ERRO no pipeline: ' + e.message, 'error');
+      }
+
+      document.getElementById('btnProcessarBrutos').disabled = false;
+    }
+  </script>
+</body>
+</html>

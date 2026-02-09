@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGEF | Retenções de Receitas - Caruaru</title>
+  <link rel="icon" type="image/png" href="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/portal-transparencia.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <img src="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png" alt="Brasão Caruaru">
+      </div>
+      <h1 class="sidebar-title">Secretaria da Fazenda</h1>
+      <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    <nav class="sidebar-menu">
+      <div class="menu-section expanded">
+        <div class="menu-section-title" onclick="toggleSection(this)">
+          <i class="fas fa-hand-holding-usd"></i>
+          <span>Receitas</span>
+          <i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="receitas-previsao.html" class="menu-link"><i class="fas fa-chart-line"></i><span>Previsão</span></a></li>
+          <li class="menu-item"><a href="receitas-arrecadacao.html" class="menu-link"><i class="fas fa-money-bill-wave"></i><span>Arrecadação</span></a></li>
+          <li class="menu-item"><a href="receitas-retencoes.html" class="menu-link active"><i class="fas fa-hand-holding-usd"></i><span>Retenções</span></a></li>
+          <li class="menu-item"><a href="receitas-deducoes.html" class="menu-link"><i class="fas fa-minus-circle"></i><span>Deduções</span></a></li>
+          <li class="menu-item"><a href="receitas-gerencial.html" class="menu-link"><i class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="receitas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)">
+          <i class="fas fa-file-invoice-dollar"></i>
+          <span>Despesas</span>
+          <i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="despesas-empenhados.html" class="menu-link"><i class="fas fa-file-invoice"></i><span>Empenhados</span></a></li>
+          <li class="menu-item"><a href="despesas-liquidados.html" class="menu-link"><i class="fas fa-check-circle"></i><span>Liquidados</span></a></li>
+          <li class="menu-item"><a href="despesas-retidos.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retidos</span></a></li>
+          <li class="menu-item"><a href="despesas-pagos.html" class="menu-link"><i class="fas fa-money-check-alt"></i><span>Pagos</span></a></li>
+          <li class="menu-item"><a href="despesas-a-pagar.html" class="menu-link"><i class="fas fa-clock"></i><span>A Pagar</span></a></li>
+          <li class="menu-item"><a href="despesas-gerencial.html" class="menu-link"><i class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="despesas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)">
+          <i class="fas fa-database"></i>
+          <span>Banco de Dados</span>
+          <i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="banco-importar-dados.html" class="menu-link"><i class="fas fa-file-import"></i><span>Importar Dados</span></a></li>
+          <li class="menu-item"><a href="banco-historico.html" class="menu-link"><i class="fas fa-history"></i><span>Histórico</span></a></li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <nav class="breadcrumb">
+          <span>Receitas</span>
+          <i class="fas fa-chevron-right"></i>
+          <span>Retenções</span>
+        </nav>
+      </div>
+      <div class="header-actions">
+        <div class="user-menu">
+          <div class="user-avatar">AD</div>
+          <div class="user-info"><span class="user-name">Administrador</span><span class="user-role">SIGEF</span></div>
+        </div>
+      </div>
+    </header>
+    <section class="page-header">
+      <div class="page-header-content">
+        <h1 class="page-title"><i class="fas fa-hand-holding-usd"></i> Retenções de Receitas</h1>
+        <p class="page-subtitle">Consulte as apropriações de retenção e consignação do município de Caruaru</p>
+      </div>
+    </section>
+    <main class="content-area">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-hand-holding-usd"></i></div>
+          <div class="stat-content">
+            <div class="stat-label">Total Retido</div>
+            <div class="stat-value" id="kpiTotal" title="Carregando...">R$ 0,00</div>
+            <div class="stat-change positive" id="kpiVariacao"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-file-contract"></i></div>
+          <div class="stat-content">
+            <div class="stat-label">Registros</div>
+            <div class="stat-value" id="kpiQtd">0</div>
+            <div class="stat-change positive"><i class="fas fa-check"></i> Retenções</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="fas fa-layer-group"></i></div>
+          <div class="stat-content">
+            <div class="stat-label">Fontes de Recurso</div>
+            <div class="stat-value" id="kpiFontes">0</div>
+            <div class="stat-change positive"><i class="fas fa-check"></i> Diferentes fontes</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-calendar-alt"></i></div>
+          <div class="stat-content">
+            <div class="stat-label">Média por Registro</div>
+            <div class="stat-value" id="kpiMedia" title="Carregando...">R$ 0,00</div>
+            <div class="stat-change positive"><i class="fas fa-chart-line"></i> Valor médio</div>
+          </div>
+        </div>
+      </div>
+      <div class="filter-section" id="filtrosSection" style="display: none;">
+        <div class="filter-title"><i class="fas fa-filter"></i> Filtrar Retenções</div>
+        <div class="filter-grid">
+          <div class="filter-group">
+            <label class="filter-label">Exercício</label>
+            <select class="filter-select" id="filtroAno" onchange="aplicarFiltros()"></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Fonte de Recurso</label>
+            <select class="filter-select" id="filtroFonte" onchange="aplicarFiltros()"><option value="">Todas</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Buscar</label>
+            <input type="text" class="filter-input" id="filtroBusca" placeholder="Código ou descrição..." onkeyup="aplicarFiltros()">
+          </div>
+          <div class="filter-group" style="display: flex; align-items: flex-end;">
+            <button class="btn btn-primary" onclick="aplicarFiltros()"><i class="fas fa-search"></i> Buscar</button>
+          </div>
+        </div>
+      </div>
+      <!-- Mensagem quando não há dados -->
+      <div id="semDadosMsg" style="display: none; text-align: center; padding: 60px 20px; background: #f8fafc; border-radius: 12px; margin-bottom: 24px;">
+        <i class="fas fa-database" style="font-size: 48px; color: #cbd5e1; margin-bottom: 16px;"></i>
+        <h3 style="color: #64748b; margin-bottom: 8px;">Nenhum dado encontrado</h3>
+        <p style="color: #94a3b8; margin-bottom: 16px;">Não há dados de retenções importados no sistema.</p>
+        <a href="banco-importar-dados.html" class="btn btn-primary"><i class="fas fa-file-import"></i> Importar Dados</a>
+      </div>
+      
+      <div class="card" id="cardDemonstrativo">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-table"></i> Demonstrativo de Retenções</h2>
+          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i class="fas fa-sync-alt"></i> Carregando...</span></div>
+        </div>
+        <div class="card-body">
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="resumo">Resumo</button>
+            <button class="tab-btn" data-tab="detalhado">Detalhado</button>
+            <button class="tab-btn" data-tab="grafico">Gráfico</button>
+          </div>
+          <div class="tab-content active" id="resumo">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Fonte de Recurso</th>
+                    <th>Qtd. Registros</th>
+                    <th>Valor Retido</th>
+                    <th>% do Total</th>
+                  </tr>
+                </thead>
+                <tbody id="corpoResumo">
+                  <tr><td colspan="4" style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Carregando dados...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="tab-content" id="detalhado">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Código</th>
+                    <th>Descrição</th>
+                    <th>Fonte de Recurso</th>
+                    <th>Valor</th>
+                  </tr>
+                </thead>
+                <tbody id="corpoDetalhado">
+                  <tr><td colspan="5" style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Carregando dados...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="tab-content" id="grafico">
+            <div style="display: grid; gap: 30px;">
+              <div style="background: #f8fafc; border-radius: 12px; padding: 24px;">
+                <h3 style="font-size: 14px; color: #64748b; margin-bottom: 16px;"><i class="fas fa-chart-pie" style="color: #f59e0b;"></i> Retenções por Fonte</h3>
+                <div style="max-width: 500px; margin: 0 auto;">
+                  <canvas id="chartFonte"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="export-section">
+            <button class="btn btn-secondary btn-sm" onclick="exportarCSV()"><i class="fas fa-download"></i> CSV</button>
+            <button class="btn btn-secondary btn-sm" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer class="main-footer">
+      <div class="footer-content">
+        <p class="footer-text">© 2026 Prefeitura Municipal de Caruaru - SIGEF. Todos os direitos reservados.</p>
+      </div>
+    </footer>
+  </div>
+  <script src="js/portal-transparencia.js"></script>
+  <script>
+    const DB_NAME = 'PortalTransparenciaDB';
+    const DB_VERSION = 2;
+    const STORE_NAME = 'receitas-retencoes';
+    let db = null;
+    let dadosOriginais = [];
+    let dadosFiltrados = [];
+    let chartFonte = null;
+
+    function initDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => { db = request.result; resolve(db); };
+        request.onupgradeneeded = (event) => {
+          const database = event.target.result;
+          ['despesas-empenhados','despesas-liquidados','despesas-pagos','despesas-retidos','despesas-a-pagar','receitas-previsao','receitas-arrecadacao','receitas-retencoes','receitas-deducoes'].forEach(s => {
+            if (!database.objectStoreNames.contains(s)) database.createObjectStore(s, { keyPath: 'id', autoIncrement: true });
+          });
+        };
+      });
+    }
+
+    function carregarDados() {
+      return new Promise((resolve, reject) => {
+        if (!db) { reject(new Error('DB não inicializado')); return; }
+        const transaction = db.transaction([STORE_NAME], 'readonly');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function identificarColunas(dados) {
+      if (!dados || dados.length === 0) return {};
+      const colunas = Object.keys(dados[0]);
+      return {
+        data: colunas.find(c => c.toLowerCase().includes('data')) || 'Data',
+        receita: colunas.find(c => c.toLowerCase().includes('receita')) || 'Receita',
+        valor: colunas.find(c => c.toLowerCase().includes('valor')) || 'Valor',
+        fonte: colunas.find(c => c.toLowerCase().includes('fonte')) || 'Fonte de recurso'
+      };
+    }
+
+    function formatarMoeda(valor) { return (parseFloat(valor) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+    function formatarData(dataStr) {
+      if (!dataStr || dataStr === '-') return '-';
+      if (dataStr instanceof Date) { const d = dataStr; return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
+      if (typeof dataStr === 'number' && dataStr > 40000 && dataStr < 60000) { const d = new Date((dataStr - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`; }
+      const str = String(dataStr).trim();
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) return str;
+      if (/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/\d{4}$/.test(str)) { const m = str.match(/^(\d{2})\s+\d{2}:\d{2}:\d{2}\/(\d{2})\/(\d{4})$/); if (m) return `${m[1]}/${m[2]}/${m[3]}`; }
+      const num = parseFloat(str); if (!isNaN(num) && num > 40000 && num < 60000) { const d = new Date((num - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`; }
+      if (str.includes('-')) { const p = str.split('T')[0].split(' ')[0].split('-'); if (p.length === 3 && p[0].length === 4) return `${p[2]}/${p[1]}/${p[0]}`; }
+      try { const d = new Date(str); if (!isNaN(d.getTime()) && d.getFullYear() > 1990) return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; } catch(e) {}
+      return str;
+    }
+
+    function popularFiltros() {
+      const cols = identificarColunas(dadosOriginais);
+      const anos = [...new Set(dadosOriginais.map(d => { const dt = d[cols.data]; return dt ? String(dt).substring(0, 4) : null; }).filter(a => a && a.match(/^\d{4}$/)))].sort().reverse();
+      document.getElementById('filtroAno').innerHTML = '<option value="">Todos</option>' + anos.map(a => `<option value="${a}">${a}</option>`).join('');
+      const fontes = [...new Set(dadosOriginais.map(d => d[cols.fonte]).filter(Boolean))].sort();
+      document.getElementById('filtroFonte').innerHTML = '<option value="">Todas</option>' + fontes.map(f => `<option value="${f}">${String(f).substring(0, 60)}...</option>`).join('');
+    }
+
+    function aplicarFiltros() {
+      const cols = identificarColunas(dadosOriginais);
+      const anoSel = document.getElementById('filtroAno').value;
+      const fonteSel = document.getElementById('filtroFonte').value;
+      const busca = document.getElementById('filtroBusca').value.toLowerCase();
+      
+      dadosFiltrados = dadosOriginais.filter(d => {
+        const data = String(d[cols.data] || '');
+        if (anoSel && !data.startsWith(anoSel)) return false;
+        if (fonteSel && d[cols.fonte] !== fonteSel) return false;
+        if (busca && !String(d[cols.receita] || '').toLowerCase().includes(busca)) return false;
+        return true;
+      });
+      
+      atualizarKPIs();
+      renderizarResumo();
+      renderizarDetalhado();
+      atualizarGraficos();
+    }
+
+    function atualizarKPIs() {
+      const cols = identificarColunas(dadosFiltrados);
+      const total = dadosFiltrados.reduce((acc, d) => acc + (parseFloat(d[cols.valor]) || 0), 0);
+      setKpiValue('kpiTotal', total);
+      document.getElementById('kpiVariacao').innerHTML = '<i class="fas fa-check"></i> Retenções/Consignações';
+      const kpiQtdEl = document.getElementById('kpiQtd');
+      kpiQtdEl.textContent = dadosFiltrados.length.toLocaleString();
+      kpiQtdEl.title = dadosFiltrados.length.toLocaleString() + ' registros';
+      const kpiFontesEl = document.getElementById('kpiFontes');
+      const qtdFontes = [...new Set(dadosFiltrados.map(d => d[cols.fonte]).filter(Boolean))].length;
+      kpiFontesEl.textContent = qtdFontes;
+      kpiFontesEl.title = qtdFontes + ' fontes diferentes';
+      if (dadosFiltrados.length > 0) { setKpiValue('kpiMedia', total / dadosFiltrados.length); } else { document.getElementById('kpiMedia').textContent = 'R$ 0,00'; }
+    }
+
+    function renderizarResumo() {
+      const cols = identificarColunas(dadosFiltrados);
+      const corpo = document.getElementById('corpoResumo');
+      if (dadosFiltrados.length === 0) { corpo.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-inbox"></i> Nenhum dado encontrado. <a href="banco-importar-dados.html">Importar dados</a></td></tr>'; return; }
+      
+      const grupos = {}; let totalGeral = 0;
+      dadosFiltrados.forEach(d => {
+        const fonte = d[cols.fonte] || 'Sem fonte';
+        const valor = parseFloat(d[cols.valor]) || 0;
+        if (!grupos[fonte]) grupos[fonte] = { qtd: 0, valor: 0 };
+        grupos[fonte].qtd++; grupos[fonte].valor += valor; totalGeral += valor;
+      });
+      
+      const fontesOrdenadas = Object.entries(grupos).sort((a, b) => b[1].valor - a[1].valor);
+      let html = fontesOrdenadas.map(([fonte, dados]) => {
+        const perc = totalGeral > 0 ? ((dados.valor / totalGeral) * 100).toFixed(2) : 0;
+        return `<tr><td><strong>${String(fonte).substring(0, 80)}</strong></td><td>${dados.qtd.toLocaleString()}</td><td class="value">${formatarMoeda(dados.valor)}</td><td><div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;background:#e2e8f0;border-radius:4px;height:8px;"><div style="width:${Math.min(perc, 100)}%;background:#f59e0b;border-radius:4px;height:100%;"></div></div><span style="min-width:50px;">${perc}%</span></div></td></tr>`;
+      }).join('');
+      html += `<tr class="total-row"><td><strong>TOTAL GERAL</strong></td><td><strong>${dadosFiltrados.length.toLocaleString()}</strong></td><td class="value"><strong>${formatarMoeda(totalGeral)}</strong></td><td><strong>100%</strong></td></tr>`;
+      corpo.innerHTML = html;
+    }
+
+    function renderizarDetalhado() {
+      const cols = identificarColunas(dadosFiltrados);
+      const corpo = document.getElementById('corpoDetalhado');
+      if (dadosFiltrados.length === 0) { corpo.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-inbox"></i> Nenhum dado encontrado.</td></tr>'; return; }
+      
+      const dadosExibir = dadosFiltrados.slice(0, 100);
+      let html = dadosExibir.map(d => {
+        const receita = String(d[cols.receita] || '');
+        const partes = receita.split(' - ');
+        return `<tr><td>${formatarData(d[cols.data])}</td><td><strong>${partes[0] || '-'}</strong></td><td>${partes.slice(1).join(' - ').substring(0, 60) || receita.substring(0, 60)}</td><td>${String(d[cols.fonte] || '-').substring(0, 40)}...</td><td class="value">${formatarMoeda(d[cols.valor])}</td></tr>`;
+      }).join('');
+      if (dadosFiltrados.length > 100) html += `<tr><td colspan="5" style="text-align:center;padding:10px;color:#64748b;">Exibindo 100 de ${dadosFiltrados.length.toLocaleString()} registros</td></tr>`;
+      corpo.innerHTML = html;
+    }
+
+    function atualizarGraficos() {
+      const cols = identificarColunas(dadosFiltrados);
+      if (chartFonte) chartFonte.destroy();
+      if (dadosFiltrados.length === 0) return;
+
+      const gruposFonte = {};
+      dadosFiltrados.forEach(d => {
+        const fonte = String(d[cols.fonte] || 'Outros').substring(0, 30);
+        gruposFonte[fonte] = (gruposFonte[fonte] || 0) + (parseFloat(d[cols.valor]) || 0);
+      });
+      const fontesOrdenadas = Object.entries(gruposFonte).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      
+      chartFonte = new Chart(document.getElementById('chartFonte'), {
+        type: 'doughnut',
+        data: {
+          labels: fontesOrdenadas.map(f => f[0]),
+          datasets: [{ data: fontesOrdenadas.map(f => f[1]), backgroundColor: ['#f59e0b', '#3b82f6', '#22c55e', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899', '#6366f1'], borderWidth: 2, borderColor: '#fff' }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: ctx => `${ctx.label}: ${formatarMoeda(ctx.raw)}` } } } }
+      });
+    }
+
+    function exportarCSV() {
+      if (dadosFiltrados.length === 0) { alert('Nenhum dado para exportar'); return; }
+      const cols = identificarColunas(dadosFiltrados);
+      const headers = ['Data', 'Receita', 'Fonte', 'Valor'];
+      const linhas = dadosFiltrados.map(d => [formatarData(d[cols.data]), d[cols.receita], d[cols.fonte], d[cols.valor]]);
+      let csv = headers.join(';') + '\n' + linhas.map(l => l.join(';')).join('\n');
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'receitas-retencoes.csv'; link.click();
+    }
+
+    async function init() {
+      try {
+        await initDB();
+        dadosOriginais = await carregarDados();
+        dadosFiltrados = [...dadosOriginais];
+        if (dadosOriginais.length === 0) {
+          document.getElementById('cardDemonstrativo').style.display = 'none';
+          document.getElementById('semDadosMsg').style.display = 'block';
+          document.querySelector('.stats-grid').style.display = 'none';
+          document.getElementById('filtrosSection').style.display = 'none';
+          atualizarDataUltimaImportacao();
+          return;
+        }
+        document.getElementById('cardDemonstrativo').style.display = 'block';
+        document.getElementById('semDadosMsg').style.display = 'none';
+        popularFiltros();
+        aplicarFiltros();
+        atualizarDataUltimaImportacao();
+      } catch (erro) {
+        console.error('Erro:', erro);
+        document.getElementById('corpoResumo').innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Erro: ' + erro.message + '</td></tr>';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', init);
+    
+    // Controlar visibilidade dos filtros por aba
+    function atualizarVisibilidadeFiltros(tabId) {
+      const filtrosSection = document.getElementById('filtrosSection');
+      if (filtrosSection) {
+        filtrosSection.style.display = tabId === 'resumo' ? 'none' : 'block';
+      }
+    }
+    
+    // Sobrescrever comportamento das tabs para controlar filtros
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const tabId = this.getAttribute('data-tab');
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          this.classList.add('active');
+          document.getElementById(tabId).classList.add('active');
+          atualizarVisibilidadeFiltros(tabId);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

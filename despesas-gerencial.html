@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGEF | Dashboard Gerencial - Despesas - Caruaru</title>
+  <link rel="icon" type="image/png" href="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/portal-transparencia.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><img src="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png" alt="Brasão Caruaru"></div>
+      <h1 class="sidebar-title">Secretaria da Fazenda</h1>
+      <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    <nav class="sidebar-menu">
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)"><i class="fas fa-hand-holding-usd"></i><span>Receitas</span><i class="fas fa-chevron-right section-arrow"></i></div>
+        <ul>
+          <li class="menu-item"><a href="receitas-previsao.html" class="menu-link"><i class="fas fa-chart-line"></i><span>Previsão</span></a></li>
+          <li class="menu-item"><a href="receitas-arrecadacao.html" class="menu-link"><i class="fas fa-money-bill-wave"></i><span>Arrecadação</span></a></li>
+          <li class="menu-item"><a href="receitas-retencoes.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retenções</span></a></li>
+          <li class="menu-item"><a href="receitas-deducoes.html" class="menu-link"><i class="fas fa-minus-circle"></i><span>Deduções</span></a></li>
+          <li class="menu-item"><a href="receitas-gerencial.html" class="menu-link"><i class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="receitas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section expanded">
+        <div class="menu-section-title" onclick="toggleSection(this)"><i class="fas fa-file-invoice-dollar"></i><span>Despesas</span><i class="fas fa-chevron-right section-arrow"></i></div>
+        <ul>
+          <li class="menu-item"><a href="despesas-empenhados.html" class="menu-link"><i class="fas fa-file-invoice"></i><span>Empenhados</span></a></li>
+          <li class="menu-item"><a href="despesas-liquidados.html" class="menu-link"><i class="fas fa-check-circle"></i><span>Liquidados</span></a></li>
+          <li class="menu-item"><a href="despesas-retidos.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retidos</span></a></li>
+          <li class="menu-item"><a href="despesas-pagos.html" class="menu-link"><i class="fas fa-money-check-alt"></i><span>Pagos</span></a></li>
+          <li class="menu-item"><a href="despesas-a-pagar.html" class="menu-link"><i class="fas fa-clock"></i><span>A Pagar</span></a></li>
+          <li class="menu-item"><a href="despesas-gerencial.html" class="menu-link active"><i class="fas fa-chart-line"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="despesas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)"><i class="fas fa-database"></i><span>Banco de Dados</span><i class="fas fa-chevron-right section-arrow"></i></div>
+        <ul>
+          <li class="menu-item"><a href="banco-importar-dados.html" class="menu-link"><i class="fas fa-file-import"></i><span>Importar Dados</span></a></li>
+          <li class="menu-item"><a href="banco-historico.html" class="menu-link"><i class="fas fa-history"></i><span>Histórico</span></a></li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <nav class="breadcrumb">
+          <span>Despesas</span>
+          <i class="fas fa-chevron-right"></i>
+          <span>Gerencial</span>
+        </nav>
+      </div>
+      <div class="header-actions">
+        <div class="user-menu">
+          <div class="user-avatar">AD</div>
+          <div class="user-info"><span class="user-name">Administrador</span><span class="user-role">SIGEF</span></div>
+        </div>
+      </div>
+    </header>
+    <section class="page-header">
+      <div class="page-header-content">
+        <h1 class="page-title"><i class="fas fa-chart-line"></i> Dashboard Gerencial de Despesas</h1>
+        <p class="page-subtitle">Comparativo por quantidade de registros entre exercícios</p>
+      </div>
+    </section>
+    <main class="content-area">
+
+      <!-- Filtros (oculto na aba Resumo) -->
+      <div class="filter-section" id="filtrosSection" style="display: none;">
+        <div class="filter-title"><i class="fas fa-filter"></i> Filtrar Comparativos</div>
+        <div class="filter-grid">
+          <div class="filter-group">
+            <label class="filter-label">Exercício Base</label>
+            <select id="anoBase" class="filter-select" style="font-weight: bold; border-color: #3b82f6;"></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Comparar com</label>
+            <select id="anoComparacao" class="filter-select"></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Unidade Gestora</label>
+            <select id="filtroUnidadeGestora" class="filter-select">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Unidade Orçamentária</label>
+            <select id="filtroUnidade" class="filter-select">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Credor/Fornecedor</label>
+            <input type="text" id="filtroCredor" class="filter-input" placeholder="Digite 2+ letras..." autocomplete="off" oninput="filtrarCredorSugestoes(this.value)">
+            <datalist id="listaCredores"></datalist>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Espécie</label>
+            <select id="filtroEspecie" class="filter-select">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Tipo</label>
+            <select id="filtroTipo" class="filter-select">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Função</label>
+            <select id="filtroFuncao" class="filter-select">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">CNPJ/CPF</label>
+            <input type="text" id="filtroCNPJCPF" class="filter-input" placeholder="Digite CNPJ/CPF..." autocomplete="off">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Município</label>
+            <select id="filtroMunicipio" class="filter-select">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Ação</label>
+            <select id="filtroAcao" class="filter-select">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Natureza da Despesa</label>
+            <select id="filtroNaturezaDespesa" class="filter-select">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">SubFunção</label>
+            <select id="filtroSubFuncao" class="filter-select">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Programa</label>
+            <select id="filtroPrograma" class="filter-select">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Detalhamento Despesa</label>
+            <input type="text" id="filtroDetalhamentoDespesa" class="filter-input" placeholder="Digite detalhamento..." autocomplete="off">
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
+          <button class="btn btn-primary" onclick="aplicarFiltros()"><i class="fas fa-search"></i> Buscar</button>
+          <button class="btn btn-secondary" onclick="limparFiltros()"><i class="fas fa-times"></i> Limpar</button>
+        </div>
+      </div>
+
+      <!-- Card com Tabs -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-chart-bar"></i> Comparativo por Quantidade de Registros</h2>
+          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i class="fas fa-sync-alt"></i> Carregando...</span></div>
+        </div>
+        <div class="card-body">
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="resumo">Resumo</button>
+            <button class="tab-btn" data-tab="detalhado">Detalhado</button>
+            <button class="tab-btn" data-tab="grafico">Gráfico</button>
+          </div>
+          
+          <!-- Tab Resumo -->
+          <div class="tab-content active" id="resumo">
+            <!-- Filtro de Anos para Resumo -->
+            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; border: 1px solid #bae6fd;">
+              <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i class="fas fa-calendar-alt" style="color: #0284c7; font-size: 16px;"></i>
+                  <label style="font-weight: 600; color: #0369a1;">Comparar Anos:</label>
+                </div>
+                <div id="checkboxesAnos" style="display: flex; gap: 12px; flex-wrap: wrap;"></div>
+                <button class="btn btn-primary btn-sm" onclick="aplicarFiltroAnosResumo()" style="margin-left: auto;">
+                  <i class="fas fa-sync-alt"></i> Atualizar
+                </button>
+              </div>
+            </div>
+            <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <label style="font-weight: 600; color: var(--text-secondary);">Agrupar por:</label>
+              <select id="colunaAgrupamento" class="filter-select" style="min-width: 200px;" onchange="renderizarResumo()">
+                <option value="Unidade gestora">Unidade Gestora</option>
+                <option value="Unidade orçamentária">Unidade Orçamentária</option>
+                <option value="Função">Função</option>
+                <option value="Credor/Fornecedor">Credor/Fornecedor</option>
+                <option value="Espécie">Espécie</option>
+                <option value="Tipo">Tipo</option>
+                <option value="Município">Município</option>
+                <option value="Ação">Ação</option>
+                <option value="Natureza da Despesa">Natureza da Despesa</option>
+                <option value="SubFunção">SubFunção</option>
+                <option value="Programa">Programa</option>
+              </select>
+              <label style="font-weight: 600; color: var(--text-secondary); margin-left: 16px;">Tipo de Despesa:</label>
+              <select id="tipoResumo" class="filter-select" style="min-width: 150px;" onchange="renderizarResumo()">
+                <option value="empenhados">Empenhados</option>
+                <option value="liquidados">Liquidados</option>
+                <option value="pagos">Pagos</option>
+                <option value="a-pagar">A Pagar</option>
+                <option value="retidos">Retidos</option>
+              </select>
+              <span id="totalAgrupamentos" style="margin-left: auto; color: var(--text-muted); font-size: 14px;"></span>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead id="headerResumo">
+                  <tr>
+                    <th id="thAgrupamento">Agrupamento</th>
+                    <th style="text-align: center;">2025</th>
+                    <th style="text-align: center;">2024</th>
+                    <th style="text-align: center;">Variação</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaResumo"></tbody>
+              </table>
+            </div>
+          </div>
+          
+          <!-- Tab Detalhado -->
+          <div class="tab-content" id="detalhado">
+            <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <label style="font-weight: 600; color: var(--text-secondary);">Tipo de Despesa:</label>
+              <select id="tipoDespesa" class="filter-select" style="min-width: 150px;" onchange="renderizarDetalhado()">
+                <option value="empenhados">Empenhados</option>
+                <option value="liquidados">Liquidados</option>
+                <option value="pagos">Pagos</option>
+                <option value="a-pagar">A Pagar</option>
+                <option value="retidos">Retidos</option>
+              </select>
+              <label style="font-weight: 600; color: var(--text-secondary); margin-left: 16px;">Por página:</label>
+              <select id="registrosPorPagina" class="filter-select" style="width: 80px;" onchange="mudarPagina(1)">
+                <option value="25">25</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="250">250</option>
+              </select>
+              <div class="col-selector-wrap">
+                <button class="col-selector-btn" onclick="toggleColSelector(event)">
+                  <i class="fas fa-columns"></i> Colunas <span class="badge-count" id="colCount">0</span>
+                </button>
+                <div class="col-selector-dropdown" id="colSelectorDropdown">
+                  <div class="col-actions">
+                    <button onclick="colSelectorAll(true)">Todas</button>
+                    <button onclick="colSelectorAll(false)">Nenhuma</button>
+                    <button onclick="colSelectorReset()">Padrão</button>
+                  </div>
+                  <div id="colSelectorList"></div>
+                </div>
+              </div>
+              <div id="paginacaoInfo" style="margin-left: auto; color: var(--text-muted); font-size: 14px;"></div>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead id="theadDetalhado"></thead>
+                <tbody id="tabelaDetalhado"></tbody>
+              </table>
+            </div>
+            <div id="paginacaoControles" style="margin-top: 16px; display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;"></div>
+          </div>
+          
+          <!-- Tab Gráfico -->
+          <div class="tab-content" id="grafico">
+            <div style="display: flex; flex-direction: column; gap: 40px;">
+              <div>
+                <h4 style="margin-bottom: 16px; color: var(--text-dark); font-size: 16px;"><i class="fas fa-chart-bar" style="color: var(--color-primary); margin-right: 8px;"></i> Comparativo de Quantidade por Etapa</h4>
+                <div style="height: 450px;"><canvas id="chartComparativo"></canvas></div>
+              </div>
+              <div>
+                <h4 style="color: var(--text-dark); font-size: 16px; margin-bottom: 12px;"><i class="fas fa-chart-line" style="color: var(--color-primary); margin-right: 8px;"></i> Evolução Mensal</h4>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                  <label style="font-weight: 600; color: var(--text-secondary);">Tipo de Despesa:</label>
+                  <select id="tipoGraficoMensal" class="filter-select" style="min-width: 150px;" onchange="atualizarGraficoMensal()">
+                    <option value="empenhados">Empenhados</option>
+                    <option value="liquidados">Liquidados</option>
+                    <option value="pagos">Pagos</option>
+                    <option value="a-pagar">A Pagar</option>
+                    <option value="retidos">Retidos</option>
+                  </select>
+                </div>
+                <div style="height: 450px;"><canvas id="chartMensal"></canvas></div>
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                  <h4 style="color: var(--text-dark); font-size: 16px; margin: 0;"><i class="fas fa-chart-pie" style="color: var(--color-primary); margin-right: 8px;"></i> Distribuição por Tipo</h4>
+                  <select id="anoGraficoPizza" class="filter-select" style="min-width: 120px;" onchange="atualizarGraficoPizza()">
+                    <option value="todos">Todos os Anos</option>
+                  </select>
+                </div>
+                <div style="height: 350px; max-width: 400px; margin: 0 auto;"><canvas id="chartPizza"></canvas></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="export-section">
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+          </div>
+        </div>
+      </div>
+      
+    </main>
+    <footer class="main-footer">
+      <div class="footer-content">
+        <p class="footer-text">© 2026 Prefeitura Municipal de Caruaru - SIGEF. Todos os direitos reservados.</p>
+      </div>
+    </footer>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="js/portal-transparencia.js"></script>
+  <script src="js/indexeddb-utils.js"></script>
+  <script src="js/exportar-dados.js"></script>
+  <script>
+    // Dados globais
+    let dados = { empenhados: [], liquidados: [], pagos: [], retidos: [], 'a-pagar': [] };
+    let dadosFiltrados = { 
+      base: { empenhados: [], liquidados: [], pagos: [], retidos: [], 'a-pagar': [] }, 
+      comp: { empenhados: [], liquidados: [], pagos: [], retidos: [], 'a-pagar': [] } 
+    };
+    let listaCredoresUnicos = [];
+    let charts = {};
+    let paginaAtual = 1;
+
+    function formatarMoeda(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
+    function formatarNumero(v) { return v.toLocaleString('pt-BR'); }
+    function getValor(item, ...campos) { for (let c of campos) if (item[c] !== undefined && item[c] !== null && item[c] !== '') return item[c]; return null; }
+    function extrairAno(dataStr) {
+      if (!dataStr) return null;
+      const str = String(dataStr).trim();
+      // Formato especial: "02 00:00:00/01/2024"
+      const matchEspecial = str.match(/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/(\d{4})$/);
+      if (matchEspecial) return matchEspecial[1];
+      // Formato DD/MM/YYYY
+      if (str.includes('/')) { const p = str.split('/'); if (p.length === 3) return p[2].substring(0, 4); }
+      // Formato YYYY-MM-DD
+      if (str.includes('-') && !str.includes('/')) return str.substring(0, 4);
+      return null;
+    }
+    function extrairMes(dataStr) {
+      if (!dataStr) return null;
+      const str = String(dataStr).trim();
+      // Formato especial: "02 00:00:00/01/2024"
+      const matchEspecial = str.match(/^\d{2}\s+\d{2}:\d{2}:\d{2}\/(\d{2})\/\d{4}$/);
+      if (matchEspecial) return matchEspecial[1];
+      // Formato DD/MM/YYYY
+      if (str.includes('/')) { const p = str.split('/'); if (p.length === 3) return p[1]; }
+      // Formato YYYY-MM-DD
+      if (str.includes('-') && !str.includes('/')) return str.substring(5, 7);
+      return null;
+    }
+    function calcVariacao(atual, anterior) {
+      if (!anterior || anterior === 0) return atual > 0 ? 100 : 0;
+      return ((atual - anterior) / anterior * 100);
+    }
+    function formatarData(dataStr) {
+      if (!dataStr || dataStr === '-') return '-';
+      if (dataStr instanceof Date) { const d = dataStr; return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
+      if (typeof dataStr === 'number' && dataStr > 40000 && dataStr < 60000) { const d = new Date((dataStr - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`; }
+      const str = String(dataStr).trim();
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) return str;
+      if (/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/\d{4}$/.test(str)) { const m = str.match(/^(\d{2})\s+\d{2}:\d{2}:\d{2}\/(\d{2})\/(\d{4})$/); if (m) return `${m[1]}/${m[2]}/${m[3]}`; }
+      const num = parseFloat(str); if (!isNaN(num) && num > 40000 && num < 60000) { const d = new Date((num - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`; }
+      if (str.includes('-')) { const p = str.split('T')[0].split(' ')[0].split('-'); if (p.length === 3 && p[0].length === 4) return `${p[2]}/${p[1]}/${p[0]}`; }
+      try { const d = new Date(str); if (!isNaN(d.getTime()) && d.getFullYear() > 1990) return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; } catch(e) {}
+      return str;
+    }
+    function getCampoValor(tipo) {
+      if (tipo === 'retidos') return ['Valor retido', 'Valor'];
+      return ['Valor (R$)', 'Valor'];
+    }
+    
+    function filtrarCredorSugestoes(termo) {
+      const datalist = document.getElementById('listaCredores');
+      const input = document.getElementById('filtroCredor');
+      datalist.innerHTML = '';
+      if (termo.length < 2) { input.removeAttribute('list'); return; }
+      input.setAttribute('list', 'listaCredores');
+      const matches = listaCredoresUnicos.filter(c => c.toLowerCase().includes(termo.toLowerCase())).slice(0, 15);
+      matches.forEach(c => { const opt = document.createElement('option'); opt.value = c; datalist.appendChild(opt); });
+    }
+
+    // Cache de dados indexados por ano para evitar re-filtragem
+    let indicePorAno = {}; // { tipo: { ano: [registros] } }
+    let cacheFiltragem = {}; // Cache de resultados de filtrarDadosPorAno
+    let cacheFiltrosKey = ''; // Key para invalidar cache quando filtros mudam
+
+    function construirIndicePorAno() {
+      indicePorAno = {};
+      ['empenhados', 'liquidados', 'pagos', 'retidos', 'a-pagar'].forEach(tipo => {
+        indicePorAno[tipo] = {};
+        dados[tipo].forEach(d => {
+          const ano = extrairAno(getValor(d, 'Data'));
+          if (ano) {
+            if (!indicePorAno[tipo][ano]) indicePorAno[tipo][ano] = [];
+            indicePorAno[tipo][ano].push(d);
+          }
+        });
+      });
+    }
+
+    function invalidarCacheFiltragem() {
+      cacheFiltragem = {};
+      cacheFiltrosKey = '';
+    }
+
+    async function carregarDados() {
+      try {
+        const [emp, liq, pag, ret, apg] = await Promise.all([
+          carregarDadosPortal('despesas-empenhados'),
+          carregarDadosPortal('despesas-liquidados'),
+          carregarDadosPortal('despesas-pagos'),
+          carregarDadosPortal('despesas-retidos'),
+          carregarDadosPortal('despesas-a-pagar')
+        ]);
+        dados.empenhados = emp || [];
+        dados.liquidados = liq || [];
+        dados.pagos = pag || [];
+        dados.retidos = ret || [];
+        dados['a-pagar'] = apg || [];
+
+        construirIndicePorAno();
+        popularFiltros();
+        detectarColunasDosDados(dados);
+        aplicarFiltros();
+
+        atualizarDataUltimaImportacao();
+      } catch (e) {
+        console.error('Erro:', e);
+      }
+    }
+
+    function popularFiltros() {
+      // Usar o índice por ano para extrair anos rapidamente
+      const todosAnos = new Set();
+      Object.values(indicePorAno).forEach(porAno => {
+        Object.keys(porAno).forEach(ano => todosAnos.add(ano));
+      });
+
+      const todasUnidadesGestoras = new Set();
+      const todasUnidades = new Set();
+      const todasEspecies = new Set();
+      const todosTipos = new Set();
+      const todasFuncoes = new Set();
+      const todosMunicipios = new Set();
+      const todasAcoes = new Set();
+      const todasNaturezasDespesa = new Set();
+      const todasSubFuncoes = new Set();
+      const todosProgramas = new Set();
+
+      // Apenas iterar empenhados para popular filtros (maior dataset)
+      const listaPrincipal = dados.empenhados.length > 0 ? dados.empenhados : Object.values(dados).find(l => l.length > 0) || [];
+      listaPrincipal.forEach(d => {
+        const ug = getValor(d, 'Unidade gestora', 'Unidade Gestora');
+        if (ug) todasUnidadesGestoras.add(ug);
+        const uni = getValor(d, 'Unidade orçamentária', 'Unidade Orçamentária');
+        if (uni) todasUnidades.add(uni);
+        const esp = getValor(d, 'Espécie');
+        if (esp) todasEspecies.add(esp);
+        const tipo = getValor(d, 'Tipo');
+        if (tipo) todosTipos.add(tipo);
+        const func = getValor(d, 'Função');
+        if (func) todasFuncoes.add(func);
+        const municipio = getValor(d, 'Município', 'Municipio');
+        if (municipio) todosMunicipios.add(municipio);
+        const acao = getValor(d, 'Ação', 'Acao');
+        if (acao) todasAcoes.add(acao);
+        const natureza = getValor(d, 'Natureza da Despesa', 'Natureza da despesa', 'Natureza Despesa');
+        if (natureza) todasNaturezasDespesa.add(natureza);
+        const subFuncao = getValor(d, 'SubFunção', 'SubFuncao', 'Sub-Função', 'Sub-Funcao');
+        if (subFuncao) todasSubFuncoes.add(subFuncao);
+        const programa = getValor(d, 'Programa');
+        if (programa) todosProgramas.add(programa);
+      });
+      
+      const anosOrdenados = [...todosAnos].sort().reverse();
+      
+      // Popular checkboxes de anos para o Resumo
+      const checkboxesContainer = document.getElementById('checkboxesAnos');
+      checkboxesContainer.innerHTML = '';
+      anosOrdenados.forEach((ano, idx) => {
+        const checked = idx < 2; // Seleciona os 2 mais recentes por padrão
+        const bgColor = checked ? '#3b82f6' : '#f1f5f9';
+        const textColor = checked ? '#ffffff' : '#64748b';
+        checkboxesContainer.innerHTML += `
+          <label onclick="toggleAnoCheckbox(this, '${ano}')" 
+                 style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; cursor: pointer; 
+                        background: ${bgColor}; color: ${textColor}; font-weight: 500; font-size: 14px; transition: all 0.2s; user-select: none;"
+                 data-ano="${ano}" data-checked="${checked}">
+            <i class="fas ${checked ? 'fa-check-square' : 'fa-square'}" style="font-size: 14px;"></i>
+            ${ano}
+          </label>`;
+      });
+      
+      ['anoBase', 'anoComparacao'].forEach((id, idx) => {
+        const sel = document.getElementById(id);
+        sel.innerHTML = '';
+        anosOrdenados.forEach((ano, i) => {
+          sel.innerHTML += `<option value="${ano}" ${i === idx ? 'selected' : ''}>${ano}</option>`;
+        });
+      });
+      
+      const selUnidadeGestora = document.getElementById('filtroUnidadeGestora');
+      selUnidadeGestora.innerHTML = '<option value="">Todas</option>';
+      [...todasUnidadesGestoras].sort().forEach(u => selUnidadeGestora.innerHTML += `<option value="${u}">${u.length > 40 ? u.substring(0, 40) + '...' : u}</option>`);
+      
+      const selUnidade = document.getElementById('filtroUnidade');
+      selUnidade.innerHTML = '<option value="">Todas</option>';
+      [...todasUnidades].sort().forEach(u => selUnidade.innerHTML += `<option value="${u}">${u.length > 40 ? u.substring(0, 40) + '...' : u}</option>`);
+      
+      const selEspecie = document.getElementById('filtroEspecie');
+      selEspecie.innerHTML = '<option value="">Todas</option>';
+      [...todasEspecies].sort().forEach(e => selEspecie.innerHTML += `<option value="${e}">${e}</option>`);
+      
+      const selTipo = document.getElementById('filtroTipo');
+      selTipo.innerHTML = '<option value="">Todos</option>';
+      [...todosTipos].sort().forEach(t => selTipo.innerHTML += `<option value="${t}">${t}</option>`);
+      
+      const selFuncao = document.getElementById('filtroFuncao');
+      selFuncao.innerHTML = '<option value="">Todas</option>';
+      [...todasFuncoes].sort().forEach(f => selFuncao.innerHTML += `<option value="${f}">${f}</option>`);
+      
+      const selMunicipio = document.getElementById('filtroMunicipio');
+      selMunicipio.innerHTML = '<option value="">Todos</option>';
+      [...todosMunicipios].sort().forEach(m => selMunicipio.innerHTML += `<option value="${m}">${m}</option>`);
+      
+      const selAcao = document.getElementById('filtroAcao');
+      selAcao.innerHTML = '<option value="">Todas</option>';
+      [...todasAcoes].sort().forEach(a => selAcao.innerHTML += `<option value="${a}">${a}</option>`);
+      
+      const selNaturezaDespesa = document.getElementById('filtroNaturezaDespesa');
+      selNaturezaDespesa.innerHTML = '<option value="">Todas</option>';
+      [...todasNaturezasDespesa].sort().forEach(n => selNaturezaDespesa.innerHTML += `<option value="${n}">${n}</option>`);
+      
+      const selSubFuncao = document.getElementById('filtroSubFuncao');
+      selSubFuncao.innerHTML = '<option value="">Todas</option>';
+      [...todasSubFuncoes].sort().forEach(sf => selSubFuncao.innerHTML += `<option value="${sf}">${sf}</option>`);
+      
+      const selPrograma = document.getElementById('filtroPrograma');
+      selPrograma.innerHTML = '<option value="">Todos</option>';
+      [...todosProgramas].sort().forEach(p => selPrograma.innerHTML += `<option value="${p}">${p}</option>`);
+      
+      listaCredoresUnicos = [...new Set(dados.empenhados.map(d => getValor(d, 'Credor/Fornecedor')).filter(v => v))].sort();
+      
+      // Popular select de anos para o gráfico de pizza
+      const selAnoPizza = document.getElementById('anoGraficoPizza');
+      selAnoPizza.innerHTML = '<option value="todos">Todos os Anos</option>';
+      anosOrdenados.forEach(ano => selAnoPizza.innerHTML += `<option value="${ano}">${ano}</option>`);
+    }
+    
+    // Funções para gerenciar checkboxes de anos
+    function toggleAnoCheckbox(label, ano) {
+      const isChecked = label.dataset.checked === 'true';
+      const newChecked = !isChecked;
+      label.dataset.checked = newChecked;
+      label.style.background = newChecked ? '#3b82f6' : '#f1f5f9';
+      label.style.color = newChecked ? '#ffffff' : '#64748b';
+      label.querySelector('i').className = newChecked ? 'fas fa-check-square' : 'fas fa-square';
+    }
+    
+    function getAnosSelecionados() {
+      const labels = document.querySelectorAll('#checkboxesAnos label');
+      const anos = [];
+      labels.forEach(label => {
+        if (label.dataset.checked === 'true') {
+          anos.push(label.dataset.ano);
+        }
+      });
+      return anos.sort().reverse();
+    }
+    
+    function aplicarFiltroAnosResumo() {
+      const anos = getAnosSelecionados();
+      if (anos.length < 2) {
+        alert('Selecione pelo menos 2 anos para comparar.');
+        return;
+      }
+      invalidarCacheFiltragem();
+      renderizarResumo();
+      atualizarGraficosMultiAnos();
+    }
+
+    function aplicarFiltrosLista(lista, ano, unidadeGestora, unidade, credor, especie, tipo, funcao, cnpjcpf, municipio, acao, naturezaDespesa, subFuncao, programa, detalhamentoDespesa) {
+      return lista.filter(d => {
+        if (ano && extrairAno(getValor(d, 'Data')) !== ano) return false;
+        if (unidadeGestora && getValor(d, 'Unidade gestora', 'Unidade Gestora') !== unidadeGestora) return false;
+        if (unidade && getValor(d, 'Unidade orçamentária', 'Unidade Orçamentária') !== unidade) return false;
+        if (credor && !String(getValor(d, 'Credor/Fornecedor') || '').toLowerCase().includes(credor.toLowerCase())) return false;
+        if (especie && getValor(d, 'Espécie') !== especie) return false;
+        if (tipo && getValor(d, 'Tipo') !== tipo) return false;
+        if (funcao && getValor(d, 'Função') !== funcao) return false;
+        if (cnpjcpf && !String(getValor(d, 'CNPJ/CPF', 'CNPJ', 'CPF', 'CNPJ&CPF') || '').toLowerCase().includes(cnpjcpf.toLowerCase())) return false;
+        if (municipio && getValor(d, 'Município', 'Municipio') !== municipio) return false;
+        if (acao && getValor(d, 'Ação', 'Acao') !== acao) return false;
+        if (naturezaDespesa && getValor(d, 'Natureza da Despesa', 'Natureza da despesa', 'Natureza Despesa') !== naturezaDespesa) return false;
+        if (subFuncao && getValor(d, 'SubFunção', 'SubFuncao', 'Sub-Função', 'Sub-Funcao') !== subFuncao) return false;
+        if (programa && getValor(d, 'Programa') !== programa) return false;
+        if (detalhamentoDespesa && !String(getValor(d, 'Detalhamento Despesa', 'Detalhamento despesa', 'Detalhamento') || '').toLowerCase().includes(detalhamentoDespesa.toLowerCase())) return false;
+        return true;
+      });
+    }
+    
+    // Função auxiliar para aplicar filtros sem filtrar por ano específico
+    function getFiltrosAtuais() {
+      return {
+        unidadeGestora: document.getElementById('filtroUnidadeGestora').value,
+        unidade: document.getElementById('filtroUnidade').value,
+        credor: document.getElementById('filtroCredor').value.trim(),
+        especie: document.getElementById('filtroEspecie').value,
+        tipo: document.getElementById('filtroTipo').value,
+        funcao: document.getElementById('filtroFuncao').value,
+        cnpjcpf: document.getElementById('filtroCNPJCPF').value.trim(),
+        municipio: document.getElementById('filtroMunicipio').value,
+        acao: document.getElementById('filtroAcao').value,
+        naturezaDespesa: document.getElementById('filtroNaturezaDespesa').value,
+        subFuncao: document.getElementById('filtroSubFuncao').value,
+        programa: document.getElementById('filtroPrograma').value,
+        detalhamentoDespesa: document.getElementById('filtroDetalhamentoDespesa').value.trim()
+      };
+    }
+    
+    // Filtra dados por ano e pelos filtros atuais - com cache
+    function filtrarDadosPorAno(lista, ano, tipo) {
+      const filtros = getFiltrosAtuais();
+      const filtrosKey = JSON.stringify(filtros);
+
+      // Invalidar cache se filtros mudaram
+      if (filtrosKey !== cacheFiltrosKey) {
+        cacheFiltragem = {};
+        cacheFiltrosKey = filtrosKey;
+      }
+
+      // Determinar tipo pelo lista se não fornecido
+      const tipoKey = tipo || Object.keys(dados).find(k => dados[k] === lista) || 'unknown';
+      const cacheKey = tipoKey + '|' + ano;
+      if (cacheFiltragem[cacheKey]) return cacheFiltragem[cacheKey];
+
+      // Usar índice por ano em vez de filtrar toda a lista
+      const dadosDoAno = (indicePorAno[tipoKey] && indicePorAno[tipoKey][ano]) || [];
+
+      // Se não há filtros ativos, retornar direto do índice
+      const temFiltros = filtros.unidadeGestora || filtros.unidade || filtros.credor || filtros.especie || filtros.tipo || filtros.funcao || filtros.cnpjcpf || filtros.municipio || filtros.acao || filtros.naturezaDespesa || filtros.subFuncao || filtros.programa || filtros.detalhamentoDespesa;
+
+      let resultado;
+      if (!temFiltros) {
+        resultado = dadosDoAno;
+      } else {
+        resultado = aplicarFiltrosLista(dadosDoAno, null, filtros.unidadeGestora, filtros.unidade, filtros.credor, filtros.especie, filtros.tipo, filtros.funcao, filtros.cnpjcpf, filtros.municipio, filtros.acao, filtros.naturezaDespesa, filtros.subFuncao, filtros.programa, filtros.detalhamentoDespesa);
+      }
+
+      cacheFiltragem[cacheKey] = resultado;
+      return resultado;
+    }
+
+    function aplicarFiltros() {
+      invalidarCacheFiltragem();
+      const anoBase = document.getElementById('anoBase').value;
+      const anoComp = document.getElementById('anoComparacao').value;
+
+      ['empenhados', 'liquidados', 'pagos', 'retidos', 'a-pagar'].forEach(t => {
+        dadosFiltrados.base[t] = filtrarDadosPorAno(dados[t], anoBase, t);
+        dadosFiltrados.comp[t] = filtrarDadosPorAno(dados[t], anoComp, t);
+      });
+
+      renderizarResumo();
+      atualizarGraficosMultiAnos();
+      paginaAtual = 1;
+      renderizarDetalhado();
+    }
+
+    function limparFiltros() {
+      invalidarCacheFiltragem();
+      document.getElementById('filtroUnidadeGestora').value = '';
+      document.getElementById('filtroUnidade').value = '';
+      document.getElementById('filtroCredor').value = '';
+      document.getElementById('filtroEspecie').value = '';
+      document.getElementById('filtroTipo').value = '';
+      document.getElementById('filtroFuncao').value = '';
+      document.getElementById('filtroCNPJCPF').value = '';
+      document.getElementById('filtroMunicipio').value = '';
+      document.getElementById('filtroAcao').value = '';
+      document.getElementById('filtroNaturezaDespesa').value = '';
+      document.getElementById('filtroSubFuncao').value = '';
+      document.getElementById('filtroPrograma').value = '';
+      document.getElementById('filtroDetalhamentoDespesa').value = '';
+      aplicarFiltros();
+    }
+
+    function renderizarResumo() {
+      const anos = getAnosSelecionados();
+      if (anos.length < 2) {
+        // Fallback para modo antigo se menos de 2 anos selecionados
+        const anoBase = document.getElementById('anoBase').value;
+        const anoComp = document.getElementById('anoComparacao').value;
+        anos.length = 0;
+        anos.push(anoBase, anoComp);
+      }
+      
+      const agrupamento = document.getElementById('colunaAgrupamento').value;
+      const tipo = document.getElementById('tipoResumo').value;
+      
+      // Agrupar dados por ano - usando filtros e cache
+      const agrupadoPorAno = {};
+      anos.forEach(ano => {
+        agrupadoPorAno[ano] = {};
+        const dadosFiltradosAno = filtrarDadosPorAno(dados[tipo], ano, tipo);
+        dadosFiltradosAno.forEach(d => {
+          let chave;
+          if (agrupamento === 'Município') {
+            chave = getValor(d, 'Município', 'Municipio') || 'Não informado';
+          } else if (agrupamento === 'Ação') {
+            chave = getValor(d, 'Ação', 'Acao') || 'Não informado';
+          } else if (agrupamento === 'Natureza da Despesa') {
+            chave = getValor(d, 'Natureza da Despesa', 'Natureza da despesa', 'Natureza Despesa') || 'Não informado';
+          } else if (agrupamento === 'SubFunção') {
+            chave = getValor(d, 'SubFunção', 'SubFuncao', 'Sub-Função', 'Sub-Funcao') || 'Não informado';
+          } else if (agrupamento === 'Programa') {
+            chave = getValor(d, 'Programa') || 'Não informado';
+          } else {
+            chave = getValor(d, agrupamento) || 'Não informado';
+          }
+          agrupadoPorAno[ano][chave] = (agrupadoPorAno[ano][chave] || 0) + 1;
+        });
+      });
+      
+      // Encontrar todas as chaves
+      const todasChaves = new Set();
+      anos.forEach(ano => {
+        Object.keys(agrupadoPorAno[ano]).forEach(chave => todasChaves.add(chave));
+      });
+      
+      // Construir resumo
+      const resumo = [...todasChaves].map(chave => {
+        const item = { nome: chave };
+        anos.forEach(ano => {
+          item[ano] = agrupadoPorAno[ano][chave] || 0;
+        });
+        return item;
+      }).sort((a, b) => (b[anos[0]] || 0) - (a[anos[0]] || 0));
+      
+      // Atualizar cabeçalho da tabela dinamicamente
+      const headerResumo = document.getElementById('headerResumo');
+      let headerHtml = `<tr><th id="thAgrupamento">${agrupamento}</th>`;
+      anos.forEach(ano => {
+        headerHtml += `<th style="text-align: center;">${ano}</th>`;
+      });
+      headerHtml += `<th style="text-align: center;">Variação</th></tr>`;
+      headerResumo.innerHTML = headerHtml;
+      
+      // Atualizar dados do resumo para exportação
+      dadosResumoGlobal = resumo.map(r => {
+        const exportItem = { 'Agrupamento': r.nome };
+        anos.forEach(ano => {
+          exportItem[`Qtd ${ano}`] = r[ano];
+        });
+        const primeiroAno = anos[0];
+        const ultimoAno = anos[anos.length - 1];
+        exportItem['Variação (%)'] = calcVariacao(r[primeiroAno], r[ultimoAno]).toFixed(2) + '%';
+        return exportItem;
+      });
+      
+      // Renderizar tabela
+      const tbody = document.getElementById('tabelaResumo');
+      const colunas = anos.length + 2; // Agrupamento + anos + Variação
+      
+      tbody.innerHTML = resumo.map(r => {
+        const primeiroAno = anos[0];
+        const ultimoAno = anos[anos.length - 1];
+        const variacao = calcVariacao(r[primeiroAno], r[ultimoAno]);
+        const corFundo = variacao > 0 ? 'rgba(45, 152, 70, 0.1)' : variacao < 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)';
+        const corTexto = variacao > 0 ? '#2D9846' : variacao < 0 ? '#ef4444' : '#3b82f6';
+        const sinal = variacao >= 0 ? '+' : '';
+        
+        let html = `<tr><td title="${r.nome}" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">${r.nome.length > 40 ? r.nome.substring(0, 40) + '...' : r.nome}</td>`;
+        anos.forEach((ano, idx) => {
+          const badgeClass = idx === 0 ? 'badge-info' : 'badge-secondary';
+          html += `<td style="text-align: center;"><span class="badge ${badgeClass}">${formatarNumero(r[ano])}</span></td>`;
+        });
+        html += `<td style="text-align: center;"><span class="badge" style="background: ${corFundo}; color: ${corTexto};">${sinal}${variacao.toFixed(1)}%</span></td></tr>`;
+        return html;
+      }).join('') || `<tr><td colspan="${colunas}" style="text-align: center; padding: 40px;">Nenhum dado encontrado</td></tr>`;
+      
+      document.getElementById('totalAgrupamentos').textContent = `${resumo.length} grupo(s) encontrado(s)`;
+    }
+    
+    function atualizarGraficosMultiAnos() {
+      const anos = getAnosSelecionados();
+      if (anos.length < 2) return;
+      
+      // Cores para os anos
+      const cores = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899'];
+      
+      // Dados por etapa para cada ano
+      const etapas = ['Empenhados', 'Liquidados', 'Pagos', 'A Pagar', 'Retidos'];
+      const tiposMap = { 'Empenhados': 'empenhados', 'Liquidados': 'liquidados', 'Pagos': 'pagos', 'A Pagar': 'a-pagar', 'Retidos': 'retidos' };
+      
+      const datasets = anos.map((ano, idx) => {
+        const qtds = etapas.map(etapa => {
+          const tipo = tiposMap[etapa];
+          // Usar dados filtrados por ano e pelos filtros atuais - com cache
+          const dadosFiltradosAno = filtrarDadosPorAno(dados[tipo], ano, tipo);
+          return dadosFiltradosAno.length;
+        });
+        return {
+          label: ano,
+          data: qtds,
+          backgroundColor: cores[idx % cores.length],
+          borderRadius: 6
+        };
+      });
+      
+      if (charts.comparativo) charts.comparativo.destroy();
+      charts.comparativo = new Chart(document.getElementById('chartComparativo'), {
+        type: 'bar',
+        data: { labels: etapas, datasets: datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'top' } },
+          scales: { y: { ticks: { callback: v => formatarNumero(v) } } }
+        }
+      });
+      
+      // Atualizar gráfico mensal
+      atualizarGraficoMensal();
+    }
+    
+    function atualizarGraficoMensal() {
+      const anos = getAnosSelecionados();
+      if (anos.length < 2) return;
+      
+      const tipoSelecionado = document.getElementById('tipoGraficoMensal').value;
+      const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      const cores = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899'];
+      
+      // Mostrar um tipo específico com linhas por ano
+      const dadosPorAnoMes = {};
+      anos.forEach(ano => {
+        dadosPorAnoMes[ano] = {};
+        for (let m = 1; m <= 12; m++) {
+          dadosPorAnoMes[ano][m.toString().padStart(2, '0')] = 0;
+        }
+        
+        // Filtrar dados por ano e pelos filtros atuais - com cache
+        const dadosFiltradosAno = filtrarDadosPorAno(dados[tipoSelecionado], ano, tipoSelecionado);
+        dadosFiltradosAno.forEach(d => {
+          const mes = extrairMes(getValor(d, 'Data'));
+          if (mes) {
+            dadosPorAnoMes[ano][mes] = (dadosPorAnoMes[ano][mes] || 0) + 1;
+          }
+        });
+      });
+      
+      const datasetsMensal = anos.map((ano, idx) => ({
+        label: ano,
+        data: nomesMeses.map((_, i) => dadosPorAnoMes[ano][(i + 1).toString().padStart(2, '0')] || 0),
+        borderColor: cores[idx % cores.length],
+        backgroundColor: cores[idx % cores.length] + '30',
+        fill: true,
+        tension: 0.3,
+        borderWidth: 2
+      }));
+      
+      if (charts.mensal) charts.mensal.destroy();
+      charts.mensal = new Chart(document.getElementById('chartMensal'), {
+        type: 'line',
+        data: { 
+          labels: nomesMeses, 
+          datasets: datasetsMensal
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: true, position: 'top' } },
+          scales: { y: { ticks: { callback: v => formatarNumero(v) } } }
+        }
+      });
+      
+      // Atualizar também o gráfico de pizza
+      atualizarGraficoPizza();
+    }
+    
+    function atualizarGraficoPizza() {
+      const anoSelecionado = document.getElementById('anoGraficoPizza').value;
+      const anos = getAnosSelecionados();
+      const tipos = ['empenhados', 'liquidados', 'pagos', 'a-pagar', 'retidos'];
+      const nomesTipos = ['Empenhados', 'Liquidados', 'Pagos', 'A Pagar', 'Retidos'];
+      const coresTipos = ['#3b82f6', '#10b981', '#22c55e', '#f59e0b', '#ef4444'];
+      
+      const valores = tipos.map(tipo => {
+        let total = 0;
+        if (anoSelecionado === 'todos') {
+          // Para "todos", usar os anos selecionados nos checkboxes
+          anos.forEach(ano => {
+            total += filtrarDadosPorAno(dados[tipo], ano, tipo).length;
+          });
+        } else {
+          // Para um ano específico
+          total = filtrarDadosPorAno(dados[tipo], anoSelecionado, tipo).length;
+        }
+        return total;
+      });
+      
+      if (charts.pizza) charts.pizza.destroy();
+      charts.pizza = new Chart(document.getElementById('chartPizza'), {
+        type: 'pie',
+        data: {
+          labels: nomesTipos,
+          datasets: [{
+            data: valores,
+            backgroundColor: coresTipos,
+            borderWidth: 2,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: true, position: 'bottom' },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                  const valor = ctx.raw;
+                  const pct = total > 0 ? ((valor / total) * 100).toFixed(1) : 0;
+                  return `${ctx.label}: ${formatarNumero(valor)} (${pct}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderizarDetalhado() {
+      const anoBase = document.getElementById('anoBase').value;
+      const anoComp = document.getElementById('anoComparacao').value;
+      const porPagina = parseInt(document.getElementById('registrosPorPagina').value);
+      const tipo = document.getElementById('tipoDespesa').value;
+      const camposValor = getCampoValor(tipo);
+      const cols = getColunasAtivas();
+
+      renderThead();
+
+      const todosDados = [
+        ...dadosFiltrados.base[tipo].map(d => ({ ...d, _exercicio: anoBase })),
+        ...dadosFiltrados.comp[tipo].map(d => ({ ...d, _exercicio: anoComp }))
+      ];
+
+      todosDados.sort((a, b) => {
+        const dataA = getValor(a, 'Data') || '';
+        const dataB = getValor(b, 'Data') || '';
+        return dataB.localeCompare(dataA);
+      });
+
+      const totalPaginas = Math.ceil(todosDados.length / porPagina);
+      if (paginaAtual > totalPaginas) paginaAtual = totalPaginas || 1;
+
+      const inicio = (paginaAtual - 1) * porPagina;
+      const fim = Math.min(inicio + porPagina, todosDados.length);
+      const dadosPagina = todosDados.slice(inicio, fim);
+
+      const tbody = document.getElementById('tabelaDetalhado');
+
+      if (todosDados.length === 0 || cols.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="' + (cols.length || 1) + '" style="text-align: center; padding: 40px;">Nenhum dado encontrado</td></tr>';
+        document.getElementById('paginacaoInfo').textContent = '';
+        document.getElementById('paginacaoControles').innerHTML = '';
+        return;
+      }
+
+      tbody.innerHTML = dadosPagina.map(d => {
+        let html = '<tr>';
+        cols.forEach(col => {
+          let v;
+          if (col === 'Exercicio') {
+            v = d._exercicio;
+          } else {
+            v = getValor(d, col);
+            // Fallbacks for alternative field names
+            if ((v === undefined || v === null) && col === 'CNPJ/CPF') v = getValor(d, 'CNPJ', 'CPF', 'CNPJ&CPF');
+            if ((v === undefined || v === null) && col === 'Unidade orçamentária') v = getValor(d, 'Unidade Orçamentária');
+            if ((v === undefined || v === null) && col === 'Nr emp.') v = getValor(d, 'Nr Emp.', 'Seq liq.');
+            if ((v === undefined || v === null) && col === 'SubFunção') v = getValor(d, 'SubFuncao', 'Sub-Função', 'Sub-Funcao');
+            if ((v === undefined || v === null) && col === 'Município') v = getValor(d, 'Municipio');
+            if ((v === undefined || v === null) && col === 'Ação') v = getValor(d, 'Acao');
+            if ((v === undefined || v === null) && col === 'Natureza da Despesa') v = getValor(d, 'Natureza da despesa', 'Natureza Despesa');
+            if ((v === undefined || v === null) && col === 'Detalhamento Despesa') v = getValor(d, 'Detalhamento despesa', 'Detalhamento');
+            if ((v === undefined || v === null) && col === 'Espécie') v = getValor(d, 'Retenção');
+          }
+          const s = String(v || '-');
+          const isValor = col.toLowerCase().includes('valor') || col.includes('R$');
+          const isData = col.toLowerCase() === 'data';
+          const isExercicio = col === 'Exercicio';
+          if (isValor) {
+            html += '<td class="value">' + formatarMoeda(parseFloat(v) || 0) + '</td>';
+          } else if (isData) {
+            html += '<td>' + formatarData(v) + '</td>';
+          } else if (isExercicio) {
+            const exClass = v === anoBase ? 'badge-info' : 'badge-secondary';
+            html += '<td><span class="badge ' + exClass + '">' + s + '</span></td>';
+          } else {
+            html += '<td title="' + s.replace(/"/g, '&quot;') + '">' + (s.length > 30 ? s.substring(0, 30) + '...' : s) + '</td>';
+          }
+        });
+        html += '</tr>';
+        return html;
+      }).join('');
+
+      document.getElementById('paginacaoInfo').textContent = todosDados.length > 0
+        ? `Exibindo ${inicio + 1}-${fim} de ${todosDados.length.toLocaleString()} registros` : '';
+
+      renderizarPaginacao(totalPaginas);
+    }
+
+    function renderizarPaginacao(totalPaginas) {
+      const container = document.getElementById('paginacaoControles');
+      container.innerHTML = '';
+      if (totalPaginas <= 1) return;
+      
+      const btnPrim = document.createElement('button');
+      btnPrim.className = 'btn btn-secondary btn-sm';
+      btnPrim.innerHTML = '<i class="fas fa-angle-double-left"></i>';
+      btnPrim.disabled = paginaAtual === 1;
+      btnPrim.onclick = () => { paginaAtual = 1; renderizarDetalhado(); };
+      container.appendChild(btnPrim);
+      
+      const btnAnt = document.createElement('button');
+      btnAnt.className = 'btn btn-secondary btn-sm';
+      btnAnt.innerHTML = '<i class="fas fa-angle-left"></i>';
+      btnAnt.disabled = paginaAtual === 1;
+      btnAnt.onclick = () => { paginaAtual--; renderizarDetalhado(); };
+      container.appendChild(btnAnt);
+      
+      let inicioP = Math.max(1, paginaAtual - 2);
+      let fimP = Math.min(totalPaginas, inicioP + 4);
+      if (fimP - inicioP < 4) inicioP = Math.max(1, fimP - 4);
+      
+      for (let i = inicioP; i <= fimP; i++) {
+        const btn = document.createElement('button');
+        btn.className = `btn btn-sm ${i === paginaAtual ? 'btn-primary' : 'btn-secondary'}`;
+        btn.textContent = i;
+        btn.onclick = () => { paginaAtual = i; renderizarDetalhado(); };
+        container.appendChild(btn);
+      }
+      
+      const btnProx = document.createElement('button');
+      btnProx.className = 'btn btn-secondary btn-sm';
+      btnProx.innerHTML = '<i class="fas fa-angle-right"></i>';
+      btnProx.disabled = paginaAtual === totalPaginas;
+      btnProx.onclick = () => { paginaAtual++; renderizarDetalhado(); };
+      container.appendChild(btnProx);
+      
+      const btnUlt = document.createElement('button');
+      btnUlt.className = 'btn btn-secondary btn-sm';
+      btnUlt.innerHTML = '<i class="fas fa-angle-double-right"></i>';
+      btnUlt.disabled = paginaAtual === totalPaginas;
+      btnUlt.onclick = () => { paginaAtual = totalPaginas; renderizarDetalhado(); };
+      container.appendChild(btnUlt);
+    }
+
+    function mudarPagina(novaPagina) {
+      paginaAtual = novaPagina;
+      renderizarDetalhado();
+    }
+
+    document.addEventListener('DOMContentLoaded', carregarDados);
+    
+    // Dados para exportação
+    let dadosResumoGlobal = [];
+    
+    // Funções de exportação
+    function getDadosDetalhado() {
+      const tipo = document.getElementById('tipoDespesa').value;
+      const anoBase = document.getElementById('anoBase').value;
+      const anoComp = document.getElementById('anoComparacao').value;
+      return [
+        ...dadosFiltrados.base[tipo].map(d => ({ ...d, Exercicio: anoBase })),
+        ...dadosFiltrados.comp[tipo].map(d => ({ ...d, Exercicio: anoComp }))
+      ];
+    }
+    
+    // =====================================================
+    // Seletor de colunas dinâmico
+    // =====================================================
+    const COLUNAS_PADRAO = ['Nr emp.', 'Data', 'Credor/Fornecedor', 'CNPJ/CPF', 'Unidade orçamentária', 'Função', 'SubFunção', 'Espécie', 'Município', 'Ação', 'Natureza da Despesa', 'Programa', 'Detalhamento Despesa', 'Valor (R$)', 'Exercicio'];
+    let colunasDisponiveis = [];
+    let colunasSelecionadas = new Set(COLUNAS_PADRAO);
+    const STORAGE_KEY = 'cols-despesas-gerencial';
+
+    function detectarColunasDosDados(todosDados) {
+      const keys = new Set();
+      // Scan across all 5 expense types to find all available columns
+      Object.values(todosDados).forEach(lista => {
+        if (!lista || lista.length === 0) return;
+        const amostra = lista.slice(0, 100);
+        amostra.forEach(item => {
+          Object.keys(item).forEach(k => {
+            if (k !== 'id' && !k.startsWith('_')) keys.add(k);
+          });
+        });
+      });
+      // Add Exercicio as a virtual column (added during render)
+      keys.add('Exercicio');
+      colunasDisponiveis = Array.from(keys);
+
+      // Load saved selection from localStorage
+      try {
+        const salvo = localStorage.getItem(STORAGE_KEY);
+        if (salvo) {
+          const arr = JSON.parse(salvo);
+          if (Array.isArray(arr) && arr.length > 0) {
+            colunasSelecionadas = new Set(arr.filter(c => colunasDisponiveis.includes(c)));
+          }
+        }
+      } catch(e) {}
+
+      if (colunasSelecionadas.size === 0) {
+        colunasSelecionadas = new Set(COLUNAS_PADRAO.filter(c => colunasDisponiveis.includes(c)));
+      }
+
+      renderColSelector();
+    }
+
+    function renderColSelector() {
+      const list = document.getElementById('colSelectorList');
+      if (!list) return;
+      list.innerHTML = colunasDisponiveis.map(col => {
+        const checked = colunasSelecionadas.has(col) ? 'checked' : '';
+        const esc = col.replace(/"/g, '&quot;');
+        return '<label><input type="checkbox" value="' + esc + '" ' + checked + ' onchange="toggleColuna(this)"> ' + col + '</label>';
+      }).join('');
+      document.getElementById('colCount').textContent = colunasSelecionadas.size;
+    }
+
+    function toggleColSelector(e) {
+      e.stopPropagation();
+      document.getElementById('colSelectorDropdown').classList.toggle('show');
+    }
+
+    document.addEventListener('click', function(e) {
+      const dd = document.getElementById('colSelectorDropdown');
+      if (dd && !e.target.closest('.col-selector-wrap')) dd.classList.remove('show');
+    });
+
+    function toggleColuna(cb) {
+      if (cb.checked) { colunasSelecionadas.add(cb.value); } else { colunasSelecionadas.delete(cb.value); }
+      salvarEAtualizar();
+    }
+
+    function colSelectorAll(marcar) {
+      if (marcar) { colunasDisponiveis.forEach(c => colunasSelecionadas.add(c)); } else { colunasSelecionadas.clear(); }
+      renderColSelector();
+      salvarEAtualizar();
+    }
+
+    function colSelectorReset() {
+      colunasSelecionadas = new Set(COLUNAS_PADRAO.filter(c => colunasDisponiveis.includes(c)));
+      renderColSelector();
+      salvarEAtualizar();
+    }
+
+    function salvarEAtualizar() {
+      document.getElementById('colCount').textContent = colunasSelecionadas.size;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(colunasSelecionadas)));
+      renderThead();
+      renderizarDetalhado();
+    }
+
+    function getColunasAtivas() {
+      return colunasDisponiveis.filter(c => colunasSelecionadas.has(c));
+    }
+
+    function renderThead() {
+      const thead = document.getElementById('theadDetalhado');
+      if (!thead) return;
+      const cols = getColunasAtivas();
+      let html = '<tr>';
+      cols.forEach(col => {
+        html += '<th>' + col + '</th>';
+      });
+      html += '</tr>';
+      thead.innerHTML = html;
+    }
+    const colunasResumo = ['Agrupamento', 'Qtd Base', 'Qtd Comparação', 'Variação (%)'];
+    
+    function getAbaAtiva() {
+      const btnAtivo = document.querySelector('.tab-btn.active');
+      return btnAtivo ? btnAtivo.dataset.tab : 'grafico';
+    }
+    
+    function exportarDadosExcel() {
+      const aba = getAbaAtiva();
+      if (aba === 'resumo') {
+        exportarExcel(dadosResumoGlobal, 'gerencial-resumo', colunasResumo);
+      } else {
+        exportarExcel(getDadosDetalhado(), 'gerencial-detalhado', getColunasAtivas());
+      }
+    }
+
+    function exportarDadosPDF() {
+      const aba = getAbaAtiva();
+      if (aba === 'resumo') {
+        exportarPDF(dadosResumoGlobal, 'gerencial-resumo', 'Gerencial - Comparativo por Quantidade', colunasResumo);
+      } else {
+        exportarPDF(getDadosDetalhado(), 'gerencial-detalhado', 'Gerencial - Detalhado', getColunasAtivas());
+      }
+    }
+    
+    // Controlar visibilidade dos filtros por aba
+    function atualizarVisibilidadeFiltros(tabId) {
+      const filtrosSection = document.getElementById('filtrosSection');
+      if (filtrosSection) {
+        filtrosSection.style.display = tabId === 'resumo' ? 'none' : 'block';
+      }
+    }
+    
+    // Sobrescrever comportamento das tabs para controlar filtros
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const tabId = this.getAttribute('data-tab');
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          this.classList.add('active');
+          document.getElementById(tabId).classList.add('active');
+          atualizarVisibilidadeFiltros(tabId);
+          // Re-renderizar gráficos quando a aba de gráfico é ativada
+          if (tabId === 'grafico') {
+            setTimeout(() => atualizarGraficosMultiAnos(), 100);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

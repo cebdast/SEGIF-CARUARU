@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Testar Transformações SIGEF</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 24px; color: #1e293b; }
+    h1 { font-size: 22px; margin-bottom: 8px; }
+    .subtitle { color: #64748b; margin-bottom: 24px; font-size: 14px; }
+    .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .card h2 { font-size: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .card h2 .badge { color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+    .badge-green { background: #059669; }
+    .badge-blue { background: #2563eb; }
+    .badge-orange { background: #ea580c; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; }
+    select, input[type="file"] { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; margin-bottom: 16px; }
+    select:focus { outline: none; border-color: #059669; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
+    .btn-primary { background: #059669; color: white; }
+    .btn-primary:hover { background: #047857; }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-blue { background: #2563eb; color: white; }
+    .btn-blue:hover { background: #1d4ed8; }
+    .btn-orange { background: #ea580c; color: white; }
+    .btn-orange:hover { background: #c2410c; }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0; }
+    .stat-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; }
+    .stat-box .num { font-size: 22px; font-weight: 700; color: #059669; }
+    .stat-box .lbl { font-size: 11px; color: #64748b; margin-top: 4px; }
+    .table-wrap { overflow-x: auto; max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 16px; }
+    table { border-collapse: collapse; width: 100%; font-size: 12px; }
+    th { background: #f1f5f9; padding: 8px 10px; text-align: left; position: sticky; top: 0; border-bottom: 2px solid #cbd5e1; white-space: nowrap; z-index: 1; }
+    td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+    tr:hover td { background: #f0fdf4; }
+    .status { padding: 12px 16px; border-radius: 8px; margin: 12px 0; font-size: 13px; display: none; }
+    .status.show { display: block; }
+    .status.success { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+    .status.error { background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; }
+    .status.info { background: #eff6ff; border: 1px solid #93c5fd; color: #1d4ed8; }
+    .compare-section { border-top: 2px dashed #e2e8f0; padding-top: 20px; margin-top: 20px; }
+    .diff-ok { color: #059669; font-weight: 600; }
+    .diff-err { color: #dc2626; font-weight: 600; }
+    .diff-detail { font-size: 12px; background: #fef2f2; padding: 8px; border-radius: 6px; margin-top: 8px; max-height: 300px; overflow: auto; }
+    .diff-detail .line { padding: 2px 0; border-bottom: 1px solid #fecaca; }
+    .hidden { display: none; }
+    .info-box { background: #eff6ff; border: 1px solid #93c5fd; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px; color: #1d4ed8; }
+    .tab-bar { display: flex; gap: 0; margin-bottom: 0; border-bottom: 2px solid #e2e8f0; }
+    .tab-btn { padding: 8px 16px; border: none; background: transparent; font-size: 13px; font-weight: 600;
+      cursor: pointer; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; }
+    .tab-btn.active { color: #059669; border-bottom-color: #059669; }
+    .tab-btn:hover { color: #059669; }
+    .sheet-summary { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+    .sheet-tag { background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 4px 10px;
+      border-radius: 6px; font-size: 12px; font-weight: 600; }
+    .progress-bar { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; margin: 8px 0; }
+    .progress-bar .fill { height: 100%; background: #059669; border-radius: 3px; transition: width .3s; }
+  </style>
+</head>
+<body>
+  <h1>Testar Transformações SIGEF</h1>
+  <p class="subtitle">Valide se os scripts JavaScript produzem o mesmo resultado dos scripts Python (v3 - ColTracker - 07/02/2026)</p>
+
+  <!-- ETAPA 1: Configurar -->
+  <div class="card">
+    <h2>1. Selecionar Transformação</h2>
+    <label for="tipoTransformacao">Tipo de transformação:</label>
+    <select id="tipoTransformacao">
+      <option value="">-- Selecione --</option>
+      <optgroup label="Simples (1 aba de saída)">
+        <option value="credores">Credores/Fornecedores (CPFECNPJ.py)</option>
+        <option value="a-pagar">Empenhos a Pagar (Empenhos a pagar.py)</option>
+        <option value="pagos">Empenhos Pagos (Empenhos pagos.py)</option>
+        <option value="emitidos">Empenhos Emitidos (Empenhos emitidos.py)</option>
+      </optgroup>
+      <optgroup label="Complexos (múltiplas abas de saída)">
+        <option value="liquidados">Empenhos Liquidados (Empenhos Liquidados.py)</option>
+        <option value="retidos">Empenhos Retidos (Empenhos retidos.py)</option>
+      </optgroup>
+      <optgroup label="Externos">
+        <option value="detalhamento">Detalhamento Despesa (Relatório Despesa por Natureza)</option>
+        <option value="consignados">Retidos Consignados Analítico (TESTE)</option>
+      </optgroup>
+    </select>
+    <div class="info-box" id="infoBox">
+      Selecione uma transformação para ver as instruções.
+    </div>
+  </div>
+
+  <!-- ETAPA 2: Upload -->
+  <div class="card">
+    <h2>2. Enviar Arquivo Bruto <span class="badge badge-green">ENTRADA</span></h2>
+    <label for="fileBruto">Arquivo Excel bruto (do SIGEF):</label>
+    <input type="file" id="fileBruto" accept=".xlsx,.xls">
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnProcessar" disabled onclick="processar()">Processar Transformação</button>
+    </div>
+    <div class="progress-bar hidden" id="progressBar"><div class="fill" id="progressFill" style="width:0%"></div></div>
+    <div class="status" id="statusProcessar"></div>
+  </div>
+
+  <!-- ETAPA 3: Resultado -->
+  <div class="card hidden" id="resultadoSection">
+    <h2>3. Resultado da Transformação</h2>
+    <div class="stats" id="statsContainer"></div>
+
+    <!-- Abas de saída (para multi-sheet) -->
+    <div id="sheetSummary" class="sheet-summary"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="downloadResultado()">Baixar Resultado (.xlsx)</button>
+    </div>
+
+    <!-- Tab bar + Preview -->
+    <h3 style="font-size:14px; margin:16px 0 8px;">Preview (primeiras 20 linhas):</h3>
+    <div id="tabBar" class="tab-bar"></div>
+    <div class="table-wrap" id="previewContainer"></div>
+
+    <!-- ETAPA 4: Comparar -->
+    <div class="compare-section">
+      <h2>4. Comparar com Resultado Python <span class="badge badge-blue">OPCIONAL</span></h2>
+      <p style="font-size:13px; color:#64748b; margin-bottom:12px;">
+        Envie o arquivo processado pelo Python para comparação automática célula a célula.
+      </p>
+      <label for="fileEsperado">Arquivo processado pelo Python (esperado):</label>
+      <input type="file" id="fileEsperado" accept=".xlsx,.xls">
+      <div class="btn-row">
+        <button class="btn btn-orange" onclick="comparar()">Comparar Resultados</button>
+      </div>
+      <div class="status" id="statusComparar"></div>
+      <div id="diffContainer"></div>
+    </div>
+  </div>
+
+  <!-- Scripts de transformação (cache-bust v7: Unidade gestora + multi-ano) -->
+  <script src="js/utils-transformacao.js?v=20260207v8"></script>
+  <script src="js/transformar-credores.js?v=20260207v7"></script>
+  <script src="js/transformar-a-pagar.js?v=20260207v8"></script>
+  <script src="js/transformar-pagos.js?v=20260207v8"></script>
+  <script src="js/transformar-emitidos.js?v=20260207v8"></script>
+  <script src="js/transformar-liquidados.js?v=20260207v8"></script>
+  <script src="js/transformar-retidos.js?v=20260207v7"></script>
+  <script src="js/transformar-detalhamento.js?v=20260207v7"></script>
+  <script src="js/transformar-consignados.js?v=20260208v5"></script>
+
+  <script>
+    // ==============================================================
+    // Estado global
+    // ==============================================================
+    let resultadoAtual = null;
+    let previewAbaAtual = 0;
+
+    const INFO_TRANSFORMACOES = {
+      'credores': {
+        nome: 'Credores/Fornecedores',
+        script: 'CPFECNPJ.py',
+        arquivo: 'Relacao_de_Credores_Fornecedores.xlsx',
+        descricao: 'Extrai CPF/CNPJ, classifica como CPF ou CNPJ, remove linhas inválidas e exclui colunas desnecessárias.',
+        abas: ['Principal']
+      },
+      'a-pagar': {
+        nome: 'Empenhos a Pagar',
+        script: 'Empenhos a pagar.py',
+        arquivo: 'Relacao_de_Empenhos_a_Pagar_por_Data_de_Emissao___Completo.xlsx',
+        descricao: 'Remove linhas sem Av. liquid., remove colunas vazias, trunca Av. liquid. a 7 chars, preenche datas e formata.',
+        abas: ['Principal']
+      },
+      'pagos': {
+        nome: 'Empenhos Pagos',
+        script: 'Empenhos pagos.py',
+        arquivo: 'Relacao_de_Empenhos_Pagos_Sintetico_por_Numero_de_Empenho.xlsx',
+        descricao: 'Desmescla células, remove subtítulo e linhas de totais, preenche Credor/Fornecedor, formata Seq.Liq e Data.',
+        abas: ['Principal']
+      },
+      'emitidos': {
+        nome: 'Empenhos Emitidos',
+        script: 'Empenhos emitidos.py',
+        arquivo: 'Relacao_de_Empenhos_Emitidos_por_Data_de_Emissao___Mensal_Diario___Completo.xlsx',
+        descricao: 'Desmescla, limpa linhas auxiliares, extrai Tipo/Documento via regex (MEMO/PAD), preenche datas e formata.',
+        abas: ['Principal']
+      },
+      'liquidados': {
+        nome: 'Empenhos Liquidados',
+        script: 'Empenhos Liquidados.py',
+        arquivo: 'Relacao_de_Empenhos_Liquidados_por_Data_de_Movimento___Mensal_Diario___Completo.xlsx',
+        descricao: '39 etapas de transformação complexa. Gera 2 abas: Liquidados Final (processada) e Planilha Bruta Liq (intermediária).',
+        abas: ['Liquidados Final', 'Planilha Bruta Liq']
+      },
+      'retidos': {
+        nome: 'Empenhos Retidos',
+        script: 'Empenhos retidos.py',
+        arquivo: 'Relacao_de_Retencoes_Consignacoes.xlsx',
+        descricao: 'Processa múltiplas abas, separa por tipo de retenção. Gera GERAL, TOTAL, abas individuais por tipo, LISTA e Planilha Bruta.',
+        abas: ['GERAL', 'Planilha Bruta', 'LISTA', '+ abas individuais']
+      },
+      'detalhamento': {
+        nome: 'Detalhamento Despesa',
+        script: '(novo)',
+        arquivo: 'Relatorio_da_Despesa_por_Natureza_Consolidado.xlsx',
+        descricao: 'Desmescla células, exclui linha de título, remove linhas de totais e linhas vazias. Pronto para cruzamento.',
+        abas: ['Detalhamento']
+      },
+      'consignados': {
+        nome: 'Retidos Consignados Analítico (TESTE)',
+        script: '(novo)',
+        arquivo: 'Relacao_de_Empenhos_Retidos_Consignados_Analitico_por_Data_de_Movimento.xlsx',
+        descricao: 'Desmescla, remove título e sub-cabeçalhos (Documento fiscal/Conta contábil), remove totais, fill-down empenho→detalhe, formata datas, adiciona Unidade gestora.',
+        abas: ['Consignados']
+      }
+    };
+
+    // ==============================================================
+    // Eventos
+    // ==============================================================
+    document.getElementById('tipoTransformacao').addEventListener('change', function() {
+      const tipo = this.value;
+      const info = INFO_TRANSFORMACOES[tipo];
+      const infoBox = document.getElementById('infoBox');
+      if (info) {
+        const abasHtml = info.abas.map(a => `<code>${a}</code>`).join(', ');
+        infoBox.innerHTML = `
+          <strong>${info.nome}</strong> <span style="color:#94a3b8">(${info.script})</span><br>
+          Arquivo bruto: <code>${info.arquivo}</code><br>
+          Abas de saída: ${abasHtml}<br>
+          <em style="color:#475569">${info.descricao}</em>
+        `;
+      } else {
+        infoBox.textContent = 'Selecione uma transformação para ver as instruções.';
+      }
+      updateBtnState();
+    });
+
+    document.getElementById('fileBruto').addEventListener('change', updateBtnState);
+
+    function updateBtnState() {
+      const tipo = document.getElementById('tipoTransformacao').value;
+      const file = document.getElementById('fileBruto').files[0];
+      document.getElementById('btnProcessar').disabled = !tipo || !file;
+    }
+
+    // ==============================================================
+    // Processar transformação
+    // ==============================================================
+    function showStatus(id, msg, tipo) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.className = `status show ${tipo}`;
+    }
+
+    function showProgress(show, pct) {
+      const bar = document.getElementById('progressBar');
+      const fill = document.getElementById('progressFill');
+      bar.classList.toggle('hidden', !show);
+      fill.style.width = (pct || 0) + '%';
+    }
+
+    async function processar() {
+      const tipo = document.getElementById('tipoTransformacao').value;
+      const file = document.getElementById('fileBruto').files[0];
+      if (!tipo || !file) return;
+
+      showStatus('statusProcessar', 'Lendo arquivo...', 'info');
+      showProgress(true, 10);
+
+      try {
+        const data = await file.arrayBuffer();
+        showProgress(true, 30);
+        showStatus('statusProcessar', 'Processando transformação... (pode levar alguns segundos para arquivos grandes)', 'info');
+
+        // Usar setTimeout para liberar a UI antes do processamento pesado
+        await new Promise(resolve => setTimeout(resolve, 50));
+
+        const workbook = XLSX.read(data, { type: 'array' });
+        showProgress(true, 50);
+
+        let resultado;
+        const t0 = performance.now();
+
+        switch (tipo) {
+          case 'credores':   resultado = transformarCredores(workbook); break;
+          case 'a-pagar':    resultado = transformarAPagar(workbook); break;
+          case 'pagos':      resultado = transformarPagos(workbook); break;
+          case 'emitidos':   resultado = transformarEmitidos(workbook); break;
+          case 'liquidados': resultado = transformarLiquidados(workbook); break;
+          case 'retidos':       resultado = transformarRetidos(workbook); break;
+          case 'detalhamento': resultado = transformarDetalhamento(workbook); break;
+          case 'consignados': resultado = transformarConsignados(workbook); break;
+          default: throw new Error('Tipo não implementado: ' + tipo);
+        }
+
+        const tempoMs = Math.round(performance.now() - t0);
+        resultado._tipo = tipo;
+        resultadoAtual = resultado;
+        showProgress(true, 90);
+
+        // Montar estatísticas
+        renderStats(resultado, tempoMs);
+
+        // Montar resumo de abas
+        renderSheetSummary(resultado);
+
+        // Preview com tabs
+        renderPreviewTabs(resultado);
+
+        document.getElementById('resultadoSection').classList.remove('hidden');
+        showProgress(true, 100);
+
+        const info = INFO_TRANSFORMACOES[tipo];
+        const linhasFinal = resultado.stats.linhasFinal || resultado.matrix.length - 1;
+        const headerTxt = resultado.matrix[0] ? resultado.matrix[0].join(' | ') : '?';
+        const brutaInfo = resultado.matrixBruta ? ` | Bruta: ${resultado.matrixBruta.length} linhas` : '';
+        showStatus('statusProcessar',
+          `Transformação "${info.nome}" concluída em ${tempoMs}ms! ${linhasFinal.toLocaleString()} linhas x ${resultado.matrix[0].length} cols.${brutaInfo} Headers: ${headerTxt}`,
+          'success'
+        );
+
+        // Resetar comparação
+        document.getElementById('statusComparar').className = 'status';
+        document.getElementById('diffContainer').innerHTML = '';
+
+        setTimeout(() => showProgress(false), 800);
+
+      } catch (e) {
+        console.error(e);
+        showProgress(false);
+        showStatus('statusProcessar', `ERRO: ${e.message}`, 'error');
+      }
+    }
+
+    // ==============================================================
+    // Estatísticas
+    // ==============================================================
+    function renderStats(resultado, tempoMs) {
+      const s = resultado.stats;
+      const tipo = resultado._tipo;
+      let html = '';
+
+      html += statBox(s.linhasOriginal, 'Linhas Original');
+      html += statBox(s.linhasFinal || (resultado.matrix.length - 1), 'Linhas Final');
+
+      if (s.linhasRemovidas != null) {
+        html += statBox(s.linhasRemovidas, 'Linhas Removidas');
+      }
+      if (s.linhasBruta != null) {
+        html += statBox(s.linhasBruta, 'Linhas Bruta');
+      }
+      if (s.tiposRetencao != null) {
+        html += statBox(s.tiposRetencao, 'Tipos Retenção');
+      }
+      if (s.totalAbas != null) {
+        html += statBox(s.totalAbas, 'Abas Geradas');
+      }
+
+      html += statBox(resultado.matrix[0].length, 'Colunas');
+      html += statBox(tempoMs + 'ms', 'Tempo');
+
+      document.getElementById('statsContainer').innerHTML = html;
+    }
+
+    function statBox(val, label) {
+      const formatted = typeof val === 'number' ? val.toLocaleString() : val;
+      return `<div class="stat-box"><div class="num">${formatted}</div><div class="lbl">${label}</div></div>`;
+    }
+
+    // ==============================================================
+    // Resumo de abas
+    // ==============================================================
+    function renderSheetSummary(resultado) {
+      const container = document.getElementById('sheetSummary');
+      if (!resultado.workbook || !resultado.workbook.SheetNames) {
+        container.innerHTML = '';
+        return;
+      }
+      const names = resultado.workbook.SheetNames;
+      if (names.length <= 1) { container.innerHTML = ''; return; }
+      container.innerHTML = names.map(n => `<span class="sheet-tag">${esc(n)}</span>`).join('');
+    }
+
+    // ==============================================================
+    // Preview com tabs (para multi-sheet)
+    // ==============================================================
+    function getPreviewSheets(resultado) {
+      const sheets = [];
+      const tipo = resultado._tipo;
+
+      // Aba principal
+      sheets.push({ name: getMainSheetName(tipo), matrix: resultado.matrix });
+
+      // Abas adicionais
+      if (resultado.matrixBruta) {
+        const brutaName = tipo === 'liquidados' ? 'Planilha Bruta Liq' : 'Planilha Bruta';
+        sheets.push({ name: brutaName, matrix: resultado.matrixBruta });
+      }
+
+      return sheets;
+    }
+
+    function getMainSheetName(tipo) {
+      switch (tipo) {
+        case 'liquidados': return 'Liquidados Final';
+        case 'retidos': return 'GERAL';
+        default: return 'Principal';
+      }
+    }
+
+    function renderPreviewTabs(resultado) {
+      const sheets = getPreviewSheets(resultado);
+      const tabBar = document.getElementById('tabBar');
+
+      if (sheets.length <= 1) {
+        tabBar.innerHTML = '';
+        renderPreview(sheets[0].matrix, 20);
+        return;
+      }
+
+      tabBar.innerHTML = sheets.map((s, i) =>
+        `<button class="tab-btn ${i === 0 ? 'active' : ''}" onclick="switchPreviewTab(${i})">${esc(s.name)}</button>`
+      ).join('');
+      previewAbaAtual = 0;
+      renderPreview(sheets[0].matrix, 20);
+    }
+
+    function switchPreviewTab(idx) {
+      if (!resultadoAtual) return;
+      const sheets = getPreviewSheets(resultadoAtual);
+      if (idx >= sheets.length) return;
+
+      previewAbaAtual = idx;
+      document.querySelectorAll('.tab-btn').forEach((btn, i) =>
+        btn.classList.toggle('active', i === idx)
+      );
+      renderPreview(sheets[idx].matrix, 20);
+    }
+
+    function renderPreview(matrix, maxRows) {
+      const container = document.getElementById('previewContainer');
+      if (!matrix || matrix.length === 0) { container.innerHTML = '<p style="padding:12px;color:#94a3b8">Sem dados</p>'; return; }
+
+      const header = matrix[0];
+      const rows = matrix.slice(1, maxRows + 1);
+      let html = '<table><thead><tr>';
+      html += '<th style="color:#94a3b8">#</th>';
+      html += header.map((h, i) => `<th title="Col ${i}">${esc(h) || `[${i}]`}</th>`).join('');
+      html += '</tr></thead><tbody>';
+      for (let ri = 0; ri < rows.length; ri++) {
+        const row = rows[ri];
+        html += `<tr><td style="color:#94a3b8;font-size:11px">${ri + 1}</td>`;
+        html += header.map((_, i) => {
+          const val = i < row.length ? (row[i] ?? '') : '';
+          return `<td title="${esc(String(val))}">${esc(String(val).substring(0, 60))}</td>`;
+        }).join('');
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    // ==============================================================
+    // Download resultado
+    // ==============================================================
+    function downloadResultado() {
+      if (!resultadoAtual) return;
+      const tipo = resultadoAtual._tipo;
+      const nomes = {
+        'credores': 'Credores_JS',
+        'a-pagar': 'APagar_JS',
+        'pagos': 'Pagos_JS',
+        'emitidos': 'Emitidos_JS',
+        'liquidados': 'Liquidados_JS',
+        'retidos': 'Retidos_JS'
+      };
+      const filename = `${nomes[tipo] || 'resultado'}_transformado.xlsx`;
+
+      // Gerar array binário com compressão (melhora compatibilidade com Excel)
+      const wbout = XLSX.write(resultadoAtual.workbook, {
+        bookType: 'xlsx',
+        type: 'array',
+        compression: true,
+        bookSST: true
+      });
+
+      // Criar Blob com MIME type correto para xlsx
+      const blob = new Blob([wbout], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      // Download via link temporário
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+    }
+
+    // ==============================================================
+    // Comparar com resultado Python
+    // ==============================================================
+    async function comparar() {
+      const file = document.getElementById('fileEsperado').files[0];
+      if (!file) { showStatus('statusComparar', 'Selecione o arquivo esperado!', 'error'); return; }
+      if (!resultadoAtual) { showStatus('statusComparar', 'Processe a transformação primeiro!', 'error'); return; }
+
+      showStatus('statusComparar', 'Comparando...', 'info');
+
+      try {
+        const data = await file.arrayBuffer();
+        const wbEsperado = XLSX.read(data, { type: 'array' });
+        const tipo = resultadoAtual._tipo;
+
+        // Determinar quais abas comparar
+        const comparacoes = getComparacoes(tipo, resultadoAtual, wbEsperado);
+
+        let htmlTotal = '';
+        let totalDiffs = 0;
+        let totalOk = 0;
+
+        for (const comp of comparacoes) {
+          const result = compararMatrizes(comp.matrizJS, comp.matrizPython, comp.nome);
+          if (result.diffs === 0) {
+            totalOk++;
+            htmlTotal += `<p class="diff-ok" style="margin-top:12px">
+              [${esc(comp.nome)}] IDÊNTICOS! (${result.rowsJS} linhas x ${result.colsJS} colunas)</p>`;
+          } else {
+            totalDiffs += result.diffs;
+            htmlTotal += result.html;
+          }
+        }
+
+        document.getElementById('diffContainer').innerHTML = htmlTotal;
+
+        if (totalDiffs === 0) {
+          showStatus('statusComparar',
+            `Comparação: TODOS IDÊNTICOS! (${comparacoes.length} aba(s) comparadas)`, 'success');
+        } else {
+          showStatus('statusComparar',
+            `Comparação: ${totalDiffs} diferença(s) em ${comparacoes.length} aba(s). ${totalOk} aba(s) idênticas.`, 'error');
+        }
+
+      } catch (e) {
+        console.error(e);
+        showStatus('statusComparar', `ERRO: ${e.message}`, 'error');
+      }
+    }
+
+    function getComparacoes(tipo, resultado, wbEsperado) {
+      const comps = [];
+
+      if (tipo === 'liquidados') {
+        comps.push({
+          nome: 'Liquidados Final',
+          matrizJS: resultado.matrix,
+          matrizPython: readSheetMatrix(wbEsperado, 'Liquidados Final')
+        });
+        comps.push({
+          nome: 'Planilha Bruta Liq',
+          matrizJS: resultado.matrixBruta,
+          matrizPython: readSheetMatrix(wbEsperado, 'Planilha Bruta Liq')
+        });
+      } else if (tipo === 'retidos') {
+        comps.push({
+          nome: 'GERAL',
+          matrizJS: resultado.matrix,
+          matrizPython: readSheetMatrix(wbEsperado, 'GERAL')
+        });
+        comps.push({
+          nome: 'Planilha Bruta',
+          matrizJS: resultado.matrixBruta,
+          matrizPython: readSheetMatrix(wbEsperado, 'Planilha Bruta')
+        });
+      } else {
+        // Transformações com 1 aba: comparar primeira aba
+        comps.push({
+          nome: getMainSheetName(tipo),
+          matrizJS: resultado.matrix,
+          matrizPython: readSheetMatrix(wbEsperado, wbEsperado.SheetNames[0])
+        });
+      }
+
+      return comps;
+    }
+
+    function readSheetMatrix(wb, sheetName) {
+      const ws = wb.Sheets[sheetName];
+      if (!ws) throw new Error(`Aba "${sheetName}" não encontrada no arquivo Python. Abas disponíveis: ${wb.SheetNames.join(', ')}`);
+      // raw: false para que datas sejam retornadas como strings formatadas (não como serial numbers)
+      // Isso garante compatibilidade com o output JS que já tem datas formatadas
+      return XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+    }
+
+    function compararMatrizes(matrizJS_raw, matrizPython, nomeAba) {
+      if (!matrizJS_raw || matrizJS_raw.length === 0) {
+        return { diffs: 1, html: `<p class="diff-err" style="margin-top:12px">[${esc(nomeAba)}] ERRO: Matriz JS está vazia!</p>`, rowsJS: 0, colsJS: 0 };
+      }
+      // Normalizar para strings
+      const matrizJS = (matrizJS_raw || []).map(row =>
+        (row || []).map(v => v === null || v === undefined ? '' : String(v))
+      );
+      const matrizPy = (matrizPython || []).map(row =>
+        (row || []).map(v => v === null || v === undefined ? '' : String(v))
+      );
+
+      const rowsJS = matrizJS.length;
+      const rowsPy = matrizPy.length;
+      const colsJS = matrizJS[0] ? matrizJS[0].length : 0;
+      const colsPy = matrizPy[0] ? matrizPy[0].length : 0;
+
+      const diffs = [];
+      const maxRows = Math.max(rowsJS, rowsPy);
+      const maxCols = Math.max(colsJS, colsPy);
+
+      for (let r = 0; r < maxRows && diffs.length < 100; r++) {
+        for (let c = 0; c < maxCols; c++) {
+          const vJS = r < rowsJS && c < (matrizJS[r] || []).length ?
+            String(matrizJS[r][c] || '').trim() : '';
+          const vPy = r < rowsPy && c < (matrizPy[r] || []).length ?
+            String(matrizPy[r][c] || '').trim() : '';
+
+          if (!valoresIguais(vJS, vPy)) {
+            const colName = r === 0 ? `Header[${c}]` :
+              (matrizJS[0] && c < matrizJS[0].length ? matrizJS[0][c] : `Col${c}`);
+            diffs.push({ row: r + 1, col: colName, colIdx: c, js: vJS, python: vPy });
+          }
+        }
+      }
+
+      if (diffs.length === 0 && rowsJS === rowsPy && colsJS === colsPy) {
+        return { diffs: 0, rowsJS, colsJS };
+      }
+
+      let html = `<p class="diff-err" style="margin-top:12px">
+        [${esc(nomeAba)}] ${diffs.length}${diffs.length >= 100 ? '+' : ''} diferença(s)</p>`;
+      html += `<p style="font-size:12px;color:#64748b;">JS: ${rowsJS} linhas x ${colsJS} cols | Python: ${rowsPy} linhas x ${colsPy} cols</p>`;
+      if (diffs.length > 0) {
+        html += '<div class="diff-detail">';
+        for (const d of diffs.slice(0, 50)) {
+          html += `<div class="line">Linha ${d.row}, Col "${esc(d.col)}" [${d.colIdx}]: JS=<b>"${esc(d.js)}"</b> vs Python=<b>"${esc(d.python)}"</b></div>`;
+        }
+        if (diffs.length > 50) html += `<div class="line">... e mais ${diffs.length - 50} diferenças</div>`;
+        html += '</div>';
+      }
+
+      return { diffs: diffs.length, html, rowsJS, colsJS };
+    }
+
+    // ==============================================================
+    // Utilitários
+    // ==============================================================
+    function esc(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').substring(0, 100);
+    }
+
+    /** Comparação tolerante de valores (normaliza números, datas, etc.) */
+    function valoresIguais(a, b) {
+      if (a === b) return true;
+
+      const sa = String(a || '').trim();
+      const sb = String(b || '').trim();
+      if (sa === sb) return true;
+
+      // Ambos vazios
+      const aEmpty = sa === '' || sa === 'null' || sa === 'undefined';
+      const bEmpty = sb === '' || sb === 'null' || sb === 'undefined';
+      if (aEmpty && bEmpty) return true;
+
+      // Comparar como números (tolerância absoluta + relativa)
+      const na = parseFloat(sa.replace(',', '.'));
+      const nb = parseFloat(sb.replace(',', '.'));
+      if (!isNaN(na) && !isNaN(nb)) {
+        const diff = Math.abs(na - nb);
+        if (diff < 0.05) return true;
+        if (diff / Math.max(Math.abs(na), Math.abs(nb), 1) < 1e-8) return true;
+      }
+
+      // Normalizar strings (trim, lowercase, espaços múltiplos)
+      const sA = sa.toLowerCase().replace(/\s+/g, ' ');
+      const sB = sb.toLowerCase().replace(/\s+/g, ' ');
+      if (sA === sB) return true;
+
+      // Normalização de datas: DD/MM/YYYY vs YYYY-MM-DD[ HH:MM:SS] vs serial Excel
+      const dA = parseDate(sa);
+      const dB = parseDate(sb);
+      if (dA && dB && dA === dB) return true;
+
+      // Truncamento de strings longas (Python xlsxwriter pode truncar)
+      if (sA.length > 10 && sB.length > 10 && (sA.startsWith(sB) || sB.startsWith(sA))) return true;
+
+      return false;
+    }
+
+    /** Converte serial Excel para YYYY-MM-DD */
+    function excelSerialToDate(serial) {
+      const n = parseFloat(serial);
+      if (isNaN(n) || n < 1 || n > 100000) return null;
+      const msDay = 86400000;
+      const adj = n > 60 ? 25569 : 25568;
+      const d = new Date((n - adj) * msDay);
+      if (isNaN(d.getTime())) return null;
+      const y = d.getUTCFullYear();
+      const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const dd = String(d.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${dd}`;
+    }
+
+    /** Tenta normalizar uma string de data para YYYY-MM-DD */
+    function parseDate(s) {
+      if (!s) return null;
+      // DD/MM/YYYY
+      const m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (m1) return `${m1[3]}-${m1[2].padStart(2,'0')}-${m1[1].padStart(2,'0')}`;
+      // YYYY-MM-DD (com ou sem hora)
+      const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (m2) return `${m2[1]}-${m2[2]}-${m2[3]}`;
+      // Serial Excel (número entre 1 e 100000)
+      if (/^\d+(\.\d+)?$/.test(s.trim())) return excelSerialToDate(s);
+      return null;
+    }
+  </script>
+</body>
+</html>

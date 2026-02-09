@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGEF | Comparativos de Receitas - Caruaru</title>
+  <link rel="icon" type="image/png" href="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/portal-transparencia.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <img src="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png" alt="Brasão Caruaru">
+      </div>
+      <h1 class="sidebar-title">Secretaria da Fazenda</h1>
+      <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    <nav class="sidebar-menu">
+      <div class="menu-section expanded">
+        <div class="menu-section-title" onclick="toggleSection(this)">
+          <i class="fas fa-hand-holding-usd"></i>
+          <span>Receitas</span>
+          <i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="receitas-previsao.html" class="menu-link"><i class="fas fa-chart-line"></i><span>Previsão</span></a></li>
+          <li class="menu-item"><a href="receitas-arrecadacao.html" class="menu-link"><i class="fas fa-money-bill-wave"></i><span>Arrecadação</span></a></li>
+          <li class="menu-item"><a href="receitas-retencoes.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retenções</span></a></li>
+          <li class="menu-item"><a href="receitas-deducoes.html" class="menu-link"><i class="fas fa-minus-circle"></i><span>Deduções</span></a></li>
+          <li class="menu-item"><a href="receitas-gerencial.html" class="menu-link"><i class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="receitas-comparativos.html" class="menu-link active"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)">
+          <i class="fas fa-file-invoice-dollar"></i>
+          <span>Despesas</span>
+          <i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="despesas-empenhados.html" class="menu-link"><i class="fas fa-file-invoice"></i><span>Empenhados</span></a></li>
+          <li class="menu-item"><a href="despesas-liquidados.html" class="menu-link"><i class="fas fa-check-circle"></i><span>Liquidados</span></a></li>
+          <li class="menu-item"><a href="despesas-retidos.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retidos</span></a></li>
+          <li class="menu-item"><a href="despesas-pagos.html" class="menu-link"><i class="fas fa-money-check-alt"></i><span>Pagos</span></a></li>
+          <li class="menu-item"><a href="despesas-a-pagar.html" class="menu-link"><i class="fas fa-clock"></i><span>A Pagar</span></a></li>
+          <li class="menu-item"><a href="despesas-gerencial.html" class="menu-link"><i class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="despesas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)">
+          <i class="fas fa-database"></i>
+          <span>Banco de Dados</span>
+          <i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="banco-importar-dados.html" class="menu-link"><i class="fas fa-file-import"></i><span>Importar Dados</span></a></li>
+          <li class="menu-item"><a href="banco-historico.html" class="menu-link"><i class="fas fa-history"></i><span>Histórico</span></a></li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <nav class="breadcrumb">
+          <span>Receitas</span>
+          <i class="fas fa-chevron-right"></i>
+          <span>Comparativos</span>
+        </nav>
+      </div>
+      <div class="header-actions">
+        <div class="user-menu">
+          <div class="user-avatar">AD</div>
+          <div class="user-info"><span class="user-name">Administrador</span><span class="user-role">SIGEF</span></div>
+        </div>
+      </div>
+    </header>
+    <section class="page-header">
+      <div class="page-header-content">
+        <h1 class="page-title"><i class="fas fa-balance-scale"></i> Comparativo de Receitas</h1>
+        <p class="page-subtitle">Compare a arrecadação de receitas entre exercícios</p>
+      </div>
+    </section>
+    <main class="content-area">
+      <div class="filter-section" id="filtrosSection" style="display: none;">
+        <div class="filter-title"><i class="fas fa-filter"></i> Filtrar Comparativo</div>
+        <div class="filter-grid">
+          <div class="filter-group">
+            <label class="filter-label">Exercício Base</label>
+            <select class="filter-select" id="anoBase" onchange="aplicarComparativo()"></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Comparar com</label>
+            <select class="filter-select" id="anoComparacao" onchange="aplicarComparativo()"></select>
+          </div>
+          <div class="filter-group" style="display: flex; align-items: flex-end;">
+            <button class="btn btn-primary" onclick="aplicarComparativo()"><i class="fas fa-search"></i> Buscar</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-table"></i> Comparativo de Receitas por Exercício</h2>
+          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i class="fas fa-sync-alt"></i> Carregando...</span></div>
+        </div>
+        <div class="card-body">
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="resumo">Resumo</button>
+            <button class="tab-btn" data-tab="detalhado">Detalhado</button>
+            <button class="tab-btn" data-tab="grafico">Gráfico</button>
+          </div>
+          <div class="tab-content active" id="resumo">
+            <!-- Filtro de Anos para Resumo -->
+            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; border: 1px solid #bae6fd;">
+              <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i class="fas fa-calendar-alt" style="color: #0284c7; font-size: 16px;"></i>
+                  <label style="font-weight: 600; color: #0369a1;">Comparar Anos:</label>
+                </div>
+                <div id="checkboxesAnos" style="display: flex; gap: 12px; flex-wrap: wrap;"></div>
+                <button class="btn btn-primary btn-sm" onclick="aplicarFiltroAnosResumo()" style="margin-left: auto;">
+                  <i class="fas fa-sync-alt"></i> Atualizar
+                </button>
+              </div>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead id="headerResumo">
+                  <tr>
+                    <th>Tipo de Receita</th>
+                    <th id="colAnoBase">Valor Base</th>
+                    <th id="colAnoComp">Valor Comparação</th>
+                    <th>Variação (R$)</th>
+                    <th>Variação (%)</th>
+                  </tr>
+                </thead>
+                <tbody id="corpoResumo">
+                  <tr><td colspan="5" style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Carregando dados...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="tab-content" id="detalhado">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Categoria</th>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    <th>Exercício</th>
+                    <th>Valor</th>
+                  </tr>
+                </thead>
+                <tbody id="corpoDetalhado">
+                  <tr><td colspan="5" style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Carregando dados...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="tab-content" id="grafico">
+            <div style="display: grid; gap: 30px;">
+              <div style="background: #f8fafc; border-radius: 12px; padding: 24px;">
+                <h3 style="font-size: 14px; color: #64748b; margin-bottom: 16px;"><i class="fas fa-chart-bar" style="color: #3b82f6;"></i> Comparativo de Valores por Categoria</h3>
+                <canvas id="chartComparativo" style="max-height: 400px;"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="export-section">
+            <button class="btn btn-secondary btn-sm" onclick="exportarCSV()"><i class="fas fa-download"></i> CSV</button>
+            <button class="btn btn-secondary btn-sm" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer class="main-footer">
+      <div class="footer-content">
+        <p class="footer-text">© 2026 Prefeitura Municipal de Caruaru - SIGEF. Todos os direitos reservados.</p>
+      </div>
+    </footer>
+  </div>
+  <script src="js/portal-transparencia.js"></script>
+  <script>
+    const DB_NAME = 'PortalTransparenciaDB';
+    const DB_VERSION = 2;
+    const STORES = ['receitas-previsao', 'receitas-arrecadacao', 'receitas-retencoes', 'receitas-deducoes'];
+    let db = null;
+    let dadosPorCategoria = {};
+    let chartComparativo = null;
+
+    const nomesCategoria = {
+      'receitas-previsao': { nome: 'Previsão Orçamentária', cor: '#3b82f6' },
+      'receitas-arrecadacao': { nome: 'Arrecadação', cor: '#22c55e' },
+      'receitas-retencoes': { nome: 'Retenções/Consignações', cor: '#f59e0b' },
+      'receitas-deducoes': { nome: 'Deduções', cor: '#ef4444' }
+    };
+
+    function initDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => { db = request.result; resolve(db); };
+        request.onupgradeneeded = (event) => {
+          const database = event.target.result;
+          ['despesas-empenhados','despesas-liquidados','despesas-pagos','despesas-retidos','despesas-a-pagar','receitas-previsao','receitas-arrecadacao','receitas-retencoes','receitas-deducoes'].forEach(s => {
+            if (!database.objectStoreNames.contains(s)) database.createObjectStore(s, { keyPath: 'id', autoIncrement: true });
+          });
+        };
+      });
+    }
+
+    function carregarDados(storeName) {
+      return new Promise((resolve, reject) => {
+        if (!db) { resolve([]); return; }
+        try {
+          const transaction = db.transaction([storeName], 'readonly');
+          const store = transaction.objectStore(storeName);
+          const request = store.getAll();
+          request.onsuccess = () => resolve(request.result || []);
+          request.onerror = () => resolve([]);
+        } catch (e) { resolve([]); }
+      });
+    }
+
+    function identificarColunas(dados) {
+      if (!dados || dados.length === 0) return {};
+      const colunas = Object.keys(dados[0]);
+      return {
+        data: colunas.find(c => c.toLowerCase().includes('data')) || 'Data',
+        valor: colunas.find(c => c.toLowerCase().includes('valor')) || 'Valor',
+        receita: colunas.find(c => c.toLowerCase().includes('receita')) || 'Receita'
+      };
+    }
+
+    function formatarMoeda(valor) { 
+      const num = parseFloat(valor) || 0;
+      const formatted = Math.abs(num).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      return num < 0 ? '-' + formatted : formatted;
+    }
+
+    function formatarData(dataStr) {
+      if (!dataStr || dataStr === '-') return '-';
+      if (dataStr instanceof Date) { const d = dataStr; return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
+      if (typeof dataStr === 'number' && dataStr > 40000 && dataStr < 60000) { const d = new Date((dataStr - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`; }
+      const str = String(dataStr).trim();
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) return str;
+      if (/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/\d{4}$/.test(str)) { const m = str.match(/^(\d{2})\s+\d{2}:\d{2}:\d{2}\/(\d{2})\/(\d{4})$/); if (m) return `${m[1]}/${m[2]}/${m[3]}`; }
+      const num = parseFloat(str); if (!isNaN(num) && num > 40000 && num < 60000) { const d = new Date((num - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`; }
+      if (str.includes('-')) { const p = str.split('T')[0].split(' ')[0].split('-'); if (p.length === 3 && p[0].length === 4) return `${p[2]}/${p[1]}/${p[0]}`; }
+      try { const d = new Date(str); if (!isNaN(d.getTime()) && d.getFullYear() > 1990) return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; } catch(e) {}
+      return str;
+    }
+
+    async function carregarTodosDados() {
+      dadosPorCategoria = {};
+      const anos = new Set();
+      
+      for (const store of STORES) {
+        const dados = await carregarDados(store);
+        dadosPorCategoria[store] = dados;
+        
+        const cols = identificarColunas(dados);
+        dados.forEach(d => {
+          const data = String(d[cols.data] || '');
+          const ano = data.substring(0, 4);
+          if (ano.match(/^\d{4}$/)) anos.add(ano);
+        });
+      }
+      
+      const anosArray = [...anos].sort().reverse();
+      const selectBase = document.getElementById('anoBase');
+      const selectComp = document.getElementById('anoComparacao');
+      
+      selectBase.innerHTML = anosArray.map((a, i) => `<option value="${a}" ${i === 0 ? 'selected' : ''}>${a}</option>`).join('');
+      selectComp.innerHTML = anosArray.map((a, i) => `<option value="${a}" ${i === 1 ? 'selected' : ''}>${a}</option>`).join('');
+      
+      // Popular checkboxes de anos para o filtro do Resumo
+      const checkboxesContainer = document.getElementById('checkboxesAnos');
+      checkboxesContainer.innerHTML = '';
+      anosArray.forEach((ano, idx) => {
+        const checked = idx < 2 ? 'checked' : ''; // Selecionar os 2 primeiros por padrão
+        checkboxesContainer.innerHTML += `
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 6px 12px; background: ${checked ? '#0284c7' : '#fff'}; color: ${checked ? '#fff' : '#334155'}; border-radius: 8px; border: 1px solid ${checked ? '#0284c7' : '#cbd5e1'}; transition: all 0.2s; font-weight: 500;">
+            <input type="checkbox" value="${ano}" ${checked} onchange="toggleAnoCheckbox(this)" style="display: none;">
+            <i class="fas fa-calendar" style="font-size: 12px;"></i>
+            ${ano}
+          </label>
+        `;
+      });
+      
+      if (anosArray.length < 2) {
+        document.getElementById('corpoResumo').innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-info-circle"></i> É necessário ter dados de pelo menos 2 exercícios para comparar. <a href="banco-importar-dados.html">Importar dados</a></td></tr>';
+      }
+    }
+    
+    // Variável global para anos selecionados
+    let anosSelecionados = [];
+    
+    function toggleAnoCheckbox(checkbox) {
+      const label = checkbox.parentElement;
+      if (checkbox.checked) {
+        label.style.background = '#0284c7';
+        label.style.color = '#fff';
+        label.style.borderColor = '#0284c7';
+      } else {
+        label.style.background = '#fff';
+        label.style.color = '#334155';
+        label.style.borderColor = '#cbd5e1';
+      }
+    }
+    
+    function getAnosSelecionados() {
+      const checkboxes = document.querySelectorAll('#checkboxesAnos input[type="checkbox"]:checked');
+      return Array.from(checkboxes).map(cb => cb.value).sort().reverse();
+    }
+    
+    function aplicarFiltroAnosResumo() {
+      anosSelecionados = getAnosSelecionados();
+      if (anosSelecionados.length < 2) {
+        alert('Selecione pelo menos 2 anos para comparar.');
+        return;
+      }
+      renderizarResumoMultiAnos();
+    }
+
+    function aplicarComparativo() {
+      const anoBase = document.getElementById('anoBase').value;
+      const anoComp = document.getElementById('anoComparacao').value;
+      
+      document.getElementById('colAnoBase').textContent = `Valor ${anoBase}`;
+      document.getElementById('colAnoComp').textContent = `Valor ${anoComp}`;
+      
+      const comparativo = {};
+      let totalBase = 0, totalComp = 0;
+      
+      for (const [store, dados] of Object.entries(dadosPorCategoria)) {
+        const cols = identificarColunas(dados);
+        
+        const dadosBase = dados.filter(d => String(d[cols.data] || '').startsWith(anoBase));
+        const dadosComp = dados.filter(d => String(d[cols.data] || '').startsWith(anoComp));
+        
+        const valorBase = dadosBase.reduce((acc, d) => acc + (parseFloat(d[cols.valor]) || 0), 0);
+        const valorComp = dadosComp.reduce((acc, d) => acc + (parseFloat(d[cols.valor]) || 0), 0);
+        
+        comparativo[store] = { valorBase, valorComp, dadosBase, dadosComp };
+        totalBase += valorBase;
+        totalComp += valorComp;
+      }
+      
+      renderizarResumo(comparativo, totalBase, totalComp, anoBase, anoComp);
+      renderizarDetalhado(comparativo, anoBase, anoComp);
+      atualizarGrafico(comparativo, anoBase, anoComp);
+    }
+
+    function renderizarResumo(comparativo, totalBase, totalComp, anoBase, anoComp) {
+      const corpo = document.getElementById('corpoResumo');
+      
+      let html = STORES.map(store => {
+        const info = nomesCategoria[store];
+        const dados = comparativo[store];
+        const variacao = dados.valorBase - dados.valorComp;
+        const varPercent = dados.valorComp !== 0 ? ((variacao / Math.abs(dados.valorComp)) * 100).toFixed(2) : (dados.valorBase > 0 ? 100 : 0);
+        const isPositivo = variacao >= 0;
+        const isDeducao = store === 'receitas-deducoes';
+        
+        return `
+          <tr>
+            <td><strong>${info.nome}</strong></td>
+            <td class="value">${formatarMoeda(dados.valorBase)}</td>
+            <td class="value">${formatarMoeda(dados.valorComp)}</td>
+            <td class="value" style="color: ${isPositivo ? '#22c55e' : '#ef4444'};">${isPositivo ? '+' : ''}${formatarMoeda(variacao)}</td>
+            <td><span style="background:${isPositivo ? '#dcfce7' : '#fee2e2'};color:${isPositivo ? '#166534' : '#991b1b'};padding:4px 8px;border-radius:12px;font-size:11px;">${isPositivo ? '+' : ''}${varPercent}%</span></td>
+          </tr>
+        `;
+      }).join('');
+      
+      // Total líquido
+      const receitaLiqBase = totalBase;
+      const receitaLiqComp = totalComp;
+      const varLiq = receitaLiqBase - receitaLiqComp;
+      const varLiqPerc = receitaLiqComp !== 0 ? ((varLiq / Math.abs(receitaLiqComp)) * 100).toFixed(2) : 0;
+      const isLiqPositivo = varLiq >= 0;
+      
+      html += `
+        <tr class="total-row">
+          <td><strong>TOTAL</strong></td>
+          <td class="value"><strong>${formatarMoeda(receitaLiqBase)}</strong></td>
+          <td class="value"><strong>${formatarMoeda(receitaLiqComp)}</strong></td>
+          <td class="value" style="color: ${isLiqPositivo ? '#22c55e' : '#ef4444'};"><strong>${isLiqPositivo ? '+' : ''}${formatarMoeda(varLiq)}</strong></td>
+          <td><span style="background:${isLiqPositivo ? '#dcfce7' : '#fee2e2'};color:${isLiqPositivo ? '#166534' : '#991b1b'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:600;">${isLiqPositivo ? '+' : ''}${varLiqPerc}%</span></td>
+        </tr>
+      `;
+      
+      corpo.innerHTML = html;
+    }
+    
+    function renderizarResumoMultiAnos() {
+      const anos = getAnosSelecionados();
+      if (anos.length < 2) return;
+      
+      // Cores para cada ano
+      const coresAnos = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899'];
+      
+      // Calcular valores por ano para cada categoria
+      const dadosPorAnoCategoria = {};
+      const totaisPorAno = {};
+      
+      anos.forEach(ano => {
+        totaisPorAno[ano] = 0;
+        STORES.forEach(store => {
+          const dados = dadosPorCategoria[store] || [];
+          const cols = identificarColunas(dados);
+          const dadosAno = dados.filter(d => String(d[cols.data] || '').startsWith(ano));
+          const valor = dadosAno.reduce((acc, d) => acc + (parseFloat(d[cols.valor]) || 0), 0);
+          
+          if (!dadosPorAnoCategoria[store]) dadosPorAnoCategoria[store] = {};
+          dadosPorAnoCategoria[store][ano] = valor;
+          totaisPorAno[ano] += valor;
+        });
+      });
+      
+      // Atualizar header da tabela
+      const headerResumo = document.getElementById('headerResumo');
+      let headerHtml = `<tr><th>Tipo de Receita</th>`;
+      anos.forEach((ano, idx) => {
+        const cor = coresAnos[idx % coresAnos.length];
+        headerHtml += `<th style="text-align: right; color: ${cor};"><i class="fas fa-calendar" style="margin-right: 4px;"></i>${ano}</th>`;
+      });
+      headerHtml += `<th style="text-align: center;">Variação (%)</th></tr>`;
+      headerResumo.innerHTML = headerHtml;
+      
+      // Renderizar corpo
+      const corpo = document.getElementById('corpoResumo');
+      let html = STORES.map(store => {
+        const info = nomesCategoria[store];
+        const valorPrimeiroAno = dadosPorAnoCategoria[store][anos[0]] || 0;
+        const valorUltimoAno = dadosPorAnoCategoria[store][anos[anos.length - 1]] || 0;
+        const variacao = valorUltimoAno !== 0 ? ((valorPrimeiroAno - valorUltimoAno) / Math.abs(valorUltimoAno) * 100) : (valorPrimeiroAno > 0 ? 100 : 0);
+        const isPositivo = variacao >= 0;
+        
+        let row = `<tr><td><strong style="color: ${info.cor};">${info.nome}</strong></td>`;
+        anos.forEach((ano, idx) => {
+          const valor = dadosPorAnoCategoria[store][ano] || 0;
+          const peso = idx === 0 ? 'font-weight: 600;' : '';
+          row += `<td class="value" style="${peso}">${formatarMoeda(valor)}</td>`;
+        });
+        row += `<td style="text-align: center;"><span style="background:${isPositivo ? '#dcfce7' : '#fee2e2'};color:${isPositivo ? '#166534' : '#991b1b'};padding:4px 8px;border-radius:12px;font-size:11px;">${isPositivo ? '+' : ''}${variacao.toFixed(1)}%</span></td></tr>`;
+        return row;
+      }).join('');
+      
+      // Linha de total
+      const totalPrimeiroAno = totaisPorAno[anos[0]] || 0;
+      const totalUltimoAno = totaisPorAno[anos[anos.length - 1]] || 0;
+      const variacaoTotal = totalUltimoAno !== 0 ? ((totalPrimeiroAno - totalUltimoAno) / Math.abs(totalUltimoAno) * 100) : 0;
+      const isPositivoTotal = variacaoTotal >= 0;
+      
+      html += `<tr class="total-row"><td><strong>TOTAL</strong></td>`;
+      anos.forEach((ano, idx) => {
+        const peso = idx === 0 ? 'font-weight: 700;' : 'font-weight: 600;';
+        html += `<td class="value" style="${peso}">${formatarMoeda(totaisPorAno[ano])}</td>`;
+      });
+      html += `<td style="text-align: center;"><span style="background:${isPositivoTotal ? '#dcfce7' : '#fee2e2'};color:${isPositivoTotal ? '#166534' : '#991b1b'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:600;">${isPositivoTotal ? '+' : ''}${variacaoTotal.toFixed(1)}%</span></td></tr>`;
+      
+      corpo.innerHTML = html;
+    }
+
+    function renderizarDetalhado(comparativo, anoBase, anoComp) {
+      const corpo = document.getElementById('corpoDetalhado');
+      let html = '';
+      let totalRegistros = 0;
+      
+      for (const [store, dados] of Object.entries(comparativo)) {
+        const info = nomesCategoria[store];
+        const cols = identificarColunas(dadosPorCategoria[store]);
+        
+        // Mostrar até 10 registros de cada exercício
+        const registrosBase = dados.dadosBase.slice(0, 5);
+        const registrosComp = dados.dadosComp.slice(0, 5);
+        
+        registrosBase.forEach(d => {
+          html += `<tr><td style="color:${info.cor};">${info.nome}</td><td>${formatarData(d[cols.data])}</td><td>${String(d[cols.receita] || '-').substring(0, 50)}</td><td>${anoBase}</td><td class="value">${formatarMoeda(d[cols.valor])}</td></tr>`;
+          totalRegistros++;
+        });
+        
+        registrosComp.forEach(d => {
+          html += `<tr><td style="color:${info.cor};">${info.nome}</td><td>${formatarData(d[cols.data])}</td><td>${String(d[cols.receita] || '-').substring(0, 50)}</td><td>${anoComp}</td><td class="value">${formatarMoeda(d[cols.valor])}</td></tr>`;
+          totalRegistros++;
+        });
+      }
+      
+      if (totalRegistros === 0) {
+        html = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-inbox"></i> Nenhum dado encontrado para os exercícios selecionados.</td></tr>';
+      } else {
+        html += `<tr><td colspan="5" style="text-align:center; padding:10px; color:#64748b;">Exibindo amostra de ${totalRegistros} registros</td></tr>`;
+      }
+      
+      corpo.innerHTML = html;
+    }
+
+    function atualizarGrafico(comparativo, anoBase, anoComp) {
+      if (chartComparativo) chartComparativo.destroy();
+      
+      const labels = STORES.map(s => nomesCategoria[s].nome);
+      const dadosBase = STORES.map(s => Math.abs(comparativo[s].valorBase));
+      const dadosComp = STORES.map(s => Math.abs(comparativo[s].valorComp));
+      
+      chartComparativo = new Chart(document.getElementById('chartComparativo'), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: anoBase, data: dadosBase, backgroundColor: '#3b82f6', borderRadius: 6 },
+            { label: anoComp, data: dadosComp, backgroundColor: '#94a3b8', borderRadius: 6 }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'top' },
+            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${formatarMoeda(ctx.raw)}` } }
+          },
+          scales: { y: { beginAtZero: true, ticks: { callback: v => formatarMoeda(v) } } }
+        }
+      });
+    }
+
+    function exportarCSV() {
+      const anoBase = document.getElementById('anoBase').value;
+      const anoComp = document.getElementById('anoComparacao').value;
+      
+      let csv = `Categoria;Valor ${anoBase};Valor ${anoComp};Variação\n`;
+      for (const store of STORES) {
+        const info = nomesCategoria[store];
+        const cols = identificarColunas(dadosPorCategoria[store]);
+        const dadosBase = dadosPorCategoria[store].filter(d => String(d[cols.data] || '').startsWith(anoBase));
+        const dadosComp = dadosPorCategoria[store].filter(d => String(d[cols.data] || '').startsWith(anoComp));
+        const valorBase = dadosBase.reduce((acc, d) => acc + (parseFloat(d[cols.valor]) || 0), 0);
+        const valorComp = dadosComp.reduce((acc, d) => acc + (parseFloat(d[cols.valor]) || 0), 0);
+        csv += `${info.nome};${valorBase};${valorComp};${valorBase - valorComp}\n`;
+      }
+      
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'receitas-comparativo.csv'; link.click();
+    }
+
+    async function init() {
+      try {
+        await initDB();
+        await carregarTodosDados();
+        aplicarComparativo();
+        atualizarDataUltimaImportacao();
+      } catch (erro) {
+        console.error('Erro:', erro);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', init);
+    
+    // Controlar visibilidade dos filtros por aba
+    function atualizarVisibilidadeFiltros(tabId) {
+      const filtrosSection = document.getElementById('filtrosSection');
+      if (filtrosSection) {
+        filtrosSection.style.display = tabId === 'resumo' ? 'none' : 'block';
+      }
+    }
+    
+    // Sobrescrever comportamento das tabs para controlar filtros
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const tabId = this.getAttribute('data-tab');
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          this.classList.add('active');
+          document.getElementById(tabId).classList.add('active');
+          atualizarVisibilidadeFiltros(tabId);
+          // Re-renderizar gráficos quando a aba de gráfico é ativada
+          if (tabId === 'grafico') {
+            setTimeout(() => buscarDados(), 100);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

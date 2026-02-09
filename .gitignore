@@ -1,0 +1,23 @@
+# Dependências
+node_modules/
+
+# Arquivos de dados (planilhas Excel)
+*.xlsx
+
+# Diretórios de dados brutos e processados
+pipeline-dados/dados-brutos/
+pipeline-dados/processados/
+
+# Configurações locais
+.claude/
+
+# Sistema operacional
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo

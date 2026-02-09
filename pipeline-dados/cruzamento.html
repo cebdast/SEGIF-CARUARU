@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pipeline SIGEF — Transformação + Cruzamento</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 24px; color: #1e293b; }
+    h1 { font-size: 22px; margin-bottom: 4px; }
+    .subtitle { color: #64748b; margin-bottom: 24px; font-size: 13px; }
+    .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .card h2 { font-size: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .badge { color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+    .badge-green { background: #059669; }
+    .badge-blue { background: #2563eb; }
+    .badge-purple { background: #7c3aed; }
+    .badge-orange { background: #ea580c; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
+    .btn-primary { background: #059669; color: white; }
+    .btn-primary:hover { background: #047857; }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-purple { background: #7c3aed; color: white; }
+    .btn-purple:hover { background: #6d28d9; }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .status { padding: 12px 16px; border-radius: 8px; margin: 12px 0; font-size: 13px; display: none; }
+    .status.show { display: block; }
+    .status.success { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+    .status.error { background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; }
+    .status.info { background: #eff6ff; border: 1px solid #93c5fd; color: #1d4ed8; }
+    .hidden { display: none; }
+    .file-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0 16px 0; }
+    .file-slot { display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+      border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; background: #f8fafc; }
+    .file-slot .role { font-weight: 600; color: #475569; min-width: 130px; }
+    .file-slot .filename { color: #059669; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-slot .missing { color: #dc2626; font-style: italic; }
+    .file-slot.ok { border-color: #86efac; background: #f0fdf4; }
+    .file-slot.err { border-color: #fca5a5; background: #fef2f2; }
+    .file-slot.warn { border-color: #fcd34d; background: #fefce8; }
+    .progress-bar { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin: 12px 0; }
+    .progress-bar .fill { height: 100%; background: #059669; border-radius: 4px; transition: width .3s; }
+    .phase-log { font-size: 12px; color: #64748b; margin: 4px 0; max-height: 160px; overflow-y: auto; }
+    .phase-line { margin: 2px 0; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 16px 0; }
+    .stat-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; }
+    .stat-box .num { font-size: 20px; font-weight: 700; color: #059669; }
+    .stat-box .lbl { font-size: 11px; color: #64748b; margin-top: 4px; }
+    .table-wrap { overflow-x: auto; max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; margin: 16px 0; }
+    table { border-collapse: collapse; width: 100%; font-size: 12px; }
+    th { background: #f1f5f9; padding: 8px 10px; text-align: left; position: sticky; top: 0;
+      border-bottom: 2px solid #cbd5e1; white-space: nowrap; z-index: 1; }
+    td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; white-space: nowrap;
+      max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+    tr:hover td { background: #f0fdf4; }
+    .tab-bar { display: flex; gap: 0; border-bottom: 2px solid #e2e8f0; }
+    .tab-btn { padding: 8px 16px; border: none; background: transparent; font-size: 13px; font-weight: 600;
+      cursor: pointer; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; }
+    .tab-btn.active { color: #059669; border-bottom-color: #059669; }
+    .tab-btn:hover { color: #059669; }
+    .info-box { background: #eff6ff; border: 1px solid #93c5fd; border-radius: 8px; padding: 12px;
+      margin-bottom: 16px; font-size: 13px; color: #1d4ed8; }
+    .folder-input-wrap { position: relative; display: inline-block; }
+    .folder-input-wrap input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .year-section { margin: 16px 0; padding: 16px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fafbfc; }
+    .year-header { font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .year-badge { background: #7c3aed; color: white; font-size: 12px; padding: 2px 10px; border-radius: 10px; font-weight: 600; }
+    .anos-resumo { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+    .ano-tag { background: #ede9fe; color: #6d28d9; padding: 6px 14px; border-radius: 8px;
+      font-size: 13px; font-weight: 600; border: 1px solid #c4b5fd; }
+  </style>
+</head>
+<body>
+  <h1>Pipeline SIGEF — Transformacao + Cruzamento</h1>
+  <p class="subtitle">Envie as planilhas <strong>brutas</strong> do SIGEF + externas. Suporta <strong>multiplos anos</strong> (subpastas 2023, 2024, 2025...).</p>
+
+  <!-- ETAPA 1: Selecionar arquivos -->
+  <div class="card">
+    <h2>1. Selecionar Planilhas Brutas <span class="badge badge-purple">9 arquivos por ano</span></h2>
+    <div class="info-box">
+      Selecione a <strong>pasta raiz</strong> contendo subpastas por ano (ex: <code>2024/</code>, <code>2025/</code>).<br>
+      Cada subpasta deve ter os 9 arquivos Excel brutos.<br>
+      <strong>SIGEF (6):</strong> Emitidos, Liquidados, Pagos, A Pagar, Retidos, Credores<br>
+      <strong>Externos (3):</strong> Balancete, Detalhamento, Simples Nacional <em>(opcional)</em><br>
+      <em>Se nao houver subpastas de ano, funciona normalmente com ano unico.</em>
+    </div>
+
+    <div class="btn-row">
+      <div class="folder-input-wrap">
+        <button class="btn btn-purple">Selecionar Pasta...</button>
+        <input type="file" id="folderInput" webkitdirectory multiple>
+      </div>
+      <span style="color:#94a3b8; font-size:13px; padding-top:10px;">ou</span>
+      <div class="folder-input-wrap">
+        <button class="btn btn-purple">Selecionar Arquivos (ano unico)...</button>
+        <input type="file" id="filesInput" multiple accept=".xlsx,.xls,.xlsm">
+      </div>
+    </div>
+
+    <div id="anosContainer"></div>
+    <div class="status" id="statusDetect"></div>
+  </div>
+
+  <!-- ETAPA 2: Processar -->
+  <div class="card">
+    <h2>2. Processar <span class="badge badge-blue">Transformacao + Cruzamento</span></h2>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnProcessar" disabled onclick="processar()">Processar Tudo</button>
+    </div>
+    <div class="progress-bar hidden" id="progressBar"><div class="fill" id="progressFill" style="width:0%"></div></div>
+    <div id="phaseLog" class="phase-log"></div>
+    <div class="status" id="statusProcessar"></div>
+  </div>
+
+  <!-- ETAPA 3: Resultado -->
+  <div class="card hidden" id="resultadoSection">
+    <h2>3. Resultado Final <span class="badge badge-green">5 abas</span></h2>
+    <div class="stats" id="statsContainer"></div>
+    <div class="btn-row" id="downloadButtons"></div>
+    <div class="status" id="statusDownload"></div>
+    <h3 style="font-size:14px; margin:16px 0 8px;">Preview (primeiras 20 linhas):</h3>
+    <div id="tabBar" class="tab-bar"></div>
+    <div class="table-wrap" id="previewContainer"></div>
+  </div>
+
+  <!-- Scripts de transformacao + cruzamento -->
+  <script src="js/utils-transformacao.js?v=20260207v8"></script>
+  <script src="js/transformar-credores.js?v=20260207v7"></script>
+  <script src="js/transformar-a-pagar.js?v=20260207v8"></script>
+  <script src="js/transformar-pagos.js?v=20260207v8"></script>
+  <script src="js/transformar-emitidos.js?v=20260207v8"></script>
+  <script src="js/transformar-liquidados.js?v=20260208v4"></script>
+  <script src="js/transformar-retidos.js?v=20260207v7"></script>
+  <script src="js/transformar-detalhamento.js?v=20260207v7"></script>
+  <script src="js/cruzar-dados.js?v=20260208v5"></script>
+
+  <script>
+    // ==============================================================
+    // Estado global
+    // ==============================================================
+    var dadosPorAno = {};  // { '2024': { matches: {...}, missing: [...] }, '2025': ... }
+    var anosOrdenados = []; // ['2024', '2025']
+    var resultadoFinal = null;
+    var previewTabAtual = 0;
+
+    // Mapeamento: role -> funcao de transformacao
+    var TRANSFORMACOES = {
+      'liquidados':   { fn: transformarLiquidados,   label: 'Liquidados' },
+      'pagos':        { fn: transformarPagos,         label: 'Pagos' },
+      'emitidos':     { fn: transformarEmitidos,      label: 'Emitidos' },
+      'aPagar':       { fn: transformarAPagar,        label: 'A Pagar' },
+      'retidos':      { fn: transformarRetidos,       label: 'Retidos' },
+      'credores':     { fn: transformarCredores,      label: 'Credores' },
+      'detalhamento': { fn: transformarDetalhamento,  label: 'Detalhamento' }
+    };
+
+    // ==============================================================
+    // Deteccao de subpastas por ano
+    // ==============================================================
+    function agruparPorAno(files) {
+      // Agrupar arquivos por subpasta de ano (4 digitos)
+      var porAno = {};
+      var semAno = [];
+
+      for (var i = 0; i < files.length; i++) {
+        var f = files[i];
+        var relPath = f.webkitRelativePath || '';
+        // webkitRelativePath: "pastaRaiz/2024/arquivo.xlsx" ou "pastaRaiz/arquivo.xlsx"
+        var parts = relPath.split('/');
+
+        // parts[0] = pasta raiz, parts[1] = subpasta ou arquivo
+        var subFolder = parts.length >= 3 ? parts[1] : null;
+
+        if (subFolder && /^\d{4}$/.test(subFolder)) {
+          if (!porAno[subFolder]) porAno[subFolder] = [];
+          porAno[subFolder].push(f);
+        } else {
+          semAno.push(f);
+        }
+      }
+
+      var anos = Object.keys(porAno).sort();
+
+      // Se nao encontrou subpastas de ano, tratar tudo como ano unico
+      if (anos.length === 0) {
+        return { '_unico': semAno };
+      }
+
+      // Se tem subpastas de ano E arquivos na raiz, ignorar os da raiz
+      return porAno;
+    }
+
+    // ==============================================================
+    // Eventos de selecao de arquivos
+    // ==============================================================
+    document.getElementById('folderInput').addEventListener('change', function(e) {
+      var files = Array.from(e.target.files).filter(function(f) {
+        var n = f.name.toLowerCase();
+        return (n.endsWith('.xlsx') || n.endsWith('.xls') || n.endsWith('.xlsm')) && !n.startsWith('~$');
+      });
+      processarSelecao(files);
+    });
+
+    document.getElementById('filesInput').addEventListener('change', function(e) {
+      var files = Array.from(e.target.files);
+      processarSelecaoUnico(files);
+    });
+
+    // Selecao por arquivos individuais (sempre ano unico)
+    function processarSelecaoUnico(files) {
+      if (!files || files.length === 0) {
+        showStatus('statusDetect', 'Nenhum arquivo selecionado.', 'error');
+        return;
+      }
+
+      dadosPorAno = {};
+      var result = autoDetectarArquivos(files);
+      dadosPorAno['_unico'] = result;
+      anosOrdenados = ['_unico'];
+
+      renderAnosUI();
+      validarEHabilitar();
+    }
+
+    // Selecao por pasta (pode ter subpastas de ano)
+    function processarSelecao(files) {
+      if (!files || files.length === 0) {
+        showStatus('statusDetect', 'Nenhum arquivo selecionado.', 'error');
+        return;
+      }
+
+      var grupos = agruparPorAno(files);
+      var anos = Object.keys(grupos).sort();
+
+      dadosPorAno = {};
+      for (var i = 0; i < anos.length; i++) {
+        var ano = anos[i];
+        dadosPorAno[ano] = autoDetectarArquivos(grupos[ano]);
+      }
+      anosOrdenados = anos;
+
+      renderAnosUI();
+      validarEHabilitar();
+    }
+
+    // ==============================================================
+    // UI: Renderizar anos e grids
+    // ==============================================================
+    function renderAnosUI() {
+      var container = document.getElementById('anosContainer');
+      var html = '';
+
+      // Resumo de anos
+      if (anosOrdenados.length > 1 || (anosOrdenados.length === 1 && anosOrdenados[0] !== '_unico')) {
+        html += '<div class="anos-resumo">';
+        for (var i = 0; i < anosOrdenados.length; i++) {
+          var label = anosOrdenados[i] === '_unico' ? 'Ano unico' : anosOrdenados[i];
+          html += '<span class="ano-tag">' + esc(label) + '</span>';
+        }
+        html += '</div>';
+      }
+
+      // Grid de arquivos por ano
+      for (var a = 0; a < anosOrdenados.length; a++) {
+        var ano = anosOrdenados[a];
+        var result = dadosPorAno[ano];
+        var anoLabel = ano === '_unico' ? 'Ano unico' : ano;
+
+        if (anosOrdenados.length > 1 || ano !== '_unico') {
+          html += '<div class="year-section">';
+          html += '<div class="year-header"><span class="year-badge">' + esc(anoLabel) + '</span> ';
+          var okCount = Object.keys(result.matches).length;
+          html += okCount + '/' + _CRUZAR_ALVOS.length + ' arquivos detectados</div>';
+        }
+
+        html += '<div class="file-grid">';
+        for (var i = 0; i < _CRUZAR_ALVOS.length; i++) {
+          var alvo = _CRUZAR_ALVOS[i];
+          var file = result.matches[alvo.role];
+          var ok = !!file;
+          var cls = ok ? 'ok' : (alvo.obrigatorio ? 'err' : 'warn');
+          html += '<div class="file-slot ' + cls + '">';
+          html += '<span class="role">' + esc(alvo.label) + ':</span>';
+          if (ok) {
+            html += '<span class="filename">' + esc(file.name) + '</span>';
+          } else {
+            html += '<span class="missing">' + (alvo.obrigatorio ? 'nao encontrado' : 'opcional') + '</span>';
+          }
+          html += '</div>';
+        }
+        html += '</div>';
+
+        if (anosOrdenados.length > 1 || ano !== '_unico') {
+          html += '</div>';
+        }
+      }
+
+      container.innerHTML = html;
+    }
+
+    function validarEHabilitar() {
+      var todosOk = true;
+      var erros = [];
+
+      for (var a = 0; a < anosOrdenados.length; a++) {
+        var ano = anosOrdenados[a];
+        var result = dadosPorAno[ano];
+        if (result.missing && result.missing.length > 0) {
+          var anoLabel = ano === '_unico' ? '' : ' (' + ano + ')';
+          erros.push(result.missing.join(', ') + anoLabel);
+          todosOk = false;
+        }
+      }
+
+      if (!todosOk) {
+        showStatus('statusDetect', 'Faltando: ' + erros.join(' | '), 'error');
+        document.getElementById('btnProcessar').disabled = true;
+      } else {
+        var anosLabel = anosOrdenados.filter(function(a) { return a !== '_unico'; });
+        var msg = 'Todos os arquivos obrigatorios identificados!';
+        if (anosLabel.length > 1) {
+          msg += ' Anos: ' + anosLabel.join(', ') + '.';
+        }
+        // Verificar simples em cada ano
+        var semSimples = anosOrdenados.filter(function(a) { return !dadosPorAno[a].matches['simples']; });
+        if (semSimples.length > 0) {
+          msg += ' (Simples Nacional sera pulado onde nao encontrado)';
+        }
+        showStatus('statusDetect', msg, 'success');
+        document.getElementById('btnProcessar').disabled = false;
+      }
+    }
+
+    // ==============================================================
+    // Pipeline de um ano: transformar + cruzar
+    // Otimizado: leitura paralela de arquivos + retorno leve
+    // ==============================================================
+    async function processarUmAno(anoLabel, arquivos) {
+      var matrices = {};
+      var retWorkbook = null;
+      var roles = ['liquidados', 'pagos', 'emitidos', 'aPagar', 'retidos', 'credores', 'simples', 'balancete', 'detalhamento'];
+
+      // --- Leitura paralela de todos os arquivos (muito mais rapido) ---
+      logPhase('  Lendo todos os arquivos em paralelo...');
+      var buffers = {};
+      var promises = [];
+      for (var i = 0; i < roles.length; i++) {
+        var role = roles[i];
+        var file = arquivos[role];
+        if (!file && role === 'simples') {
+          buffers[role] = null;
+          continue;
+        }
+        if (!file) throw new Error('[' + anoLabel + '] Arquivo nao encontrado: ' + role);
+        (function(r, f) {
+          promises.push(f.arrayBuffer().then(function(buf) { buffers[r] = buf; }));
+        })(role, file);
+      }
+      await Promise.all(promises);
+      logPhase('    -> Todos os arquivos lidos!');
+
+      // --- Transformar sequencialmente (usa CPU, nao paraleliza bem) ---
+      for (var i = 0; i < roles.length; i++) {
+        var role = roles[i];
+        if (role === 'simples' && !buffers[role]) {
+          matrices[role] = null;
+          logPhase('  Simples Nacional nao fornecido — sera pulado.');
+          continue;
+        }
+
+        var wb = XLSX.read(buffers[role], { type: 'array' });
+        buffers[role] = null; // liberar buffer imediatamente
+
+        var transformacao = TRANSFORMACOES[role];
+
+        if (transformacao) {
+          logPhase('  Transformando ' + transformacao.label + '...');
+          var resultado = transformacao.fn(wb);
+          wb = null;
+
+          if (role === 'retidos') {
+            retWorkbook = resultado.workbook;
+            var geralSheet = resultado.workbook.Sheets['GERAL'] || resultado.workbook.Sheets[resultado.workbook.SheetNames[0]];
+            matrices[role] = sheetToMatrix(geralSheet, { raw: false, defval: '' });
+          } else {
+            matrices[role] = resultado.matrix;
+          }
+
+          var stats = resultado.stats || {};
+          logPhase('    -> ' + transformacao.label + ': ' +
+            (stats.linhasFinal || (matrices[role] ? matrices[role].length - 1 : '?')) + ' linhas');
+          resultado = null;
+        } else {
+          var sheet = wb.Sheets[wb.SheetNames[0]];
+          matrices[role] = sheetToMatrix(sheet, { raw: false, defval: '' });
+          logPhase('    -> ' + role + ': ' + (matrices[role].length - 1) + ' linhas');
+          wb = null;
+        }
+      }
+      buffers = null;
+
+      logPhase('  Executando cruzamentos...');
+      await sleep(5);
+
+      // Retornar matrizes leves em vez de workbook pesado
+      var result = executarCruzamento(matrices, retWorkbook, function(fase, msg) {
+        logPhase('    [Fase ' + fase + '] ' + msg);
+      }, { returnMatricesOnly: true });
+
+      // Liberar matrices de entrada
+      for (var k in matrices) matrices[k] = null;
+      matrices = null; retWorkbook = null;
+
+      return result.abas; // Array de { nome, matrix }
+    }
+
+    // ==============================================================
+    // Empilhar matrizes de multiplos anos (incremental, leve)
+    // ==============================================================
+    function empilharMatrizes(acumulado, novasAbas) {
+      if (!acumulado) return novasAbas;
+
+      for (var s = 0; s < acumulado.length; s++) {
+        var novaAba = novasAbas[s];
+        if (!novaAba || !novaAba.matrix || novaAba.matrix.length < 2) continue;
+        for (var r = 1; r < novaAba.matrix.length; r++) {
+          acumulado[s].matrix.push(novaAba.matrix[r]);
+        }
+        novaAba.matrix = null;
+      }
+      return acumulado;
+    }
+
+    // ==============================================================
+    // Processamento principal: itera sobre anos
+    // ==============================================================
+    async function processar() {
+      document.getElementById('btnProcessar').disabled = true;
+      clearPhaseLog();
+      showProgress(true, 2);
+      showStatus('statusProcessar', 'Iniciando pipeline...', 'info');
+
+      try {
+        var t0 = performance.now();
+        var abasAcumuladas = null;
+        var totalAnos = anosOrdenados.length;
+
+        for (var a = 0; a < totalAnos; a++) {
+          var ano = anosOrdenados[a];
+          var anoLabel = ano === '_unico' ? 'Ano unico' : ano;
+          var arquivos = dadosPorAno[ano].matches;
+
+          var pctBase = Math.round((a / totalAnos) * 90);
+          showProgress(true, 2 + pctBase);
+
+          logPhase('');
+          logPhase('========================================');
+          logPhase('  ANO: ' + anoLabel + ' (' + (a + 1) + '/' + totalAnos + ')');
+          logPhase('========================================');
+
+          var abasAno = await processarUmAno(anoLabel, arquivos);
+
+          // Empilhar incrementalmente (sem guardar workbooks)
+          abasAcumuladas = empilharMatrizes(abasAcumuladas, abasAno);
+          abasAno = null;
+
+          logPhase('  -> ' + anoLabel + ' concluido!');
+          await sleep(20); // dar tempo ao GC
+        }
+
+        showProgress(true, 96);
+
+        var tempoMs = Math.round(performance.now() - t0);
+        resultadoFinal = abasAcumuladas;
+        abasAcumuladas = null;
+
+        showProgress(true, 100);
+
+        renderStats(resultadoFinal, tempoMs);
+        renderDownloadButtons(resultadoFinal);
+        renderPreviewTabs(resultadoFinal);
+
+        document.getElementById('resultadoSection').classList.remove('hidden');
+        var anosStr = anosOrdenados.length > 1
+          ? ' (' + anosOrdenados.join(', ') + ')'
+          : '';
+        showStatus('statusProcessar',
+          'Pipeline completo em ' + (tempoMs / 1000).toFixed(1) + 's!' + anosStr + ' Arquivo final pronto para download.',
+          'success');
+
+        setTimeout(function() { showProgress(false); }, 800);
+
+      } catch (e) {
+        console.error(e);
+        showProgress(false);
+        showStatus('statusProcessar', 'ERRO: ' + e.message, 'error');
+      }
+
+      document.getElementById('btnProcessar').disabled = false;
+    }
+
+    function sleep(ms) {
+      return new Promise(function(resolve) { setTimeout(resolve, ms); });
+    }
+
+    // ==============================================================
+    // Estatisticas — trabalha direto com Array de {nome, matrix}
+    // ==============================================================
+    function renderStats(abas, tempoMs) {
+      var html = '';
+
+      if (anosOrdenados.length > 1) {
+        html += statBox(anosOrdenados.length, 'Anos');
+      }
+
+      for (var i = 0; i < abas.length; i++) {
+        var mat = abas[i].matrix;
+        var rows = mat.length > 0 ? mat.length - 1 : 0;
+        var cols = mat.length > 0 && mat[0] ? mat[0].length : 0;
+        html += statBox(rows.toLocaleString() + ' x ' + cols, abas[i].nome);
+      }
+      html += statBox((tempoMs / 1000).toFixed(1) + 's', 'Tempo Total');
+
+      document.getElementById('statsContainer').innerHTML = html;
+    }
+
+    function statBox(val, label) {
+      return '<div class="stat-box"><div class="num">' + val + '</div><div class="lbl">' + label + '</div></div>';
+    }
+
+    // ==============================================================
+    // Preview com tabs — trabalha direto com Array de {nome, matrix}
+    // ==============================================================
+    function renderPreviewTabs(abas) {
+      var tabBar = document.getElementById('tabBar');
+      tabBar.innerHTML = abas.map(function(a, i) {
+        return '<button class="tab-btn ' + (i === 0 ? 'active' : '') + '" onclick="switchTab(' + i + ')">' + esc(a.nome) + '</button>';
+      }).join('');
+      previewTabAtual = 0;
+      showPreview(abas, 0);
+    }
+
+    function switchTab(idx) {
+      if (!resultadoFinal) return;
+      previewTabAtual = idx;
+      document.querySelectorAll('.tab-btn').forEach(function(btn, i) {
+        btn.classList.toggle('active', i === idx);
+      });
+      showPreview(resultadoFinal, idx);
+    }
+
+    function showPreview(abas, sheetIdx) {
+      var container = document.getElementById('previewContainer');
+      var matrix = abas[sheetIdx].matrix;
+
+      if (!matrix || matrix.length === 0) {
+        container.innerHTML = '<p style="padding:12px;color:#94a3b8">Sem dados</p>';
+        return;
+      }
+
+      var header = matrix[0];
+      var rows = matrix.slice(1, 21);
+      var html = '<table><thead><tr><th style="color:#94a3b8">#</th>';
+      for (var c = 0; c < header.length; c++) {
+        html += '<th title="Col ' + c + '">' + esc(header[c] || '[' + c + ']') + '</th>';
+      }
+      html += '</tr></thead><tbody>';
+      for (var ri = 0; ri < rows.length; ri++) {
+        var row = rows[ri];
+        html += '<tr><td style="color:#94a3b8;font-size:11px">' + (ri + 1) + '</td>';
+        for (var ci = 0; ci < header.length; ci++) {
+          var val = ci < row.length ? (row[ci] == null ? '' : row[ci]) : '';
+          html += '<td title="' + esc(String(val)) + '">' + esc(String(val).substring(0, 50)) + '</td>';
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    // ==============================================================
+    // Download — aba por aba para evitar Out of Memory
+    // ==============================================================
+    function renderDownloadButtons(abas) {
+      var container = document.getElementById('downloadButtons');
+      var html = '<button class="btn btn-primary" onclick="downloadTudo()">Baixar Todas as Abas</button> ';
+      for (var i = 0; i < abas.length; i++) {
+        html += '<button class="btn btn-purple" onclick="downloadAba(' + i + ')">' + esc(abas[i].nome) + '</button> ';
+      }
+      container.innerHTML = html;
+    }
+
+    function downloadAba(idx) {
+      if (!resultadoFinal || !resultadoFinal[idx]) return;
+      var aba = resultadoFinal[idx];
+      showStatus('statusDownload', 'Gerando ' + aba.nome + '...', 'info');
+      return new Promise(function(resolve) {
+        setTimeout(function() {
+          try {
+            var wb = XLSX.utils.book_new();
+            var ws = XLSX.utils.aoa_to_sheet(aba.matrix);
+            XLSX.utils.book_append_sheet(wb, ws, aba.nome);
+            var wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array', compression: true });
+            wb = null; ws = null;
+            var anosStr = anosOrdenados && anosOrdenados.length > 1 ? '_' + anosOrdenados.join('_') : '';
+            triggerDownload(wbout, 'V1_' + aba.nome.replace(/[^a-zA-Z0-9]/g, '_') + anosStr + '.xlsx');
+            wbout = null;
+            showStatus('statusDownload', aba.nome + ' baixado!', 'success');
+            resolve(true);
+          } catch (e) {
+            console.error(e);
+            showStatus('statusDownload', 'Erro ao baixar ' + aba.nome + ': ' + e.message, 'error');
+            resolve(false);
+          }
+        }, 50);
+      });
+    }
+
+    async function downloadTudo() {
+      if (!resultadoFinal || !resultadoFinal.length) return;
+      var total = resultadoFinal.length;
+      var ok = 0;
+
+      for (var i = 0; i < total; i++) {
+        showStatus('statusDownload', 'Baixando aba ' + (i + 1) + '/' + total + ': ' + resultadoFinal[i].nome + '...', 'info');
+        var sucesso = await downloadAba(i);
+        if (sucesso) ok++;
+        await sleep(300);
+      }
+
+      if (ok === total) {
+        showStatus('statusDownload', 'Todas as ' + total + ' abas baixadas!', 'success');
+      } else {
+        showStatus('statusDownload', ok + '/' + total + ' abas baixadas. Algumas falharam — tente individualmente.', 'error');
+      }
+    }
+
+    function triggerDownload(arrayBuffer, filename) {
+      var blob = new Blob([arrayBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function() { URL.revokeObjectURL(url); }, 2000);
+    }
+
+    // ==============================================================
+    // Utilitarios UI
+    // ==============================================================
+    function showStatus(id, msg, tipo) {
+      var el = document.getElementById(id);
+      el.textContent = msg;
+      el.className = 'status show ' + tipo;
+    }
+
+    function showProgress(show, pct) {
+      var bar = document.getElementById('progressBar');
+      var fill = document.getElementById('progressFill');
+      bar.classList.toggle('hidden', !show);
+      fill.style.width = (pct || 0) + '%';
+    }
+
+    function clearPhaseLog() {
+      document.getElementById('phaseLog').innerHTML = '';
+    }
+
+    function logPhase(msg) {
+      var el = document.getElementById('phaseLog');
+      var line = document.createElement('div');
+      line.className = 'phase-line';
+      line.textContent = msg;
+      el.appendChild(line);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function esc(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').substring(0, 120);
+    }
+  </script>
+</body>
+</html>
