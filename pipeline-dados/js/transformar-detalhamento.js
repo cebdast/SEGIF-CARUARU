@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Transformação: Relatório da Despesa por Natureza Consolidado
  * (Detalhamento de Despesa)
  *
@@ -73,3 +73,4 @@ function transformarDetalhamento(workbook) {
     }
   };
 }
+

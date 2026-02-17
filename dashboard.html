@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGEF | Dashboard Executivo - Caruaru</title>
+  <link rel="icon" type="image/png" href="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/portal-transparencia.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .btn-fullscreen {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: auto;
+    }
+
+    .btn-fullscreen:hover {
+      background: #f1f5f9;
+      color: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .btn-fullscreen i {
+      font-size: 14px;
+    }
+
+    /* Estilos para modo tela cheia */
+    .fullscreen-mode {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+      background: white !important;
+      padding: 20px !important;
+      margin: 0 !important;
+      max-width: none !important;
+      overflow: auto !important;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .fullscreen-mode>div:last-child {
+      flex: 1;
+      height: auto !important;
+      max-width: none !important;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .kpi-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .kpi-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e293b;
+      line-height: 1.2;
+    }
+
+    .kpi-sub {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .chart-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+    }
+
+    .chart-card h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .indicators-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .indicator-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+    }
+
+    .indicator-card .ind-value {
+      font-size: 28px;
+      font-weight: 800;
+      margin: 4px 0;
+    }
+
+    .indicator-card .ind-label {
+      font-size: 11px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .indicator-card .ind-desc {
+      font-size: 10px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    .limits-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .limit-mini {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+      text-align: center;
+    }
+
+    .limit-mini .lm-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .limit-mini .circular-progress {
+      position: relative;
+      display: inline-block;
+    }
+
+    .limit-mini .progress-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .limit-mini .progress-value {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .limit-mini .progress-label {
+      font-size: 9px;
+      color: #94a3b8;
+    }
+
+    .limit-mini .lm-status {
+      font-size: 11px;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    @media (max-width: 1024px) {
+      .charts-row {
+        grid-template-columns: 1fr;
+      }
+
+      .limits-row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .limits-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><img src="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png"
+          alt="Brasão Caruaru"></div>
+      <h1 class="sidebar-title">Secretaria da Fazenda</h1>
+      <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    <nav class="sidebar-menu" id="sidebarMenu"></nav>
+  </aside>
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <nav class="breadcrumb"><span>Visão Geral</span><i class="fas fa-chevron-right"></i><span>Dashboard
+            Executivo</span></nav>
+      </div>
+      <div class="header-actions">
+        <div class="user-menu">
+          <div class="user-avatar">AD</div>
+          <div class="user-info"><span class="user-name">Administrador</span><span class="user-role">SIGEF</span></div>
+        </div>
+        <button onclick="fazerLogout()" class="btn-logout" title="Sair do sistema">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </header>
+    <section class="page-header">
+      <div class="page-header-content">
+        <h1 class="page-title"><i class="fas fa-tachometer-alt"></i> Dashboard Executivo</h1>
+        <p class="page-subtitle">Visão consolidada das finanças municipais</p>
+      </div>
+    </section>
+    <main class="content-area">
+      <!-- Filtro Exercício -->
+      <div class="filter-section" style="margin-bottom: 20px;">
+        <div class="filter-grid" style="grid-template-columns: 200px;">
+          <div class="filter-group">
+            <label class="filter-label">Exercício</label>
+            <select id="filtroAno" class="filter-select" onchange="atualizarDashboard()"></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background: #eff6ff; color: #3b82f6;"><i class="fas fa-file-invoice-dollar"></i>
+          </div>
+          <div class="kpi-label">Receita Prevista</div>
+          <div class="kpi-value" id="kpiRecPrevista">R$ 0</div>
+          <div class="kpi-sub" id="kpiRecPrevistaSub">-</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background: #f0fdf4; color: #22c55e;"><i class="fas fa-money-bill-wave"></i>
+          </div>
+          <div class="kpi-label">Receita Arrecadada</div>
+          <div class="kpi-value" id="kpiRecArrecadada">R$ 0</div>
+          <div class="kpi-sub" id="kpiRecArrecadadaSub">-</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background: #fef3c7; color: #f59e0b;"><i class="fas fa-file-invoice"></i></div>
+          <div class="kpi-label">Despesa Empenhada</div>
+          <div class="kpi-value" id="kpiDespEmpenhada">R$ 0</div>
+          <div class="kpi-sub" id="kpiDespEmpenhadaSub">-</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background: #ede9fe; color: #8b5cf6;"><i class="fas fa-check-circle"></i></div>
+          <div class="kpi-label">Despesa Liquidada</div>
+          <div class="kpi-value" id="kpiDespLiquidada">R$ 0</div>
+          <div class="kpi-sub" id="kpiDespLiquidadaSub">-</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background: #fce7f3; color: #ec4899;"><i class="fas fa-money-check-alt"></i>
+          </div>
+          <div class="kpi-label">Despesa Paga</div>
+          <div class="kpi-value" id="kpiDespPaga">R$ 0</div>
+          <div class="kpi-sub" id="kpiDespPagaSub">-</div>
+        </div>
+        <div class="kpi-card" id="cardResultado">
+          <div class="kpi-icon" id="iconResultado" style="background: #f0fdf4; color: #22c55e;"><i
+              class="fas fa-balance-scale"></i></div>
+          <div class="kpi-label">Resultado Orçamentário</div>
+          <div class="kpi-value" id="kpiResultado">R$ 0</div>
+          <div class="kpi-sub" id="kpiResultadoSub">Receita Arrecadada - Despesa Empenhada</div>
+        </div>
+      </div>
+
+      <!-- Indicadores -->
+      <div class="indicators-row">
+        <div class="indicator-card">
+          <div class="ind-label">QDA</div>
+          <div class="ind-value" id="indQDA" style="color: #3b82f6;">-</div>
+          <div class="ind-desc">Arrecadado / Previsto</div>
+        </div>
+        <div class="indicator-card">
+          <div class="ind-label">% Liquidação</div>
+          <div class="ind-value" id="indLiquidacao" style="color: #8b5cf6;">-</div>
+          <div class="ind-desc">Liquidado / Empenhado</div>
+        </div>
+        <div class="indicator-card">
+          <div class="ind-label">% Pagamento</div>
+          <div class="ind-value" id="indPagamento" style="color: #ec4899;">-</div>
+          <div class="ind-desc">Pago / Liquidado</div>
+        </div>
+        <div class="indicator-card">
+          <div class="ind-label">% Execução</div>
+          <div class="ind-value" id="indExecucao" style="color: #f59e0b;">-</div>
+          <div class="ind-desc">Pago / Empenhado</div>
+        </div>
+      </div>
+
+      <!-- Gráficos -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <h3><i class="fas fa-chart-line" style="color: #3b82f6;"></i> Evolução Mensal - Receita vs Despesa</h3>
+          <div style="position: relative; height: 320px;"><canvas id="chartEvolucao"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3><i class="fas fa-chart-bar" style="color: #8b5cf6;"></i> Top 10 - Despesa por Função</h3>
+          <div style="position: relative; height: 320px;"><canvas id="chartFuncoes"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Semáforo de Limites -->
+      <div class="limits-row">
+        <div class="limit-mini">
+          <div class="lm-title"><i class="fas fa-users" style="color: #3b82f6;"></i> Pessoal</div>
+          <div class="circular-progress">
+            <svg width="100" height="100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" stroke-width="8" />
+              <circle id="circPessoal" cx="50" cy="50" r="40" fill="none" stroke="#2D9846" stroke-width="8"
+                stroke-dasharray="251" stroke-dashoffset="251" stroke-linecap="round" transform="rotate(-90 50 50)" />
+            </svg>
+            <div class="progress-text">
+              <div class="progress-value" id="pctPessoal">-</div>
+              <div class="progress-label">máx 54%</div>
+            </div>
+          </div>
+          <div class="lm-status" id="statusPessoal">-</div>
+        </div>
+        <div class="limit-mini">
+          <div class="lm-title"><i class="fas fa-graduation-cap" style="color: #f59e0b;"></i> Educação</div>
+          <div class="circular-progress">
+            <svg width="100" height="100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" stroke-width="8" />
+              <circle id="circEducacao" cx="50" cy="50" r="40" fill="none" stroke="#2D9846" stroke-width="8"
+                stroke-dasharray="251" stroke-dashoffset="251" stroke-linecap="round" transform="rotate(-90 50 50)" />
+            </svg>
+            <div class="progress-text">
+              <div class="progress-value" id="pctEducacao">-</div>
+              <div class="progress-label">mín 25%</div>
+            </div>
+          </div>
+          <div class="lm-status" id="statusEducacao">-</div>
+        </div>
+        <div class="limit-mini">
+          <div class="lm-title"><i class="fas fa-heartbeat" style="color: #ef4444;"></i> Saúde</div>
+          <div class="circular-progress">
+            <svg width="100" height="100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" stroke-width="8" />
+              <circle id="circSaude" cx="50" cy="50" r="40" fill="none" stroke="#2D9846" stroke-width="8"
+                stroke-dasharray="251" stroke-dashoffset="251" stroke-linecap="round" transform="rotate(-90 50 50)" />
+            </svg>
+            <div class="progress-text">
+              <div class="progress-value" id="pctSaude">-</div>
+              <div class="progress-label">mín 15%</div>
+            </div>
+          </div>
+          <div class="lm-status" id="statusSaude">-</div>
+        </div>
+      </div>
+    </main>
+    <footer class="main-footer">
+      <div class="footer-content">
+        <p class="footer-text">© 2026 Prefeitura Municipal de Caruaru - SIGEF. Todos os direitos reservados.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="js/auth-check.js"></script>
+  <script src="js/portal-transparencia.js"></script>
+  <script src="js/indexeddb-utils.js"></script>
+  <script src="js/sidebar-menu.js"></script>
+  <script>
+    // === Dados globais ===
+    let dados = {};
+    let camposDetectados = {}; // cache de nomes de campos por store
+    const MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    let charts = {};
+
+    // === Utilitários ===
+    function formatarMoeda(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
+    function fmt(v) { if (Math.abs(v) >= 1e9) return 'R$ ' + (v / 1e9).toFixed(2).replace('.', ',') + ' bi'; if (Math.abs(v) >= 1e6) return 'R$ ' + (v / 1e6).toFixed(1).replace('.', ',') + ' mi'; if (Math.abs(v) >= 1e3) return 'R$ ' + (v / 1e3).toFixed(0).replace('.', ',') + ' mil'; return formatarMoeda(v); }
+    function getValor(item, ...campos) { for (const c of campos) { const v = item[c]; if (v !== undefined && v !== null && v !== '') return v; } return null; }
+
+    // Detectar nome do campo de data em um array de registros
+    function detectarCampoData(arr) {
+      if (!arr || arr.length === 0) return 'Data';
+      const cols = Object.keys(arr[0]);
+      return cols.find(c => c.toLowerCase() === 'data') ||
+        cols.find(c => c.toLowerCase().includes('data')) ||
+        'Data';
+    }
+
+    // Detectar nome do campo de valor em um array de registros
+    function detectarCampoValor(arr) {
+      if (!arr || arr.length === 0) return 'Valor (R$)';
+      const cols = Object.keys(arr[0]);
+      return cols.find(c => c === 'Valor (R$)') ||
+        cols.find(c => c === 'Valor(R$)') ||
+        cols.find(c => c.toLowerCase().includes('valor')) ||
+        'Valor';
+    }
+
+    // Detectar campos para cada store
+    function detectarCampos(nomeStore, arr) {
+      camposDetectados[nomeStore] = {
+        data: detectarCampoData(arr),
+        valor: detectarCampoValor(arr)
+      };
+      console.log(`[Dashboard] Campos detectados para ${nomeStore}:`, camposDetectados[nomeStore],
+        arr.length > 0 ? `| Amostra: data="${arr[0][camposDetectados[nomeStore].data]}", valor="${arr[0][camposDetectados[nomeStore].valor]}"` : '| (vazio)');
+    }
+
+    // Obter data de um registro usando campo detectado
+    function getDataItem(item, nomeStore) {
+      const campo = (camposDetectados[nomeStore] || {}).data || 'Data';
+      return item[campo];
+    }
+
+    // Extrair ano - suporta DD/MM/YYYY, YYYY-MM-DD, "02 00:00:00/01/2024", serial Excel
+    function extrairAno(d) {
+      if (d === null || d === undefined || d === '' || d === '-') return null;
+      // Serial Excel (número entre 40000 e 60000)
+      if (typeof d === 'number' && d > 40000 && d < 60000) {
+        const dt = new Date((d - 25569) * 86400 * 1000);
+        return String(dt.getUTCFullYear());
+      }
+      const s = String(d).trim();
+      // Formato especial: "02 00:00:00/01/2024"
+      const matchEsp = s.match(/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/(\d{4})$/);
+      if (matchEsp) return matchEsp[1];
+      // DD/MM/YYYY
+      if (s.includes('/')) {
+        const p = s.split('/');
+        if (p.length === 3) {
+          const ultimo = p[2].substring(0, 4);
+          if (/^\d{4}$/.test(ultimo)) return ultimo;
+        }
+      }
+      // YYYY-MM-DD ou inicia com YYYY
+      const mIso = s.match(/^(\d{4})-/);
+      if (mIso) return mIso[1];
+      // Fallback: primeiro grupo de 4 dígitos
+      const m = s.match(/(\d{4})/);
+      return m ? m[1] : null;
+    }
+
+    // Extrair mês (0-based) - suporta DD/MM/YYYY, YYYY-MM-DD, "02 00:00:00/01/2024", serial Excel
+    function extrairMes(d) {
+      if (d === null || d === undefined || d === '' || d === '-') return null;
+      if (typeof d === 'number' && d > 40000 && d < 60000) {
+        const dt = new Date((d - 25569) * 86400 * 1000);
+        return dt.getUTCMonth();
+      }
+      const s = String(d).trim();
+      // Formato especial: "02 00:00:00/MM/2024"
+      const matchEsp = s.match(/^\d{2}\s+\d{2}:\d{2}:\d{2}\/(\d{2})\/\d{4}$/);
+      if (matchEsp) return parseInt(matchEsp[1]) - 1;
+      if (s.includes('/')) {
+        const p = s.split('/');
+        if (p.length >= 2) return parseInt(p[1]) - 1;
+      }
+      if (s.includes('-')) {
+        const p = s.split('-');
+        if (p.length >= 2) return parseInt(p[1]) - 1;
+      }
+      return null;
+    }
+
+    function parseValor(item, ...campos) {
+      const v = getValor(item, ...campos);
+      if (v === null) return 0;
+      if (typeof v === 'number') return v;
+      const s = String(v).replace(/[R$\s]/g, '');
+      if (s.includes(',') && s.includes('.')) return parseFloat(s.replace(/\./g, '').replace(',', '.'));
+      if (s.includes(',')) return parseFloat(s.replace(',', '.'));
+      return parseFloat(s) || 0;
+    }
+
+    // Parse valor usando campo detectado do store
+    function parseValorStore(item, nomeStore) {
+      const campo = (camposDetectados[nomeStore] || {}).valor || 'Valor (R$)';
+      return parseValor(item, campo, 'Valor (R$)', 'Valor(R$)', 'Valor', 'Valor retido', 'Valor retido (R$)');
+    }
+
+    const CIRC = 2 * Math.PI * 40;
+
+    function setCircular(id, pct, cor) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const offset = CIRC - (Math.min(Math.max(pct, 0), 100) / 100 * CIRC);
+      el.style.strokeDashoffset = offset;
+      el.style.stroke = cor;
+    }
+    function corLimite(pct, tipo) {
+      if (tipo === 'max') return pct > 90 ? '#ef4444' : pct > 70 ? '#f59e0b' : '#2D9846';
+      return pct >= 100 ? '#2D9846' : pct >= 80 ? '#f59e0b' : '#ef4444';
+    }
+
+    // === Carregar dados ===
+    async function carregarDados() {
+      const stores = ['despesas-empenhados', 'despesas-liquidados', 'despesas-pagos', 'despesas-retidos', 'despesas-a-pagar', 'receitas-previsao', 'receitas-arrecadacao', 'receitas-retencoes', 'receitas-deducoes'];
+      const keys = ['empenhados', 'liquidados', 'pagos', 'retidos', 'aPagar', 'recPrevisao', 'recArrecadacao', 'recRetencoes', 'recDeducoes'];
+      const results = await Promise.all(stores.map(s => carregarDadosPortal(s)));
+      keys.forEach((k, i) => {
+        dados[k] = results[i] || [];
+        detectarCampos(stores[i], dados[k]);
+      });
+
+      console.log('[Dashboard] Resumo de dados carregados:');
+      keys.forEach((k, i) => console.log(`  ${stores[i]}: ${dados[k].length} registros`));
+
+      // Popular filtro de anos usando campos detectados
+      const anos = new Set();
+      keys.forEach((k, i) => {
+        const campoData = camposDetectados[stores[i]]?.data || 'Data';
+        dados[k].forEach(d => {
+          const a = extrairAno(d[campoData]);
+          if (a) anos.add(a);
+        });
+      });
+      const sel = document.getElementById('filtroAno');
+      sel.innerHTML = '';
+      [...anos].sort().reverse().forEach((a, i) => sel.innerHTML += `<option value="${a}" ${i === 0 ? 'selected' : ''}>${a}</option>`);
+      if (anos.size === 0) {
+        console.warn('[Dashboard] NENHUM ano encontrado! Verificando campos disponíveis...');
+        keys.forEach((k, i) => {
+          if (dados[k].length > 0) {
+            console.warn(`  ${stores[i]}: campos = ${Object.keys(dados[k][0]).join(', ')}`);
+          }
+        });
+      }
+      atualizarDashboard();
+    }
+
+    // === Filtrar por ano (com nome do store para campo correto) ===
+    function filtrarPorAno(arr, ano, storeName) {
+      const campoData = (camposDetectados[storeName] || {}).data || 'Data';
+      return arr.filter(d => extrairAno(d[campoData]) === ano);
+    }
+
+    // === Somar valores (com nome do store para campo correto) ===
+    function somarValores(arr, storeName) {
+      const campoValor = (camposDetectados[storeName] || {}).valor || 'Valor (R$)';
+      return arr.reduce((s, d) => parseValor(d, campoValor, 'Valor (R$)', 'Valor(R$)', 'Valor', 'Valor retido', 'Valor retido (R$)') + s, 0);
+    }
+
+    // === Agrupar por mês (com nome do store para campos corretos) ===
+    function agruparPorMes(arr, storeName) {
+      const campoData = (camposDetectados[storeName] || {}).data || 'Data';
+      const campoValor = (camposDetectados[storeName] || {}).valor || 'Valor (R$)';
+      const meses = new Array(12).fill(0);
+      arr.forEach(d => {
+        const m = extrairMes(d[campoData]);
+        if (m !== null && m >= 0 && m < 12) meses[m] += parseValor(d, campoValor, 'Valor (R$)', 'Valor(R$)', 'Valor', 'Valor retido', 'Valor retido (R$)');
+      });
+      return meses;
+    }
+
+    // === Atualizar Dashboard ===
+    function atualizarDashboard() {
+      const ano = document.getElementById('filtroAno').value;
+      if (!ano) return;
+
+      // Filtrar dados usando nomes de store corretos
+      const emp = filtrarPorAno(dados.empenhados, ano, 'despesas-empenhados');
+      const liq = filtrarPorAno(dados.liquidados, ano, 'despesas-liquidados');
+      const pag = filtrarPorAno(dados.pagos, ano, 'despesas-pagos');
+      const recPrev = filtrarPorAno(dados.recPrevisao, ano, 'receitas-previsao');
+      const recArr = filtrarPorAno(dados.recArrecadacao, ano, 'receitas-arrecadacao');
+
+      console.log(`[Dashboard] Ano=${ano} | Emp=${emp.length} | Liq=${liq.length} | Pag=${pag.length} | RecPrev=${recPrev.length} | RecArr=${recArr.length}`);
+
+      // Somas usando campos detectados
+      const totalRecPrev = somarValores(recPrev, 'receitas-previsao');
+      const totalRecArr = somarValores(recArr, 'receitas-arrecadacao');
+      const totalEmp = somarValores(emp, 'despesas-empenhados');
+      const totalLiq = somarValores(liq, 'despesas-liquidados');
+      const totalPag = somarValores(pag, 'despesas-pagos');
+      const resultado = totalRecArr - totalEmp;
+
+      // KPIs
+      document.getElementById('kpiRecPrevista').textContent = fmt(totalRecPrev);
+      document.getElementById('kpiRecPrevistaSub').textContent = recPrev.length.toLocaleString() + ' registros';
+      document.getElementById('kpiRecArrecadada').textContent = fmt(totalRecArr);
+      document.getElementById('kpiRecArrecadadaSub').textContent = recArr.length.toLocaleString() + ' registros';
+      document.getElementById('kpiDespEmpenhada').textContent = fmt(totalEmp);
+      document.getElementById('kpiDespEmpenhadaSub').textContent = emp.length.toLocaleString() + ' empenhos';
+      document.getElementById('kpiDespLiquidada').textContent = fmt(totalLiq);
+      document.getElementById('kpiDespLiquidadaSub').textContent = liq.length.toLocaleString() + ' liquidações';
+      document.getElementById('kpiDespPaga').textContent = fmt(totalPag);
+      document.getElementById('kpiDespPagaSub').textContent = pag.length.toLocaleString() + ' pagamentos';
+      document.getElementById('kpiResultado').textContent = fmt(resultado);
+      document.getElementById('kpiResultadoSub').textContent = resultado >= 0 ? 'Superávit orçamentário' : 'Déficit orçamentário';
+      const iconRes = document.getElementById('iconResultado');
+      iconRes.style.background = resultado >= 0 ? '#f0fdf4' : '#fef2f2';
+      iconRes.style.color = resultado >= 0 ? '#22c55e' : '#ef4444';
+      document.getElementById('kpiResultado').style.color = resultado >= 0 ? '#16a34a' : '#dc2626';
+
+      // Indicadores
+      const qda = totalRecPrev > 0 ? (totalRecArr / totalRecPrev * 100) : 0;
+      const pctLiq = totalEmp > 0 ? (totalLiq / totalEmp * 100) : 0;
+      const pctPag = totalLiq > 0 ? (totalPag / totalLiq * 100) : 0;
+      const pctExec = totalEmp > 0 ? (totalPag / totalEmp * 100) : 0;
+      document.getElementById('indQDA').textContent = qda.toFixed(1) + '%';
+      document.getElementById('indQDA').style.color = qda >= 90 ? '#16a34a' : qda >= 70 ? '#f59e0b' : '#dc2626';
+      document.getElementById('indLiquidacao').textContent = pctLiq.toFixed(1) + '%';
+      document.getElementById('indPagamento').textContent = pctPag.toFixed(1) + '%';
+      document.getElementById('indExecucao').textContent = pctExec.toFixed(1) + '%';
+
+      // Gráfico Evolução Mensal
+      renderizarGraficoEvolucao(recArr, pag);
+      // Gráfico Funções
+      renderizarGraficoFuncoes(emp);
+      // Semáforo Limites
+      renderizarLimites(emp, totalEmp);
+    }
+
+    // === Gráfico Evolução ===
+    function renderizarGraficoEvolucao(recArr, pag) {
+      const recMes = agruparPorMes(recArr, 'receitas-arrecadacao');
+      const pagMes = agruparPorMes(pag, 'despesas-pagos');
+      if (charts.evolucao) charts.evolucao.destroy();
+      charts.evolucao = new Chart(document.getElementById('chartEvolucao'), {
+        type: 'bar',
+        data: {
+          labels: MESES,
+          datasets: [
+            { label: 'Receita Arrecadada', data: recMes, backgroundColor: 'rgba(34,197,94,0.7)', borderRadius: 4, order: 2 },
+            { label: 'Despesa Paga', data: pagMes, backgroundColor: 'rgba(59,130,246,0.7)', borderRadius: 4, order: 2 },
+            { label: 'Resultado Acumulado', data: recMes.map((v, i) => recMes.slice(0, i + 1).reduce((a, b) => a + b, 0) - pagMes.slice(0, i + 1).reduce((a, b) => a + b, 0)), type: 'line', borderColor: '#f59e0b', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, tension: 0.3, order: 1, yAxisID: 'y1' }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 16, font: { size: 11 } } } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { grid: { display: false }, ticks: { callback: v => fmt(v), font: { size: 10 } } },
+            y1: { position: 'right', display: false, grid: { drawOnChartArea: false } }
+          }
+        }
+      });
+    }
+
+    // === Gráfico Funções ===
+    function renderizarGraficoFuncoes(emp) {
+      const campoValor = (camposDetectados['despesas-empenhados'] || {}).valor || 'Valor (R$)';
+      const porFuncao = {};
+      emp.forEach(d => {
+        const f = getValor(d, 'Função', 'Funcao', 'FUNÇÃO') || 'Não informado';
+        if (!porFuncao[f]) porFuncao[f] = 0;
+        porFuncao[f] += parseValor(d, campoValor, 'Valor (R$)', 'Valor(R$)', 'Valor');
+      });
+      const top10 = Object.entries(porFuncao).sort((a, b) => b[1] - a[1]).slice(0, 10);
+      const cores = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
+      if (charts.funcoes) charts.funcoes.destroy();
+      charts.funcoes = new Chart(document.getElementById('chartFuncoes'), {
+        type: 'bar',
+        data: {
+          labels: top10.map(([f]) => f.length > 20 ? f.substring(0, 20) + '...' : f),
+          datasets: [{ label: 'Empenhado', data: top10.map(([, v]) => v), backgroundColor: cores, borderRadius: 4 }]
+        },
+        options: {
+          indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { callback: v => fmt(v), font: { size: 10 } } },
+            y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+          }
+        }
+      });
+    }
+
+    // === Semáforo de Limites ===
+    function renderizarLimites(emp, totalEmp) {
+      const campoValor = (camposDetectados['despesas-empenhados'] || {}).valor || 'Valor (R$)';
+      const porFuncao = {};
+      emp.forEach(d => {
+        const f = getValor(d, 'Função', 'Funcao', 'FUNÇÃO') || '';
+        if (!porFuncao[f]) porFuncao[f] = 0;
+        porFuncao[f] += parseValor(d, campoValor, 'Valor (R$)', 'Valor(R$)', 'Valor');
+      });
+      const base = totalEmp;
+      let totalEduc = 0, totalSaude = 0, totalPessoal = 0;
+      Object.entries(porFuncao).forEach(([f, v]) => {
+        const fl = f.toLowerCase();
+        if (fl.includes('educa')) totalEduc += v;
+        if (fl.includes('saúde') || fl.includes('saude')) totalSaude += v;
+        if (fl.includes('pessoal') || fl.includes('administra')) totalPessoal += v;
+      });
+      const pctP = base > 0 ? (totalPessoal / base * 100) : 0;
+      const pctE = base > 0 ? (totalEduc / base * 100) : 0;
+      const pctS = base > 0 ? (totalSaude / base * 100) : 0;
+
+      // Pessoal (máximo 54%)
+      document.getElementById('pctPessoal').textContent = pctP.toFixed(1) + '%';
+      setCircular('circPessoal', Math.min(pctP / 54 * 100, 100), corLimite(pctP / 54 * 100, 'max'));
+      document.getElementById('statusPessoal').innerHTML = pctP <= 54 ? '<span style="color:#2D9846;">Cumprido</span>' : '<span style="color:#ef4444;">Descumprido</span>';
+
+      // Educação (mínimo 25%)
+      document.getElementById('pctEducacao').textContent = pctE.toFixed(1) + '%';
+      setCircular('circEducacao', Math.min(pctE / 25 * 100, 100), corLimite(pctE / 25 * 100, 'min'));
+      document.getElementById('statusEducacao').innerHTML = pctE >= 25 ? '<span style="color:#2D9846;">Cumprido</span>' : '<span style="color:#ef4444;">Abaixo do mínimo</span>';
+
+      // Saúde (mínimo 15%)
+      document.getElementById('pctSaude').textContent = pctS.toFixed(1) + '%';
+      setCircular('circSaude', Math.min(pctS / 15 * 100, 100), corLimite(pctS / 15 * 100, 'min'));
+      document.getElementById('statusSaude').innerHTML = pctS >= 15 ? '<span style="color:#2D9846;">Cumprido</span>' : '<span style="color:#ef4444;">Abaixo do mínimo</span>';
+    }
+
+    // === Init ===
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof renderSidebarMenu === 'function') renderSidebarMenu('dashboard.html');
+      carregarDados();
+    });
+    // Função para alternar tela cheia
+    function toggleFullscreen(containerId) {
+      const container = document.getElementById(containerId);
+      const btn = container.querySelector('.btn-fullscreen i');
+
+      if (!container.classList.contains('fullscreen-mode')) {
+        container.classList.add('fullscreen-mode');
+        // Ajustar padding no modo tela cheia
+        container.style.padding = '20px';
+        btn.classList.remove('fa-expand');
+        btn.classList.add('fa-compress');
+
+        // Redimensionar gráfico após entrar em tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      } else {
+        container.classList.remove('fullscreen-mode');
+        container.style.padding = '';
+        btn.classList.remove('fa-compress');
+        btn.classList.add('fa-expand');
+
+        // Redimensionar gráfico após sair de tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      }
+
+      // Fechar tela cheia com ESC
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && container.classList.contains('fullscreen-mode')) {
+          toggleFullscreen(containerId);
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>

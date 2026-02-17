@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Transformação: Empenhos Emitidos
  * Port de Empenhos emitidos.py
  *
@@ -132,7 +132,7 @@ function transformarEmitidos(workbook) {
   const linhasOriginal = matrix.length - 1;
 
   // Pre-Step: Detectar Unidade gestora ANTES de qualquer remoção de linhas
-  // Busca "Unidade gestora:" em qualquer coluna → nome da unidade em outra célula da mesma linha
+  // Busca "Unidade gestora:" em qualquer coluna â†’ nome da unidade em outra célula da mesma linha
   {
     let unidadeAtual = null;
     const reUnidade = /^unidade\s*gestora/i;
@@ -182,19 +182,19 @@ function transformarEmitidos(workbook) {
   const credorCol = ct.idx('Credor/Fornecedor');
   const fonteCol = ct.idx('Fonte de recursos');
 
-  // 2) Credor/Fornecedor vazio → limpar Valor (R$)
+  // 2) Credor/Fornecedor vazio â†’ limpar Valor (R$)
   //    (linhas sem credor são linhas de texto "Objeto", não dados reais)
   for (let r = 1; r < matrix.length; r++) {
     if (isEmptyCell(safeGet(matrix, r, credorCol))) safeSet(matrix, r, valorCol, null);
   }
 
-  // 3) Data contém "Objeto:" → limpar
+  // 3) Data contém "Objeto:" â†’ limpar
   for (let r = 1; r < matrix.length; r++) {
     const v = safeGet(matrix, r, dataCol);
     if (typeof v === 'string' && v.includes('Objeto:')) safeSet(matrix, r, dataCol, null);
   }
 
-  // 4) Espécie vazia → mover Nr emp. para coluna-alvo (última+1)
+  // 4) Espécie vazia â†’ mover Nr emp. para coluna-alvo (última+1)
   let maxC = 0;
   for (let i = 0; i < matrix.length; i++) {
     const len = (matrix[i] || []).length;
@@ -250,7 +250,7 @@ function transformarEmitidos(workbook) {
     matrix[r][dataFmt] = excelDateToString(matrix[r][dataFmt]);
   }
 
-  // 12) Nr emp. → adicionar /ANO extraído da coluna Data (ex: 235 → 235/2025)
+  // 12) Nr emp. â†’ adicionar /ANO extraído da coluna Data (ex: 235 â†’ 235/2025)
   const nrEmpIdx = ct.idx('Nr emp.');
   console.log('[Emitidos] Nr emp. col=' + nrEmpIdx + ', Data col=' + dataFmt +
     ', amostra Nr emp.=[' + safeGet(matrix, 1, nrEmpIdx) + '], Data=[' + safeGet(matrix, 1, dataFmt) + ']');
@@ -303,3 +303,5 @@ function transformarEmitidos(workbook) {
     }
   };
 }
+
+

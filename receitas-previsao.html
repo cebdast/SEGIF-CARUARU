@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +9,57 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="css/portal-transparencia.css">
+  <script src="js/auth-check.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .btn-fullscreen {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-fullscreen:hover {
+      background: #f1f5f9;
+      color: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .btn-fullscreen i {
+      font-size: 14px;
+    }
+
+    /* Estilos para modo tela cheia */
+    .fullscreen-mode {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+      background: white !important;
+      padding: 20px !important;
+      margin: 0 !important;
+      max-width: none !important;
+      overflow: auto !important;
+    }
+
+    .fullscreen-mode>div:last-child {
+      height: calc(100vh - 100px) !important;
+      max-width: none !important;
+    }
+  </style>
 </head>
+
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -22,6 +70,16 @@
       <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i></button>
     </div>
     <nav class="sidebar-menu">
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)"><i class="fas fa-tachometer-alt"></i><span>Visão
+            Geral</span><i class="fas fa-chevron-right section-arrow"></i></div>
+        <ul>
+          <li class="menu-item"><a href="dashboard.html" class="menu-link"><i class="fas fa-home"></i><span>Dashboard
+                Executivo</span></a></li>
+          <li class="menu-item"><a href="resultado-orcamentario.html" class="menu-link"><i
+                class="fas fa-chart-pie"></i><span>Resultado Orçamentário</span></a></li>
+        </ul>
+      </div>
       <div class="menu-section expanded">
         <div class="menu-section-title" onclick="toggleSection(this)">
           <i class="fas fa-hand-holding-usd"></i>
@@ -29,12 +87,18 @@
           <i class="fas fa-chevron-right section-arrow"></i>
         </div>
         <ul>
-          <li class="menu-item"><a href="receitas-previsao.html" class="menu-link active"><i class="fas fa-chart-line"></i><span>Previsão</span></a></li>
-          <li class="menu-item"><a href="receitas-arrecadacao.html" class="menu-link"><i class="fas fa-money-bill-wave"></i><span>Arrecadação</span></a></li>
-          <li class="menu-item"><a href="receitas-retencoes.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retenções</span></a></li>
-          <li class="menu-item"><a href="receitas-deducoes.html" class="menu-link"><i class="fas fa-minus-circle"></i><span>Deduções</span></a></li>
-          <li class="menu-item"><a href="receitas-gerencial.html" class="menu-link"><i class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
-          <li class="menu-item"><a href="receitas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+          <li class="menu-item"><a href="receitas-previsao.html" class="menu-link active"><i
+                class="fas fa-chart-line"></i><span>Previsão</span></a></li>
+          <li class="menu-item"><a href="receitas-arrecadacao.html" class="menu-link"><i
+                class="fas fa-money-bill-wave"></i><span>Arrecadação</span></a></li>
+          <li class="menu-item"><a href="receitas-retencoes.html" class="menu-link"><i
+                class="fas fa-hand-holding-usd"></i><span>Retenções</span></a></li>
+          <li class="menu-item"><a href="receitas-deducoes.html" class="menu-link"><i
+                class="fas fa-minus-circle"></i><span>Deduções</span></a></li>
+          <li class="menu-item"><a href="receitas-gerencial.html" class="menu-link"><i
+                class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="receitas-comparativos.html" class="menu-link"><i
+                class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
         </ul>
       </div>
       <div class="menu-section">
@@ -44,13 +108,43 @@
           <i class="fas fa-chevron-right section-arrow"></i>
         </div>
         <ul>
-          <li class="menu-item"><a href="despesas-empenhados.html" class="menu-link"><i class="fas fa-file-invoice"></i><span>Empenhados</span></a></li>
-          <li class="menu-item"><a href="despesas-liquidados.html" class="menu-link"><i class="fas fa-check-circle"></i><span>Liquidados</span></a></li>
-          <li class="menu-item"><a href="despesas-retidos.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retidos</span></a></li>
-          <li class="menu-item"><a href="despesas-pagos.html" class="menu-link"><i class="fas fa-money-check-alt"></i><span>Pagos</span></a></li>
-          <li class="menu-item"><a href="despesas-a-pagar.html" class="menu-link"><i class="fas fa-clock"></i><span>A Pagar</span></a></li>
-          <li class="menu-item"><a href="despesas-gerencial.html" class="menu-link"><i class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
-          <li class="menu-item"><a href="despesas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+          <li class="menu-item"><a href="despesas-empenhados.html" class="menu-link"><i
+                class="fas fa-file-invoice"></i><span>Empenhados</span></a></li>
+          <li class="menu-item"><a href="despesas-liquidados.html" class="menu-link"><i
+                class="fas fa-check-circle"></i><span>Liquidados</span></a></li>
+          <li class="menu-item"><a href="despesas-retidos.html" class="menu-link"><i
+                class="fas fa-hand-holding-usd"></i><span>Retidos</span></a></li>
+          <li class="menu-item"><a href="despesas-pagos.html" class="menu-link"><i
+                class="fas fa-money-check-alt"></i><span>Pagos</span></a></li>
+          <li class="menu-item"><a href="despesas-a-pagar.html" class="menu-link"><i class="fas fa-clock"></i><span>A
+                Pagar</span></a></li>
+          <li class="menu-item"><a href="despesas-gerencial.html" class="menu-link"><i
+                class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="despesas-comparativos.html" class="menu-link"><i
+                class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)">
+          <i class="fas fa-search-dollar"></i>
+          <span>Análises</span>
+          <i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="despesas-analise.html" class="menu-link"><i
+                class="fas fa-chart-pie"></i><span>Análise Financeira</span></a></li>
+          <li class="menu-item"><a href="despesas-execucao.html" class="menu-link"><i
+                class="fas fa-chart-bar"></i><span>Execução Orçamentária</span></a></li>
+          <li class="menu-item"><a href="despesas-fontes.html" class="menu-link"><i
+                class="fas fa-layer-group"></i><span>Fontes de Recursos</span></a></li>
+          <li class="menu-item"><a href="despesas-credores.html" class="menu-link"><i
+                class="fas fa-users"></i><span>Credores</span></a></li>
+          <li class="menu-item"><a href="despesas-natureza.html" class="menu-link"><i
+                class="fas fa-sitemap"></i><span>Natureza da Despesa</span></a></li>
+          <li class="menu-item"><a href="limites-legais.html" class="menu-link"><i
+                class="fas fa-gavel"></i><span>Limites Legais</span></a></li>
+          <li class="menu-item"><a href="despesas-alertas.html" class="menu-link"><i
+                class="fas fa-exclamation-triangle"></i><span>Alertas</span></a></li>
         </ul>
       </div>
       <div class="menu-section">
@@ -60,8 +154,12 @@
           <i class="fas fa-chevron-right section-arrow"></i>
         </div>
         <ul>
-          <li class="menu-item"><a href="banco-importar-dados.html" class="menu-link"><i class="fas fa-file-import"></i><span>Importar Dados</span></a></li>
-          <li class="menu-item"><a href="banco-historico.html" class="menu-link"><i class="fas fa-history"></i><span>Histórico</span></a></li>
+          <li class="menu-item"><a href="banco-importar-dados.html" class="menu-link"><i
+                class="fas fa-file-import"></i><span>Importar Dados</span></a></li>
+          <li class="menu-item"><a href="banco-historico.html" class="menu-link"><i
+                class="fas fa-history"></i><span>Histórico</span></a></li>
+          <li class="menu-item"><a href="admin-usuarios.html" class="menu-link"><i
+                class="fas fa-user-shield"></i><span>Usuários</span></a></li>
         </ul>
       </div>
     </nav>
@@ -97,7 +195,8 @@
           <div class="stat-content">
             <div class="stat-label">Total Previsto</div>
             <div class="stat-value" id="kpiTotalPrevisto" title="Carregando...">R$ 0,00</div>
-            <div class="stat-change positive" id="kpiTotalVariacao"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>
+            <div class="stat-change positive" id="kpiTotalVariacao"><i class="fas fa-spinner fa-spin"></i> Carregando...
+            </div>
           </div>
         </div>
         <div class="stat-card">
@@ -134,29 +233,55 @@
           </div>
           <div class="filter-group">
             <label class="filter-label">Fonte de Recurso</label>
-            <select class="filter-select" id="filtroFonte" onchange="aplicarFiltros()"><option value="">Todas</option></select>
+            <select class="filter-select" id="filtroFonte" onchange="aplicarFiltros()">
+              <option value="">Todas</option>
+            </select>
           </div>
           <div class="filter-group">
-            <label class="filter-label">Buscar Receita</label>
-            <input type="text" class="filter-input" id="filtroBusca" placeholder="Código ou descrição..." onkeyup="aplicarFiltros()">
+            <label class="filter-label">Conta Contábil</label>
+            <select class="filter-select" id="filtroConta" onchange="aplicarFiltros()">
+              <option value="">Todas</option>
+            </select>
           </div>
-          <div class="filter-group" style="display: flex; align-items: flex-end;">
-            <button class="btn btn-primary" onclick="aplicarFiltros()"><i class="fas fa-search"></i> Buscar</button>
+          <div class="filter-group">
+            <label class="filter-label">Histórico</label>
+            <select class="filter-select" id="filtroHistorico" onchange="aplicarFiltros()">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Receita</label>
+            <select class="filter-select" id="filtroReceita" onchange="aplicarFiltros()">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Sequência</label>
+            <input type="text" class="filter-input" id="filtroSequencia" placeholder="Nº Sequência..."
+              oninput="debounceFiltro()">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Complemento</label>
+            <input type="text" class="filter-input" id="filtroComplemento" placeholder="Complemento..."
+              oninput="debounceFiltro()">
           </div>
         </div>
       </div>
       <!-- Mensagem quando não há dados -->
-      <div id="semDadosMsg" style="display: none; text-align: center; padding: 60px 20px; background: #f8fafc; border-radius: 12px; margin-bottom: 24px;">
+      <div id="semDadosMsg"
+        style="display: none; text-align: center; padding: 60px 20px; background: #f8fafc; border-radius: 12px; margin-bottom: 24px;">
         <i class="fas fa-database" style="font-size: 48px; color: #cbd5e1; margin-bottom: 16px;"></i>
         <h3 style="color: #64748b; margin-bottom: 8px;">Nenhum dado encontrado</h3>
         <p style="color: #94a3b8; margin-bottom: 16px;">Não há dados de previsão orçamentária importados no sistema.</p>
-        <a href="banco-importar-dados.html" class="btn btn-primary"><i class="fas fa-file-import"></i> Importar Dados</a>
+        <a href="banco-importar-dados.html" class="btn btn-primary"><i class="fas fa-file-import"></i> Importar
+          Dados</a>
       </div>
-      
+
       <div class="card" id="cardDemonstrativo">
         <div class="card-header">
           <h2 class="card-title"><i class="fas fa-table"></i> Demonstrativo de Previsão Orçamentária</h2>
-          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i class="fas fa-sync-alt"></i> Carregando...</span></div>
+          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i
+                class="fas fa-sync-alt"></i> Carregando...</span></div>
         </div>
         <div class="card-body">
           <div class="tabs">
@@ -176,13 +301,31 @@
                   </tr>
                 </thead>
                 <tbody id="corpoResumo">
-                  <tr><td colspan="4" style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Carregando dados...</td></tr>
+                  <tr>
+                    <td colspan="4" style="text-align:center; padding:40px; color:#64748b;"><i
+                        class="fas fa-spinner fa-spin"></i> Carregando dados...</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
           </div>
           <div class="tab-content" id="detalhado">
-            <div class="table-container">
+            <div
+              style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-size: 12px; color: #64748b;">Exibir</label>
+                <select id="registrosPorPagina" class="filter-select"
+                  style="min-width: 70px; padding: 4px 8px; font-size: 12px;" onchange="mudarPagina(1)">
+                  <option value="25">25</option>
+                  <option value="50" selected>50</option>
+                  <option value="100">100</option>
+                  <option value="250">250</option>
+                </select>
+                <span style="font-size: 12px; color: #64748b;">registros</span>
+              </div>
+              <div id="paginacaoInfo" style="font-size: 12px; color: #64748b;"></div>
+            </div>
+            <div class="table-container" style="overflow-x: auto;">
               <table class="data-table" id="tabelaDetalhado">
                 <thead>
                   <tr>
@@ -190,33 +333,54 @@
                     <th>Código</th>
                     <th>Descrição da Receita</th>
                     <th>Fonte de Recurso</th>
-                    <th>Valor Previsto</th>
+                    <th style="text-align: right;">Valor Previsto</th>
                   </tr>
                 </thead>
                 <tbody id="corpoDetalhado">
-                  <tr><td colspan="5" style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Carregando dados...</td></tr>
+                  <tr>
+                    <td colspan="5" style="text-align:center; padding:40px; color:#64748b;"><i
+                        class="fas fa-spinner fa-spin"></i> Carregando dados...</td>
+                  </tr>
                 </tbody>
               </table>
+            </div>
+            <div id="paginacaoControles"
+              style="display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 12px; flex-wrap: wrap;">
             </div>
           </div>
           <div class="tab-content" id="grafico">
             <div style="display: grid; gap: 30px;">
-              <div style="background: #f8fafc; border-radius: 12px; padding: 24px;">
-                <h3 style="font-size: 14px; color: #64748b; margin-bottom: 16px;"><i class="fas fa-chart-pie" style="color: #3b82f6;"></i> Previsão por Fonte de Recurso</h3>
+              <div id="chartFonteContainer" style="background: #f8fafc; border-radius: 12px; padding: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                  <h3 style="font-size: 14px; color: #64748b; margin: 0;"><i class="fas fa-chart-pie"
+                      style="color: #3b82f6;"></i> Previsão por Fonte de Recurso</h3>
+                  <button onclick="toggleFullscreen('chartFonteContainer')" class="btn-fullscreen" title="Tela cheia">
+                    <i class="fas fa-expand"></i>
+                  </button>
+                </div>
                 <div style="max-width: 500px; margin: 0 auto;">
                   <canvas id="chartFonte"></canvas>
                 </div>
               </div>
-              <div style="background: #f8fafc; border-radius: 12px; padding: 24px;">
-                <h3 style="font-size: 14px; color: #64748b; margin-bottom: 16px;"><i class="fas fa-chart-bar" style="color: #3b82f6;"></i> Top 10 Receitas Previstas</h3>
-                <canvas id="chartTop10" style="max-height: 400px;"></canvas>
+              <div id="chartTop10Container" style="background: #f8fafc; border-radius: 12px; padding: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                  <h3 style="font-size: 14px; color: #64748b; margin: 0;"><i class="fas fa-chart-bar"
+                      style="color: #3b82f6;"></i> Top 10 Receitas Previstas</h3>
+                  <button onclick="toggleFullscreen('chartTop10Container')" class="btn-fullscreen" title="Tela cheia">
+                    <i class="fas fa-expand"></i>
+                  </button>
+                </div>
+                <div style="height: 400px;">
+                  <canvas id="chartTop10"></canvas>
+                </div>
               </div>
             </div>
           </div>
           <div class="export-section">
-            <button class="btn btn-secondary btn-sm" onclick="exportarCSV()"><i class="fas fa-download"></i> CSV</button>
-            <button class="btn btn-secondary btn-sm" onclick="exportarPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
-            <button class="btn btn-secondary btn-sm" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosPDF()"><i class="fas fa-file-pdf"></i>
+              PDF</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosExcel()"><i class="fas fa-file-excel"></i>
+              Excel</button>
           </div>
         </div>
       </div>
@@ -228,6 +392,10 @@
     </footer>
   </div>
   <script src="js/portal-transparencia.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="js/exportar-dados.js"></script>
   <script>
     // =====================================================
     // IndexedDB - Acesso aos dados
@@ -240,6 +408,7 @@
     let dadosFiltrados = [];
     let chartFonte = null;
     let chartTop10 = null;
+    let paginaAtual = 1;
 
     // Inicializar IndexedDB
     function initDB() {
@@ -277,16 +446,17 @@
     // Identificar colunas dinamicamente
     function identificarColunas(dados) {
       if (!dados || dados.length === 0) return {};
-      const primeiroRegistro = dados[0];
-      const colunas = Object.keys(primeiroRegistro);
-      
+      const colunas = Object.keys(dados[0]);
+
       return {
         data: colunas.find(c => c.toLowerCase().includes('data')) || 'Data',
         receita: colunas.find(c => c.toLowerCase().includes('receita')) || 'Receita',
-        historico: colunas.find(c => c.toLowerCase().includes('histor')) || 'Histórico',
         valor: colunas.find(c => c.toLowerCase().includes('valor')) || 'Valor',
         fonte: colunas.find(c => c.toLowerCase().includes('fonte')) || 'Fonte de recurso',
-        sequencia: colunas.find(c => c.toLowerCase().includes('seq')) || 'Sequência'
+        conta: colunas.find(c => c.toLowerCase().includes('conta') || c.toLowerCase().includes('contabil')) || 'Conta contábil',
+        historico: colunas.find(c => c.toLowerCase().includes('histor')) || 'Histórico',
+        sequencia: colunas.find(c => c.toLowerCase().includes('seq')) || 'Sequência',
+        complemento: colunas.find(c => c.toLowerCase().includes('complem')) || 'Complemento'
       };
     }
 
@@ -299,7 +469,7 @@
     // Formatar data para DD/MM/AAAA
     function formatarData(dataStr) {
       if (!dataStr || dataStr === '-') return '-';
-      
+
       // Se for objeto Date
       if (dataStr instanceof Date) {
         const dia = String(dataStr.getDate()).padStart(2, '0');
@@ -307,7 +477,7 @@
         const ano = dataStr.getFullYear();
         return `${dia}/${mes}/${ano}`;
       }
-      
+
       // Se for número (serial do Excel), converter
       if (typeof dataStr === 'number' && dataStr > 40000 && dataStr < 60000) {
         const data = new Date((dataStr - 25569) * 86400 * 1000);
@@ -316,18 +486,18 @@
         const ano = data.getUTCFullYear();
         return `${dia}/${mes}/${ano}`;
       }
-      
+
       const str = String(dataStr).trim();
-      
+
       // Já está no formato DD/MM/AAAA
       if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) return str;
-      
+
       // Formato "DD 00:00:00/MM/YYYY" ou similar com hora no meio
       if (/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/\d{4}$/.test(str)) {
         const match = str.match(/^(\d{2})\s+\d{2}:\d{2}:\d{2}\/(\d{2})\/(\d{4})$/);
         if (match) return `${match[1]}/${match[2]}/${match[3]}`;
       }
-      
+
       // Se for string numérica (serial do Excel como texto)
       const numerico = parseFloat(str);
       if (!isNaN(numerico) && numerico > 40000 && numerico < 60000) {
@@ -337,7 +507,7 @@
         const ano = data.getUTCFullYear();
         return `${dia}/${mes}/${ano}`;
       }
-      
+
       // Formato ISO: YYYY-MM-DD ou YYYY-MM-DD HH:MM:SS
       if (str.includes('-')) {
         const partes = str.split('T')[0].split(' ')[0].split('-');
@@ -345,7 +515,7 @@
           return `${partes[2]}/${partes[1]}/${partes[0]}`;
         }
       }
-      
+
       // Tentar criar Date a partir da string
       try {
         const data = new Date(str);
@@ -355,32 +525,68 @@
           const ano = data.getFullYear();
           return `${dia}/${mes}/${ano}`;
         }
-      } catch (e) {}
-      
+      } catch (e) { }
+
       return str;
+    }
+
+    // Extrair ano de data DD/MM/YYYY, YYYY-MM-DD ou serial Excel
+    function extrairAno(dt) {
+      if (!dt) return null;
+      const num = typeof dt === 'number' ? dt : parseFloat(String(dt).trim());
+      if (!isNaN(num) && num > 40000 && num < 60000) {
+        const d = new Date((num - 25569) * 86400 * 1000);
+        return String(d.getUTCFullYear());
+      }
+      const s = String(dt).trim();
+      if (s.includes('/')) { const p = s.split('/'); if (p.length === 3 && p[2].length >= 4) { const u = p[2].substring(0, 4); if (/^\d{4}$/.test(u)) return u; } }
+      if (s.includes('-')) { const m = s.match(/^(\d{4})-/); if (m) return m[1]; }
+      const me = s.match(/\/(\d{4})$/); if (me) return me[1];
+      return null;
+    }
+    // Extrair mês (01-12) de data DD/MM/YYYY, YYYY-MM-DD ou serial Excel
+    function extrairMes(dt) {
+      if (!dt) return null;
+      const num = typeof dt === 'number' ? dt : parseFloat(String(dt).trim());
+      if (!isNaN(num) && num > 40000 && num < 60000) {
+        const d = new Date((num - 25569) * 86400 * 1000);
+        return String(d.getUTCMonth() + 1).padStart(2, '0');
+      }
+      const s = String(dt).trim();
+      if (s.includes('/')) { const p = s.split('/'); if (p.length >= 2) return p[1].padStart(2, '0'); }
+      if (s.includes('-')) { const p = s.split('-'); if (p.length >= 2) return p[1].padStart(2, '0'); }
+      return null;
     }
 
     // Popular filtros
     function popularFiltros() {
       const cols = identificarColunas(dadosOriginais);
-      
+
       // Anos
-      const anos = [...new Set(dadosOriginais.map(d => {
-        const data = d[cols.data];
-        if (data) {
-          const ano = String(data).substring(0, 4);
-          return ano.match(/^\d{4}$/) ? ano : null;
-        }
-        return null;
-      }).filter(Boolean))].sort().reverse();
-      
+      const anos = [...new Set(dadosOriginais.map(d => extrairAno(d[cols.data])).filter(a => a && a.length === 4))].sort().reverse();
+
       const selectAno = document.getElementById('filtroAno');
       selectAno.innerHTML = '<option value="">Todos</option>' + anos.map(a => `<option value="${a}">${a}</option>`).join('');
-      
+
       // Fontes
       const fontes = [...new Set(dadosOriginais.map(d => d[cols.fonte]).filter(Boolean))].sort();
       const selectFonte = document.getElementById('filtroFonte');
       selectFonte.innerHTML = '<option value="">Todas</option>' + fontes.map(f => `<option value="${f}">${String(f).substring(0, 60)}...</option>`).join('');
+
+      // Contas
+      const contas = [...new Set(dadosOriginais.map(d => d[cols.conta]).filter(Boolean))].sort();
+      document.getElementById('filtroConta').innerHTML = '<option value="">Todas</option>' + contas.map(c => `<option value="${c}">${String(c).substring(0, 60)}...</option>`).join('');
+
+      // Histórico
+      const historicos = [...new Set(dadosOriginais.map(d => d[cols.historico]).filter(Boolean))].sort();
+      document.getElementById('filtroHistorico').innerHTML = '<option value="">Todas</option>' + historicos.map(h => `<option value="${h}">${String(h).substring(0, 60)}...</option>`).join('');
+
+      // Receitas
+      const receitas = [...new Set(dadosOriginais.map(d => {
+        const val = d[cols.receita];
+        return val ? String(val).trim() : null;
+      }).filter(Boolean))].sort();
+      document.getElementById('filtroReceita').innerHTML = '<option value="">Todas</option>' + receitas.map(r => `<option value="${r}">${r.substring(0, 80)}...</option>`).join('');
     }
 
     // Aplicar filtros
@@ -388,50 +594,80 @@
       const cols = identificarColunas(dadosOriginais);
       const anoSel = document.getElementById('filtroAno').value;
       const fonteSel = document.getElementById('filtroFonte').value;
-      const busca = document.getElementById('filtroBusca').value.toLowerCase();
-      
+      const contaSel = document.getElementById('filtroConta').value;
+      const histSel = document.getElementById('filtroHistorico').value;
+
+      const receitaSel = document.getElementById('filtroReceita').value;
+      const sequenciaBusca = document.getElementById('filtroSequencia').value.toLowerCase();
+      const complementoBusca = document.getElementById('filtroComplemento').value.toLowerCase();
+
       dadosFiltrados = dadosOriginais.filter(d => {
         // Filtro por ano
         if (anoSel) {
-          const data = String(d[cols.data] || '');
-          if (!data.startsWith(anoSel)) return false;
+          if (extrairAno(d[cols.data]) !== anoSel) return false;
         }
         // Filtro por fonte
         if (fonteSel && d[cols.fonte] !== fonteSel) return false;
-        // Filtro por busca
-        if (busca) {
-          const receita = String(d[cols.receita] || '').toLowerCase();
-          if (!receita.includes(busca)) return false;
+        // Filtro por conta
+        if (contaSel && d[cols.conta] !== contaSel) return false;
+        // Filtro por histórico
+        if (histSel && d[cols.historico] !== histSel) return false;
+
+        // Filtro Receita (Select - Exato)
+        if (receitaSel) {
+          const val = d[cols.receita] ? String(d[cols.receita]).trim() : '';
+          if (val !== receitaSel) return false;
         }
+
+        // Filtro Sequência (Input - Contains)
+        if (sequenciaBusca) {
+          const val = d[cols.sequencia] ? String(d[cols.sequencia]).toLowerCase() : '';
+          if (!val.includes(sequenciaBusca)) return false;
+        }
+
+        // Filtro Complemento (Input - Contains)
+        if (complementoBusca) {
+          const val = d[cols.complemento] ? String(d[cols.complemento]).toLowerCase() : '';
+          if (!val.includes(complementoBusca)) return false;
+        }
+
         return true;
       });
-      
+
+      paginaAtual = 1;
       atualizarKPIs();
       renderizarResumo();
       renderizarDetalhado();
-      atualizarGraficos();
+
+      const tabGrafico = document.getElementById('grafico');
+      if (tabGrafico && tabGrafico.classList.contains('active')) {
+        atualizarGraficos();
+        graficoPendente = false;
+      } else {
+        graficoPendente = true;
+      }
     }
 
     // Atualizar KPIs
     function atualizarKPIs() {
       const cols = identificarColunas(dadosFiltrados);
-      
+
       // Total previsto
       const total = dadosFiltrados.reduce((acc, d) => acc + (parseFloat(d[cols.valor]) || 0), 0);
       setKpiValue('kpiTotalPrevisto', total);
       document.getElementById('kpiTotalVariacao').innerHTML = '<i class="fas fa-check"></i> Previsão orçamentária';
-      
+
       // Quantidade de registros
       const kpiQtdEl = document.getElementById('kpiQtdRegistros');
       kpiQtdEl.textContent = dadosFiltrados.length.toLocaleString();
       kpiQtdEl.title = dadosFiltrados.length.toLocaleString() + ' registros';
-      
+
       // Fontes únicas
       const fontesUnicas = [...new Set(dadosFiltrados.map(d => d[cols.fonte]).filter(Boolean))].length;
       const kpiFontesEl = document.getElementById('kpiFontes');
       kpiFontesEl.textContent = fontesUnicas;
       kpiFontesEl.title = fontesUnicas + ' fontes diferentes';
-      
+
       // Tipos de receita únicos
       const tiposUnicos = [...new Set(dadosFiltrados.map(d => {
         const receita = String(d[cols.receita] || '');
@@ -446,16 +682,16 @@
     function renderizarResumo() {
       const cols = identificarColunas(dadosFiltrados);
       const corpo = document.getElementById('corpoResumo');
-      
+
       if (dadosFiltrados.length === 0) {
         corpo.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-inbox"></i> Nenhum dado encontrado. Importe a planilha de receitas.</td></tr>';
         return;
       }
-      
+
       // Agrupar por fonte
       const grupos = {};
       let totalGeral = 0;
-      
+
       dadosFiltrados.forEach(d => {
         const fonte = d[cols.fonte] || 'Sem fonte';
         const valor = parseFloat(d[cols.valor]) || 0;
@@ -464,10 +700,10 @@
         grupos[fonte].valor += valor;
         totalGeral += valor;
       });
-      
+
       // Ordenar por valor
       const fontesOrdenadas = Object.entries(grupos).sort((a, b) => b[1].valor - a[1].valor);
-      
+
       let html = fontesOrdenadas.map(([fonte, dados]) => {
         const percentual = totalGeral > 0 ? ((dados.valor / totalGeral) * 100).toFixed(2) : 0;
         return `
@@ -486,7 +722,7 @@
           </tr>
         `;
       }).join('');
-      
+
       // Linha total
       html += `
         <tr class="total-row">
@@ -496,57 +732,81 @@
           <td><strong>100%</strong></td>
         </tr>
       `;
-      
+
       corpo.innerHTML = html;
     }
 
-    // Renderizar detalhado
+    // Renderizar detalhado com paginação
     function renderizarDetalhado() {
       const cols = identificarColunas(dadosFiltrados);
       const corpo = document.getElementById('corpoDetalhado');
-      
+
       if (dadosFiltrados.length === 0) {
         corpo.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-inbox"></i> Nenhum dado encontrado.</td></tr>';
+        document.getElementById('paginacaoInfo').textContent = '';
+        document.getElementById('paginacaoControles').innerHTML = '';
         return;
       }
-      
-      // Limitar a 100 registros para performance
-      const dadosExibir = dadosFiltrados.slice(0, 100);
-      
-      let html = dadosExibir.map(d => {
+
+      const porPagina = parseInt(document.getElementById('registrosPorPagina').value) || 50;
+      const totalPaginas = Math.ceil(dadosFiltrados.length / porPagina);
+      if (paginaAtual > totalPaginas) paginaAtual = totalPaginas;
+      if (paginaAtual < 1) paginaAtual = 1;
+      const inicio = (paginaAtual - 1) * porPagina;
+      const fim = Math.min(inicio + porPagina, dadosFiltrados.length);
+      const dadosPagina = dadosFiltrados.slice(inicio, fim);
+
+      let totalPag = 0;
+      let html = dadosPagina.map(d => {
         const receita = String(d[cols.receita] || '');
         const partes = receita.split(' - ');
         const codigo = partes[0] || '-';
         const descricao = partes.slice(1).join(' - ') || receita;
-        
-        return `
-          <tr>
-            <td>${formatarData(d[cols.data])}</td>
-            <td><strong>${codigo}</strong></td>
-            <td>${descricao.substring(0, 60)}${descricao.length > 60 ? '...' : ''}</td>
-            <td>${String(d[cols.fonte] || '-').substring(0, 40)}...</td>
-            <td class="value">${formatarMoeda(d[cols.valor])}</td>
-          </tr>
-        `;
+        const valor = parseFloat(d[cols.valor]) || 0;
+        totalPag += valor;
+        return `<tr><td>${formatarData(d[cols.data])}</td><td><strong>${codigo}</strong></td><td>${descricao.substring(0, 60)}${descricao.length > 60 ? '...' : ''}</td><td>${String(d[cols.fonte] || '-').substring(0, 40)}</td><td class="value">${formatarMoeda(valor)}</td></tr>`;
       }).join('');
-      
-      if (dadosFiltrados.length > 100) {
-        html += `<tr><td colspan="5" style="text-align:center; padding:10px; color:#64748b;">Exibindo 100 de ${dadosFiltrados.length.toLocaleString()} registros</td></tr>`;
-      }
-      
+
       corpo.innerHTML = html;
+
+      // Info de paginação
+      document.getElementById('paginacaoInfo').innerHTML = `Exibindo <strong>${inicio + 1}-${fim}</strong> de <strong>${dadosFiltrados.length.toLocaleString()}</strong> registros | Total página: <strong>${formatarMoeda(totalPag)}</strong>`;
+      renderizarControlesPaginacao(totalPaginas);
+    }
+
+    function renderizarControlesPaginacao(totalPaginas) {
+      const container = document.getElementById('paginacaoControles');
+      if (totalPaginas <= 1) { container.innerHTML = ''; return; }
+      let html = '';
+      html += `<button class="btn btn-secondary btn-sm" ${paginaAtual === 1 ? 'disabled' : ''} onclick="mudarPagina(1)" title="Primeira"><i class="fas fa-angle-double-left"></i></button>`;
+      html += `<button class="btn btn-secondary btn-sm" ${paginaAtual === 1 ? 'disabled' : ''} onclick="mudarPagina(${paginaAtual - 1})" title="Anterior"><i class="fas fa-angle-left"></i></button>`;
+      let startPage = Math.max(1, paginaAtual - 2);
+      let endPage = Math.min(totalPaginas, startPage + 4);
+      if (endPage - startPage < 4) startPage = Math.max(1, endPage - 4);
+      for (let i = startPage; i <= endPage; i++) {
+        html += `<button class="btn ${i === paginaAtual ? 'btn-primary' : 'btn-secondary'} btn-sm" onclick="mudarPagina(${i})" style="min-width:32px;">${i}</button>`;
+      }
+      html += `<button class="btn btn-secondary btn-sm" ${paginaAtual === totalPaginas ? 'disabled' : ''} onclick="mudarPagina(${paginaAtual + 1})" title="Próxima"><i class="fas fa-angle-right"></i></button>`;
+      html += `<button class="btn btn-secondary btn-sm" ${paginaAtual === totalPaginas ? 'disabled' : ''} onclick="mudarPagina(${totalPaginas})" title="Última"><i class="fas fa-angle-double-right"></i></button>`;
+      html += `<span style="margin-left:12px;font-size:12px;color:#64748b;">Ir para:</span><input type="number" min="1" max="${totalPaginas}" value="${paginaAtual}" style="width:50px;padding:4px 6px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;text-align:center;" onchange="mudarPagina(parseInt(this.value)||1)">`;
+      container.innerHTML = html;
+    }
+
+    function mudarPagina(n) {
+      paginaAtual = Math.max(1, n);
+      renderizarDetalhado();
     }
 
     // Atualizar gráficos
     function atualizarGraficos() {
       const cols = identificarColunas(dadosFiltrados);
-      
+
       // Destruir gráficos anteriores
       if (chartFonte) chartFonte.destroy();
       if (chartTop10) chartTop10.destroy();
-      
+
       if (dadosFiltrados.length === 0) return;
-      
+
       // Gráfico por Fonte
       const gruposFonte = {};
       dadosFiltrados.forEach(d => {
@@ -554,10 +814,10 @@
         const valor = parseFloat(d[cols.valor]) || 0;
         gruposFonte[fonte] = (gruposFonte[fonte] || 0) + valor;
       });
-      
+
       const fontesOrdenadas = Object.entries(gruposFonte).sort((a, b) => b[1] - a[1]).slice(0, 8);
       const coresPizza = ['#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899', '#6366f1'];
-      
+
       chartFonte = new Chart(document.getElementById('chartFonte'), {
         type: 'doughnut',
         data: {
@@ -581,7 +841,7 @@
           }
         }
       });
-      
+
       // Gráfico Top 10 Receitas
       const gruposReceita = {};
       dadosFiltrados.forEach(d => {
@@ -589,9 +849,9 @@
         const valor = parseFloat(d[cols.valor]) || 0;
         gruposReceita[receita] = (gruposReceita[receita] || 0) + valor;
       });
-      
+
       const receitasOrdenadas = Object.entries(gruposReceita).sort((a, b) => b[1] - a[1]).slice(0, 10);
-      
+
       chartTop10 = new Chart(document.getElementById('chartTop10'), {
         type: 'bar',
         data: {
@@ -616,47 +876,43 @@
           },
           scales: {
             x: {
+              grid: { display: false },
               ticks: {
                 callback: v => formatarMoeda(v)
               }
-            }
+            },
+            y: { grid: { display: false } }
           }
         }
       });
     }
 
     // Exportar CSV
-    function exportarCSV() {
-      if (dadosFiltrados.length === 0) { alert('Nenhum dado para exportar'); return; }
+    function getDadosExportacao() {
+      if (!dadosFiltrados || dadosFiltrados.length === 0) return [];
       const cols = identificarColunas(dadosFiltrados);
-      const headers = ['Data', 'Receita', 'Fonte', 'Valor'];
-      const linhas = dadosFiltrados.map(d => [
-        formatarData(d[cols.data]),
-        d[cols.receita],
-        d[cols.fonte],
-        d[cols.valor]
-      ]);
-      
-      let csv = headers.join(';') + '\n' + linhas.map(l => l.join(';')).join('\n');
-      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'receitas-previsao.csv';
-      link.click();
+      return dadosFiltrados.map(d => ({
+        'Data': formatarData(d[cols.data]),
+        'Receita': d[cols.receita] || '',
+        'Fonte': d[cols.fonte] || '',
+        'Valor': parseFloat(d[cols.valor]) || 0
+      }));
     }
 
-    // Exportar PDF (simplificado)
-    function exportarPDF() {
-      alert('Para exportar em PDF, use a função Imprimir (Ctrl+P) e selecione "Salvar como PDF".');
+    function exportarDadosExcel() {
+      exportarExcel(getDadosExportacao(), 'receitas-previsao');
     }
 
-    // Inicialização
+    function exportarDadosPDF() {
+      exportarPDF(getDadosExportacao(), 'receitas-previsao', 'Receitas - Previsão');
+    }
+
     async function init() {
       try {
         await initDB();
         dadosOriginais = await carregarDados();
         dadosFiltrados = [...dadosOriginais];
-        
+
         if (dadosOriginais.length === 0) {
           document.getElementById('cardDemonstrativo').style.display = 'none';
           document.getElementById('semDadosMsg').style.display = 'block';
@@ -665,10 +921,10 @@
           atualizarDataUltimaImportacao();
           return;
         }
-        
+
         document.getElementById('cardDemonstrativo').style.display = 'block';
         document.getElementById('semDadosMsg').style.display = 'none';
-        
+
         popularFiltros();
         aplicarFiltros();
         atualizarDataUltimaImportacao();
@@ -679,32 +935,91 @@
     }
 
     document.addEventListener('DOMContentLoaded', init);
-    
+
     // Controlar visibilidade dos filtros por aba
     function atualizarVisibilidadeFiltros(tabId) {
       const filtrosSection = document.getElementById('filtrosSection');
       if (filtrosSection) {
-        filtrosSection.style.display = tabId === 'resumo' ? 'none' : 'block';
+        filtrosSection.style.display = 'block';
       }
     }
-    
-    // Sobrescrever comportamento das tabs para controlar filtros
-    document.addEventListener('DOMContentLoaded', function() {
+
+    let timeoutFiltro;
+    function debounceFiltro() {
+      clearTimeout(timeoutFiltro);
+      timeoutFiltro = setTimeout(aplicarFiltros, 300);
+    }
+
+    // Controle de atualização de gráficos
+    let graficoPendente = false;
+
+    // Sobrescrever comportamento das tabs
+    document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
           const tabId = this.getAttribute('data-tab');
+
+          if (this.classList.contains('active')) return;
+
           document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
           document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
           this.classList.add('active');
           document.getElementById(tabId).classList.add('active');
+
           atualizarVisibilidadeFiltros(tabId);
-          // Re-renderizar gráficos quando a aba de gráfico é ativada
-          if (tabId === 'grafico') {
-            setTimeout(() => atualizarGraficos(), 100);
+
+          // Se for a aba de gráficos e houver pendência (ou for a primeira vez), atualiza
+          if (tabId === 'grafico' && (graficoPendente || !chartFonte)) {
+            setTimeout(() => atualizarGraficos(), 50);
+            graficoPendente = false;
           }
         });
       });
+      atualizarVisibilidadeFiltros('resumo');
     });
+
+    // Função para alternar tela cheia
+    function toggleFullscreen(containerId) {
+      const container = document.getElementById(containerId);
+      const btn = container.querySelector('.btn-fullscreen i');
+
+      if (!container.classList.contains('fullscreen-mode')) {
+        container.classList.add('fullscreen-mode');
+        btn.classList.remove('fa-expand');
+        btn.classList.add('fa-compress');
+
+        // Redimensionar gráfico após entrar em tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      } else {
+        container.classList.remove('fullscreen-mode');
+        btn.classList.remove('fa-compress');
+        btn.classList.add('fa-expand');
+
+        // Redimensionar gráfico após sair de tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      }
+
+      // Fechar tela cheia com ESC
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && container.classList.contains('fullscreen-mode')) {
+          toggleFullscreen(containerId);
+        }
+      });
+    }
   </script>
 </body>
+
 </html>

@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/portal-transparencia.css">
   <!-- SheetJS para ler Excel -->
+    <script src="js/auth-check.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <!-- Pipeline de transformação (para importação de planilhas brutas) -->
   <script src="pipeline-dados/js/utils-transformacao.js?v=20260208"></script>
@@ -217,6 +218,13 @@
     </div>
     <nav class="sidebar-menu">
       <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)"><i class="fas fa-tachometer-alt"></i><span>Visão Geral</span><i class="fas fa-chevron-right section-arrow"></i></div>
+        <ul>
+          <li class="menu-item"><a href="dashboard.html" class="menu-link"><i class="fas fa-home"></i><span>Dashboard Executivo</span></a></li>
+          <li class="menu-item"><a href="resultado-orcamentario.html" class="menu-link"><i class="fas fa-chart-pie"></i><span>Resultado Orçamentário</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
         <div class="menu-section-title" onclick="toggleSection(this)">
           <i class="fas fa-hand-holding-usd"></i>
           <span>Receitas</span>
@@ -247,6 +255,22 @@
           <li class="menu-item"><a href="despesas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
         </ul>
       </div>
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)">
+          <i class="fas fa-search-dollar"></i>
+          <span>Análises</span>
+          <i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="despesas-analise.html" class="menu-link"><i class="fas fa-chart-pie"></i><span>Análise Financeira</span></a></li>
+          <li class="menu-item"><a href="despesas-execucao.html" class="menu-link"><i class="fas fa-chart-bar"></i><span>Execução Orçamentária</span></a></li>
+          <li class="menu-item"><a href="despesas-fontes.html" class="menu-link"><i class="fas fa-layer-group"></i><span>Fontes de Recursos</span></a></li>
+          <li class="menu-item"><a href="despesas-credores.html" class="menu-link"><i class="fas fa-users"></i><span>Credores</span></a></li>
+          <li class="menu-item"><a href="despesas-natureza.html" class="menu-link"><i class="fas fa-sitemap"></i><span>Natureza da Despesa</span></a></li>
+          <li class="menu-item"><a href="limites-legais.html" class="menu-link"><i class="fas fa-gavel"></i><span>Limites Legais</span></a></li>
+          <li class="menu-item"><a href="despesas-alertas.html" class="menu-link"><i class="fas fa-exclamation-triangle"></i><span>Alertas</span></a></li>
+        </ul>
+      </div>
       <div class="menu-section expanded">
         <div class="menu-section-title" onclick="toggleSection(this)">
           <i class="fas fa-database"></i>
@@ -256,6 +280,7 @@
         <ul>
           <li class="menu-item"><a href="banco-importar-dados.html" class="menu-link active"><i class="fas fa-file-import"></i><span>Importar Dados</span></a></li>
           <li class="menu-item"><a href="banco-historico.html" class="menu-link"><i class="fas fa-history"></i><span>Histórico</span></a></li>
+          <li class="menu-item"><a href="admin-usuarios.html" class="menu-link"><i class="fas fa-user-shield"></i><span>Usuários</span></a></li>
         </ul>
       </div>
     </nav>
@@ -290,6 +315,11 @@
       <div class="card">
         <div class="card-header">
           <h2 class="card-title"><i class="fas fa-upload"></i> Enviar Planilha</h2>
+          <div class="card-actions">
+            <button class="btn btn-secondary" onclick="limparBancoDadosCarregado()" style="background:#fee2e2; color:#b91c1c; border:1px solid #fecaca;">
+              <i class="fas fa-trash"></i> Apagar Dados Carregados
+            </button>
+          </div>
         </div>
         <div class="card-body">
           
@@ -308,7 +338,7 @@
                 <i class="fas fa-file-invoice-dollar" style="font-size: 48px; margin-bottom: 16px;"></i>
                 <h4 style="font-size: 18px; margin: 0 0 8px 0;">Importar Despesas</h4>
                 <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 13px;">
-                  Documento completo ou planilhas brutas do SIGEF
+                  Arquivos/pasta já processados ou planilhas brutas do SIGEF
                 </p>
               </div>
             </div>
@@ -335,9 +365,9 @@
             </h3>
             <div class="sub-opcoes-grid">
               <div class="sub-opcao-card" id="subDocCompleto" onclick="selecionarSubOpcao('completo')">
-                <i class="fas fa-file-excel"></i>
-                <h4>Documento Completo</h4>
-                <p>Arquivo Excel já processado com múltiplas abas (Empenhados, Liquidados, Pagos, A Pagar, Retidos).</p>
+                <i class="fas fa-folder-open"></i>
+                <h4>Arquivos/Pasta Processados</h4>
+                <p>Selecione uma pasta ou arquivos Excel já processados (por aba/tipo ou workbook com múltiplas abas).</p>
               </div>
               <div class="sub-opcao-card" id="subBrutos" onclick="selecionarSubOpcao('brutos')">
                 <i class="fas fa-cogs"></i>
@@ -353,6 +383,32 @@
             <h3>Arraste a planilha aqui ou clique para selecionar</h3>
             <p>Formatos aceitos: .xlsx, .xls (Excel)</p>
             <input type="file" id="fileInput" accept=".xlsx,.xls">
+          </div>
+
+          <!-- Área de Upload (arquivos/pasta já processados) -->
+          <div class="upload-brutos" id="uploadProcessados">
+            <div style="background: #ecfeff; border: 1px solid #67e8f9; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px; color: #0e7490;">
+              <i class="fas fa-info-circle" style="margin-right: 6px;"></i>
+              Selecione a <strong>pasta</strong> com arquivos <strong>já processados</strong>, ou escolha os <strong>arquivos individualmente</strong>.<br>
+              Formatos aceitos: <code>.xlsx</code>, <code>.xls</code>, <code>.xlsm</code>.
+            </div>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+              <div class="folder-input-wrap">
+                <button class="btn btn-primary"><i class="fas fa-folder-open"></i> Selecionar Pasta...</button>
+                <input type="file" id="processadosFolder" webkitdirectory multiple>
+              </div>
+              <span style="color:#94a3b8; font-size:13px; padding-top:10px;">ou</span>
+              <div class="folder-input-wrap">
+                <button class="btn btn-secondary"><i class="fas fa-files"></i> Selecionar Arquivos...</button>
+                <input type="file" id="processadosFiles" multiple accept=".xlsx,.xls,.xlsm">
+              </div>
+            </div>
+            <div id="processadosDeteccao"></div>
+            <div id="processadosBotaoImportar" style="display: none; text-align: center; margin-top: 16px;">
+              <button class="btn btn-primary btn-lg" id="btnImportarProcessados" onclick="importarProcessados()">
+                <i class="fas fa-check"></i> Importar Processados
+              </button>
+            </div>
           </div>
 
           <!-- Área de Upload (planilhas brutas) -->
@@ -523,14 +579,46 @@
     }
 
     // Salvar dados no IndexedDB — conexão fresca + lotes para robustez
-    async function salvarDadosDB(storeName, dados) {
+    // Suporta reimportação seletiva: preserva dados de anos não selecionados
+    async function salvarDadosDB(storeName, dados, anosParaReimportar = null) {
       console.log(`Salvando ${dados.length} registros em ${storeName}...`);
 
       // Abrir conexão fresca (evita "connection is closing" após processamento longo)
       var freshDb = await abrirConexaoFresca();
 
       try {
-        // 1. Limpar store
+        var dadosFinais = dados;
+        var mantidosDeOutrosAnos = [];
+
+        // Se houver seleção de anos, preservar dados de anos não selecionados
+        if (anosParaReimportar && anosParaReimportar.length > 0 && anosParaReimportar[0] !== '_unico') {
+          console.log(`Reimportação seletiva: preservando dados de anos não selecionados...`);
+
+          // 1. Ler dados existentes
+          var dadosExistentes = await new Promise((resolve, reject) => {
+            var tx = freshDb.transaction([storeName], 'readonly');
+            var store = tx.objectStore(storeName);
+            var request = store.getAll();
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => reject(request.error);
+          });
+
+          console.log(`Dados existentes em ${storeName}: ${dadosExistentes.length} registros`);
+
+          // 2. Filtrar dados existentes: manter apenas anos NÃO selecionados
+          mantidosDeOutrosAnos = dadosExistentes.filter(function(registro) {
+            var exercicio = String(registro['Exercício'] || registro['Exercicio'] || '');
+            return !anosParaReimportar.includes(exercicio);
+          });
+
+          console.log(`Preservando ${mantidosDeOutrosAnos.length} registros de outros anos`);
+          console.log(`Importando ${dados.length} registros de anos selecionados: ${anosParaReimportar.join(', ')}`);
+
+          // 3. Combinar dados mantidos + dados novos
+          dadosFinais = mantidosDeOutrosAnos.concat(dados);
+        }
+
+        // 4. Limpar store completamente
         await new Promise((resolve, reject) => {
           var tx = freshDb.transaction([storeName], 'readwrite');
           tx.objectStore(storeName).clear();
@@ -539,17 +627,19 @@
           tx.onabort = () => reject(new Error('Limpeza abortada em ' + storeName));
         });
 
-        // 2. Inserir em lotes de 5000
-        var BATCH = 5000;
+        // 5. Inserir em lotes de 10000 (otimizado para grandes volumes)
+        var BATCH = 10000;
         var totalAdicionados = 0;
 
-        for (var offset = 0; offset < dados.length; offset += BATCH) {
-          var fim = Math.min(offset + BATCH, dados.length);
+        for (var offset = 0; offset < dadosFinais.length; offset += BATCH) {
+          var fim = Math.min(offset + BATCH, dadosFinais.length);
           await new Promise((resolve, reject) => {
             var tx = freshDb.transaction([storeName], 'readwrite');
             var store = tx.objectStore(storeName);
             for (var i = offset; i < fim; i++) {
-              store.put(Object.assign({}, dados[i], { id: i + 1 }));
+              // Otimização: adicionar id diretamente sem Object.assign
+              dadosFinais[i].id = i + 1;
+              store.put(dadosFinais[i]);
             }
             tx.oncomplete = () => { totalAdicionados += (fim - offset); resolve(); };
             tx.onerror = (e) => reject(e.target.error);
@@ -557,11 +647,65 @@
           });
         }
 
-        console.log(`${totalAdicionados} registros salvos em ${storeName}`);
+        if (mantidosDeOutrosAnos.length > 0) {
+          console.log(`${totalAdicionados} registros salvos em ${storeName} (${mantidosDeOutrosAnos.length} preservados + ${dados.length} novos)`);
+        } else {
+          console.log(`${totalAdicionados} registros salvos em ${storeName}`);
+        }
         return totalAdicionados;
       } finally {
         // Fechar a conexão fresca após uso
         freshDb.close();
+      }
+    }
+
+    function getStoresSistema() {
+      return [
+        'despesas-empenhados',
+        'despesas-liquidados',
+        'despesas-pagos',
+        'despesas-retidos',
+        'despesas-a-pagar',
+        'receitas-previsao',
+        'receitas-arrecadacao',
+        'receitas-retencoes',
+        'receitas-deducoes'
+      ];
+    }
+
+    async function limparBancoDadosCarregado() {
+      var confirmar = confirm(
+        'Isso vai apagar TODOS os dados importados (despesas, receitas e histórico).\\n\\nDeseja continuar?'
+      );
+      if (!confirmar) return;
+
+      try {
+        mostrarStatus('Apagando dados carregados...', 'info');
+
+        var freshDb = await abrirConexaoFresca();
+        try {
+          var stores = getStoresSistema();
+          await new Promise((resolve, reject) => {
+            var tx = freshDb.transaction(stores, 'readwrite');
+            for (var i = 0; i < stores.length; i++) {
+              tx.objectStore(stores[i]).clear();
+            }
+            tx.oncomplete = () => resolve();
+            tx.onerror = (e) => reject(e.target.error);
+            tx.onabort = () => reject(new Error('Transação abortada ao limpar banco'));
+          });
+        } finally {
+          freshDb.close();
+        }
+
+        localStorage.removeItem('historico-importacoes');
+
+        mostrarStatus('Banco limpo com sucesso! Todos os dados importados foram apagados.', 'success');
+        alert('Banco de dados limpo com sucesso!');
+      } catch (e) {
+        console.error('Erro ao limpar banco:', e);
+        mostrarStatus('Erro ao limpar banco: ' + e.message, 'error');
+        alert('Erro ao limpar banco: ' + e.message);
       }
     }
 
@@ -594,7 +738,7 @@
         // Mostrar status de sucesso brevemente
         const statusEl = document.getElementById('statusMessage');
         if (statusEl) {
-          statusEl.textContent = '✓ Sistema pronto para importação';
+          statusEl.textContent = 'âœ“ Sistema pronto para importação';
           statusEl.className = 'status-message success';
           setTimeout(() => {
             statusEl.className = 'status-message';
@@ -603,8 +747,29 @@
       })
       .catch(err => {
         console.error('Erro ao inicializar IndexedDB:', err);
+
+        // Se for erro de bloqueio, tenta novamente após 3 segundos
+        if (err && err.name === 'QuotaExceededError' || err.message === 'IndexedDB bloqueado') {
+          mostrarStatus('⚠ Banco bloqueado. Tentando reconectar...', 'warning');
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
+          return;
+        }
+
+        // Outros erros
         mostrarStatus('ERRO: Banco de dados não pôde ser inicializado. Recarregue a página (F5).', 'error');
-        alert('Erro ao inicializar o sistema!\n\nPor favor, feche todas as outras abas do SIGEF e recarregue esta página (F5).');
+
+        const mensagem = 'Erro ao inicializar o sistema!\n\n' +
+                        'POSSÍVEIS CAUSAS:\n' +
+                        '1. Você tem várias abas do SIGEF abertas\n' +
+                        '2. O navegador está bloqueando o IndexedDB\n\n' +
+                        'SOLUÇÃO:\n' +
+                        '✓ Feche TODAS as outras abas do SIGEF\n' +
+                        '✓ Recarregue esta página (F5)\n' +
+                        '✓ Se persistir, feche o navegador completamente e reabra';
+
+        alert(mensagem);
       });
 
     // =====================================================
@@ -731,6 +896,49 @@
       return dados.map(registro => converterDatasRegistro(registro));
     }
 
+    function normalizarChaveColuna(chave) {
+      return String(chave || '')
+        .toLowerCase()
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\w\s]/g, ' ')
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ');
+    }
+
+    function normalizarRegistroProcessado(registro) {
+      var aliasParaCanonical = {
+        'seq liq': 'Seq. Liq.',
+        'seq liquidacao': 'Seq. Liq.',
+        'seq liquid': 'Seq. Liq.',
+        'av liquid': 'Seq. Liq.',
+        'av liquidacao': 'Seq. Liq.',
+        'cnpj cpf': 'CNPJ&CPF',
+        'cpf cnpj': 'CNPJ&CPF',
+        'cnpj cpf do credor': 'CNPJ&CPF',
+        'detalhamento despesa': 'Detalhamento despesa'
+      };
+
+      var out = {};
+      var keys = Object.keys(registro || {});
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        var v = registro[k];
+        var nk = normalizarChaveColuna(k);
+        var canonical = aliasParaCanonical[nk] || k;
+
+        if (canonical === 'CNPJ&CPF' && v != null) {
+          v = String(v).trim();
+        }
+
+        if (out[canonical] == null || out[canonical] === '') {
+          out[canonical] = v;
+        }
+      }
+      return out;
+    }
+
     // Modelos de colunas para cada tipo de dado
     const modelosColunas = {
       'despesas-empenhados': ['Nr emp.', 'Data', 'Credor/Fornecedor', 'Espécie', 'Unidade orçamentária', 'Valor (R$)'],
@@ -743,7 +951,8 @@
     // =====================================================
     // Selecionar modo de importação
     // =====================================================
-    let modoImportacao = null; // 'completo', 'brutos', 'receitas'
+    let modoImportacao = null; // 'processados', 'brutos', 'receitas'
+    let arquivosProcessadosSelecionados = [];
     // brutosDetectados removido — agora usa brutosPorAno/brutosAnos
 
     function resetSelecao() {
@@ -753,16 +962,22 @@
       document.getElementById('importacaoReceitas').style.transform = 'scale(1)';
       document.getElementById('subOpcoesDespesas').classList.remove('show');
       document.getElementById('uploadArea').style.display = 'none';
+      document.getElementById('uploadProcessados').classList.remove('show');
       document.getElementById('uploadBrutos').classList.remove('show');
       document.getElementById('previewSection').classList.remove('show');
+      document.getElementById('processadosDeteccao').innerHTML = '';
+      document.getElementById('processadosBotaoImportar').style.display = 'none';
+      document.getElementById('processadosFolder').value = '';
+      document.getElementById('processadosFiles').value = '';
       document.querySelectorAll('.sub-opcao-card').forEach(c => c.classList.remove('selected'));
       modoImportacao = null;
+      arquivosProcessadosSelecionados = [];
       brutosPorAno = {};
       brutosAnos = [];
       esconderStatus();
     }
 
-    // Clicar em "Importar Despesas" → mostra sub-opções
+    // Clicar em "Importar Despesas" â†’ mostra sub-opções
     function selecionarTipoDespesas() {
       resetSelecao();
       tipoSelecionado = 'despesas-completo';
@@ -779,13 +994,16 @@
 
       if (modo === 'completo') {
         document.getElementById('subDocCompleto').classList.add('selected');
-        document.getElementById('uploadArea').style.display = '';
+        modoImportacao = 'processados';
+        document.getElementById('uploadArea').style.display = 'none';
+        document.getElementById('uploadProcessados').classList.add('show');
         document.getElementById('uploadBrutos').classList.remove('show');
-        mostrarStatus('Faça upload do arquivo Excel já processado com as abas: Empenhados, Liquidados, Pagos, A Pagar, Retidos.', 'success');
-        document.getElementById('uploadArea').scrollIntoView({ behavior: 'smooth' });
+        mostrarStatus('Selecione pasta/arquivos já processados para importar automaticamente.', 'success');
+        document.getElementById('uploadProcessados').scrollIntoView({ behavior: 'smooth' });
       } else if (modo === 'brutos') {
         document.getElementById('subBrutos').classList.add('selected');
         document.getElementById('uploadArea').style.display = 'none';
+        document.getElementById('uploadProcessados').classList.remove('show');
         document.getElementById('uploadBrutos').classList.add('show');
         mostrarStatus('Selecione a pasta ou os arquivos brutos do SIGEF para transformação automática.', 'success');
         document.getElementById('uploadBrutos').scrollIntoView({ behavior: 'smooth' });
@@ -1005,9 +1223,9 @@
           .trim()
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-          .replace(/\s+/g, ' '); // Múltiplos espaços → um espaço
+          .replace(/\s+/g, ' '); // Múltiplos espaços â†’ um espaço
         
-        console.log(`Processando aba: "${nomeAba}" → normalizado: "${nomeNormalizado}"`);
+        console.log(`Processando aba: "${nomeAba}" â†’ normalizado: "${nomeNormalizado}"`);
         
         let tipoDestino = null;
         
@@ -1020,7 +1238,7 @@
           // Verificar se contém a chave ou se é igual
           if (nomeNormalizado.includes(chaveNormalizada) || nomeNormalizado === chaveNormalizada) {
             tipoDestino = valor;
-            console.log(`  → Match encontrado: "${chave}" → "${valor}"`);
+            console.log(`  â†’ Match encontrado: "${chave}" â†’ "${valor}"`);
             break;
           }
         }
@@ -1035,19 +1253,19 @@
           if (dados.length > 0) {
             // Se já existe dados para esse tipo, mesclar
             if (dadosMultiplasAbas[tipoDestino]) {
-              console.log(`  → Mesclando com dados existentes de ${tipoDestino}`);
+              console.log(`  â†’ Mesclando com dados existentes de ${tipoDestino}`);
               dadosMultiplasAbas[tipoDestino] = [...dadosMultiplasAbas[tipoDestino], ...dados];
             } else {
               dadosMultiplasAbas[tipoDestino] = dados;
             }
             totalRegistros += dados.length;
-            abasProcessadas.push(`${nomeAba} (${dados.length} registros) → ${tipoDestino}`);
-            console.log(`  ✓ Aba "${nomeAba}" mapeada para "${tipoDestino}" com ${dados.length} registros`);
+            abasProcessadas.push(`${nomeAba} (${dados.length} registros) â†’ ${tipoDestino}`);
+            console.log(`  âœ“ Aba "${nomeAba}" mapeada para "${tipoDestino}" com ${dados.length} registros`);
           } else {
-            console.log(`  ✗ Aba "${nomeAba}" está vazia`);
+            console.log(`  âœ— Aba "${nomeAba}" está vazia`);
           }
         } else {
-          console.log(`  ✗ Aba "${nomeAba}" não reconhecida, ignorada.`);
+          console.log(`  âœ— Aba "${nomeAba}" não reconhecida, ignorada.`);
           console.log(`    Nomes aceitos: empenhados, liquidados, pagos, a pagar, retidos (e variações)`);
         }
       });
@@ -1073,7 +1291,7 @@
       document.getElementById('fileInfo').innerHTML = `
         <strong style="color: #059669; font-size: 18px;">${totalRegistros.toLocaleString()} registros encontrados em ${Object.keys(dadosMultiplasAbas).length} categorias!</strong><br><br>
         <div style="text-align: left; padding: 10px; background: #f8fafc; border-radius: 8px; margin-top: 10px;">
-          ${abasProcessadas.map(a => `<div style="padding: 4px 0;">✓ ${a}</div>`).join('')}
+          ${abasProcessadas.map(a => `<div style="padding: 4px 0;">âœ“ ${a}</div>`).join('')}
         </div>
       `;
       
@@ -1232,7 +1450,7 @@
         <div style="text-align: left; padding: 10px; background: #f8fafc; border-radius: 8px; margin-top: 10px;">
           ${resumoCategoria.map(r => `
             <div style="padding: 6px 0; border-bottom: 1px solid #e2e8f0;">
-              <span style="color: #22c55e; margin-right: 8px;">✓</span>
+              <span style="color: #22c55e; margin-right: 8px;">âœ“</span>
               <strong>${r.nome}:</strong> ${r.quantidade.toLocaleString()} registros
               ${r.valor !== 0 ? `<span style="color: #64748b; float: right;">R$ ${r.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>` : ''}
             </div>
@@ -1367,7 +1585,7 @@
           await salvarDadosDB(tipo, dados);
           
           const nomeTipo = tipo.replace('despesas-', 'Despesas ').replace('-', ' ');
-          resumoImportacao.push(`✓ ${nomeTipo}: ${dados.length.toLocaleString()} registros`);
+          resumoImportacao.push(`âœ“ ${nomeTipo}: ${dados.length.toLocaleString()} registros`);
           totalGeral += dados.length;
           
           console.log(`Salvos ${dados.length} registros em ${tipo}`);
@@ -1425,7 +1643,7 @@
           // Salvar no IndexedDB
           await salvarDadosDB(tipo, dados);
           
-          resumoImportacao.push(`✓ ${nomesAmigaveis[tipo]}: ${dados.length.toLocaleString()} registros`);
+          resumoImportacao.push(`âœ“ ${nomesAmigaveis[tipo]}: ${dados.length.toLocaleString()} registros`);
           totalGeral += dados.length;
           
           console.log(`Salvos ${dados.length} registros em ${tipo}`);
@@ -1538,9 +1756,9 @@
         console.log('Último registro:', verificacao[0]);
         
         if (verificacao.length > 0 && verificacao[0].id === novoRegistro.id) {
-          console.log('✓ Registro salvo com sucesso!');
+          console.log('âœ“ Registro salvo com sucesso!');
         } else {
-          console.error('✗ ERRO: Registro não foi salvo corretamente!');
+          console.error('âœ— ERRO: Registro não foi salvo corretamente!');
           alert('ERRO: Não foi possível salvar no histórico. Verifique se o localStorage está habilitado no navegador.');
         }
         
@@ -1571,6 +1789,204 @@
     verificarHistorico();
 
     // =====================================================
+    // Importação de arquivos já processados (pasta/arquivos)
+    // =====================================================
+    document.getElementById('processadosFolder').addEventListener('change', function(e) {
+      var files = Array.from(e.target.files).filter(function(f) {
+        var n = f.name.toLowerCase();
+        return (n.endsWith('.xlsx') || n.endsWith('.xls') || n.endsWith('.xlsm')) && !n.startsWith('~$');
+      });
+      files = filtrarArquivosSomenteProcessados(files);
+      detectarArquivosProcessados(files, true);
+    });
+
+    document.getElementById('processadosFiles').addEventListener('change', function(e) {
+      var files = Array.from(e.target.files).filter(function(f) {
+        var n = f.name.toLowerCase();
+        return (n.endsWith('.xlsx') || n.endsWith('.xls') || n.endsWith('.xlsm')) && !n.startsWith('~$');
+      });
+      files = filtrarArquivosSomenteProcessados(files);
+      detectarArquivosProcessados(files, false);
+    });
+
+    function normalizarTextoSimples(v) {
+      return String(v || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[_-]+/g, ' ')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function filtrarArquivosSomenteProcessados(files) {
+      if (!files || !files.length) return [];
+
+      var comPastaProcessados = files.filter(function(f) {
+        var p = String(f.webkitRelativePath || '').toLowerCase().replace(/\\/g, '/');
+        return p.includes('/processados/');
+      });
+      if (comPastaProcessados.length > 0) return comPastaProcessados;
+
+      var comPrefixoV2 = files.filter(function(f) {
+        return /^v2\b/.test(normalizarTextoSimples(f.name));
+      });
+      if (comPrefixoV2.length > 0) return comPrefixoV2;
+
+      return files;
+    }
+
+    function inferirStorePorNomeArquivo(nomeArquivo) {
+      var n = normalizarTextoSimples(nomeArquivo);
+      if (n.includes('liquidad')) return 'despesas-liquidados';
+      if (n.includes('pagos') || n.includes('pagamento')) return 'despesas-pagos';
+      if (n.includes('emitid') || n.includes('empenhad')) return 'despesas-empenhados';
+      if (n.includes('a pagar') || n.includes('apagar') || n.includes('restos')) return 'despesas-a-pagar';
+      if (n.includes('retid') || n.includes('consign')) return 'despesas-retidos';
+      return null;
+    }
+
+    function detectarArquivosProcessados(files, isPasta) {
+      arquivosProcessadosSelecionados = files || [];
+      var container = document.getElementById('processadosDeteccao');
+      var btnArea = document.getElementById('processadosBotaoImportar');
+
+      if (!arquivosProcessadosSelecionados.length) {
+        container.innerHTML = '';
+        btnArea.style.display = 'none';
+        mostrarStatus('Nenhum arquivo processado selecionado.', 'error');
+        return;
+      }
+
+      var html = '';
+      html += '<div style="margin: 10px 0; padding: 10px; border: 1px solid #bae6fd; border-radius: 8px; background: #f0f9ff;">';
+      html += '<div style="font-weight: 600; color: #0c4a6e; margin-bottom: 8px;">';
+      html += (isPasta ? 'Pasta selecionada' : 'Arquivos selecionados') + ': ' + arquivosProcessadosSelecionados.length + ' arquivo(s)</div>';
+      html += '<ul style="margin: 0; padding-left: 18px; color: #334155; font-size: 13px;">';
+
+      for (var i = 0; i < Math.min(arquivosProcessadosSelecionados.length, 15); i++) {
+        var f = arquivosProcessadosSelecionados[i];
+        var store = inferirStorePorNomeArquivo(f.name);
+        var tipo = store ? store.replace('despesas-', '') : 'múltiplas abas/auto';
+        html += '<li>' + f.name + ' <span style="color:#64748b;">(' + tipo + ')</span></li>';
+      }
+      if (arquivosProcessadosSelecionados.length > 15) {
+        html += '<li>... e mais ' + (arquivosProcessadosSelecionados.length - 15) + ' arquivo(s)</li>';
+      }
+
+      html += '</ul></div>';
+      container.innerHTML = html;
+      btnArea.style.display = '';
+      mostrarStatus('Arquivos processados selecionados. Clique em "Importar Processados".', 'success');
+    }
+
+    async function importarProcessados() {
+      if (!arquivosProcessadosSelecionados.length) {
+        mostrarStatus('Selecione arquivos processados antes de importar.', 'error');
+        return;
+      }
+
+      var btn = document.getElementById('btnImportarProcessados');
+      btn.disabled = true;
+
+      try {
+        mostrarStatus('Lendo arquivos processados...', 'info');
+        var acumulado = {
+          'despesas-empenhados': [],
+          'despesas-liquidados': [],
+          'despesas-pagos': [],
+          'despesas-a-pagar': [],
+          'despesas-retidos': []
+        };
+
+        var mapaAbas = {
+          'emp. emitidos': 'despesas-empenhados',
+          'emp. liquidados': 'despesas-liquidados',
+          'emp. pagos': 'despesas-pagos',
+          'empenhos a pagar': 'despesas-a-pagar',
+          'empenhos retidos': 'despesas-retidos',
+          'empenhados': 'despesas-empenhados',
+          'liquidados': 'despesas-liquidados',
+          'pagos': 'despesas-pagos',
+          'a pagar': 'despesas-a-pagar',
+          'retidos': 'despesas-retidos'
+        };
+
+        for (var i = 0; i < arquivosProcessadosSelecionados.length; i++) {
+          var file = arquivosProcessadosSelecionados[i];
+          mostrarStatus('Processando ' + (i + 1) + '/' + arquivosProcessadosSelecionados.length + ': ' + file.name, 'info');
+
+          var buffer = await file.arrayBuffer();
+          var wb = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+
+          // Se o arquivo tiver múltiplas abas conhecidas, importa todas as abas úteis.
+          var encontrouAbaConhecida = false;
+          for (var s = 0; s < wb.SheetNames.length; s++) {
+            var nomeAba = wb.SheetNames[s];
+            var nomeAbaNorm = normalizarTextoSimples(nomeAba);
+            var storeFromSheet = mapaAbas[nomeAbaNorm] || null;
+            if (!storeFromSheet) continue;
+            encontrouAbaConhecida = true;
+
+            var sh = wb.Sheets[nomeAba];
+            var dadosAba = XLSX.utils.sheet_to_json(sh, { raw: false, defval: '' });
+            if (dadosAba && dadosAba.length) {
+              dadosAba = dadosAba.map(normalizarRegistroProcessado);
+              acumulado[storeFromSheet] = acumulado[storeFromSheet].concat(dadosAba);
+            }
+          }
+
+          // Se não encontrou abas conhecidas, trata como arquivo de um tipo só pelo nome do arquivo.
+          if (!encontrouAbaConhecida) {
+            var store = inferirStorePorNomeArquivo(file.name);
+            if (!store) continue;
+            var sheet = wb.Sheets[wb.SheetNames[0]];
+            var dados = XLSX.utils.sheet_to_json(sheet, { raw: false, defval: '' });
+            if (dados && dados.length) {
+              dados = dados.map(normalizarRegistroProcessado);
+              acumulado[store] = acumulado[store].concat(dados);
+            }
+          }
+        }
+
+        var resumo = [];
+        var total = 0;
+        var stores = Object.keys(acumulado);
+        for (var j = 0; j < stores.length; j++) {
+          var st = stores[j];
+          var dadosStore = acumulado[st];
+          if (!dadosStore.length) continue;
+          await salvarDadosDB(st, dadosStore);
+          resumo.push('✓ ' + st.replace('despesas-', 'Despesas ') + ': ' + dadosStore.length.toLocaleString() + ' registros');
+          total += dadosStore.length;
+        }
+
+        if (total === 0) {
+          mostrarStatus('Nenhum dado válido encontrado nos arquivos processados selecionados.', 'error');
+          return;
+        }
+
+        registrarImportacao(
+          'despesas-processados',
+          'Importação de Despesas (arquivos já processados)',
+          total,
+          'Pasta/Arquivos processados'
+        );
+
+        mostrarStatus('Importação concluída! ' + total.toLocaleString() + ' registros importados.', 'success');
+        alert(
+          'IMPORTAÇÃO DE ARQUIVOS PROCESSADOS CONCLUÍDA!\n\n' +
+          total.toLocaleString() + ' registros importados:\n\n' +
+          resumo.join('\n')
+        );
+      } catch (e) {
+        console.error('Erro na importação de processados:', e);
+        mostrarStatus('Erro na importação de processados: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // =====================================================
     // Pipeline: Upload e detecção de planilhas brutas
     // =====================================================
     // =====================================================
@@ -1578,6 +1994,7 @@
     // =====================================================
     var brutosPorAno = {};   // { '2024': { matches, missing }, '2025': {...} }
     var brutosAnos = [];     // ['2024', '2025'] ou ['_unico']
+    var anosReimportar = []; // Anos selecionados pelo usuário para reimportar
 
     document.getElementById('brutosFolder').addEventListener('change', function(e) {
       var files = Array.from(e.target.files).filter(function(f) {
@@ -1612,6 +2029,19 @@
       return porAno;
     }
 
+    // Atualizar lista de anos selecionados para reimportar
+    function atualizarAnosReimportar() {
+      anosReimportar = [];
+      for (var a = 0; a < brutosAnos.length; a++) {
+        var ano = brutosAnos[a];
+        var checkbox = document.getElementById('checkAno_' + ano);
+        if (checkbox && checkbox.checked) {
+          anosReimportar.push(ano);
+        }
+      }
+      console.log('Anos selecionados para reimportar:', anosReimportar);
+    }
+
     function detectarArquivosBrutos(files, isPasta) {
       if (!files || files.length === 0) {
         mostrarStatus('Nenhum arquivo selecionado.', 'error');
@@ -1644,13 +2074,25 @@
       var todosOk = true;
       var errosGlobal = [];
 
-      // Tags de ano
+      // Inicializar anosReimportar com todos os anos selecionados
+      anosReimportar = brutosAnos.slice();
+
+      // Tags de ano com checkboxes para seleção
       if (brutosAnos.length > 1 || (brutosAnos.length === 1 && brutosAnos[0] !== '_unico')) {
-        html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;">';
+        html += '<div style="margin:12px 0;padding:12px;background:#f8f9fa;border-radius:10px;border:1px solid #e2e8f0;">';
+        html += '<div style="font-weight:600;color:#334155;margin-bottom:8px;font-size:13px;">📅 Selecione os anos para importar/reimportar:</div>';
+        html += '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
         for (var a = 0; a < brutosAnos.length; a++) {
-          var label = brutosAnos[a] === '_unico' ? 'Ano único' : brutosAnos[a];
-          html += '<span style="background:#ede9fe;color:#6d28d9;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;border:1px solid #c4b5fd;">' + label + '</span>';
+          var ano = brutosAnos[a];
+          var label = ano === '_unico' ? 'Ano único' : ano;
+          var checkId = 'checkAno_' + ano;
+          html += '<label style="display:flex;align-items:center;gap:6px;background:#fff;padding:8px 14px;border-radius:8px;border:1px solid #c4b5fd;cursor:pointer;">';
+          html += '<input type="checkbox" id="' + checkId + '" value="' + ano + '" checked onchange="atualizarAnosReimportar()" style="cursor:pointer;">';
+          html += '<span style="color:#6d28d9;font-weight:600;font-size:13px;">' + label + '</span>';
+          html += '</label>';
         }
+        html += '</div>';
+        html += '<div style="margin-top:8px;font-size:12px;color:#64748b;">💡 Desmarque anos que já estão importados e não precisam ser atualizados</div>';
         html += '</div>';
       }
 
@@ -1723,7 +2165,7 @@
       return mapa[role] || null;
     }
 
-    // Mapeamento: nome da aba do cruzamento → store do IndexedDB
+    // Mapeamento: nome da aba do cruzamento â†’ store do IndexedDB
     var MAPA_ABA_STORE = {
       'Emp. Liquidados':  'despesas-liquidados',
       'Emp. Pagos':       'despesas-pagos',
@@ -1751,7 +2193,41 @@
       document.getElementById('brutosProgressFill').style.width = pct + '%';
     }
 
-    // Converter matrix (2D array com header) → array de objetos
+    // Converter matrix (2D array com header) â†’ array de objetos
+    // Versão assíncrona que processa em chunks para evitar travar o navegador
+    // Versão otimizada para grandes volumes (500k+ linhas)
+    async function matrixParaObjetosAsync(matrix) {
+      if (!matrix || matrix.length < 2) return [];
+      var headers = matrix[0];
+      var totalRows = matrix.length - 1;
+      var objetos = new Array(totalRows); // Pré-alocar array para performance
+      var CHUNK_SIZE = 5000; // Chunks maiores = menos yields = mais rápido
+
+      for (var startRow = 1; startRow < matrix.length; startRow += CHUNK_SIZE) {
+        var endRow = Math.min(startRow + CHUNK_SIZE, matrix.length);
+
+        // Processar chunk (otimizado: menos checks)
+        for (var r = startRow; r < endRow; r++) {
+          var row = matrix[r];
+          var obj = {};
+          for (var c = 0; c < headers.length; c++) {
+            var key = headers[c];
+            if (key != null && String(key).trim()) {
+              obj[key] = c < row.length ? row[c] : '';
+            }
+          }
+          objetos[r - 1] = obj; // Índice direto ao invés de push
+        }
+
+        // Yield apenas a cada 5000 linhas para manter responsividade sem perder performance
+        if (endRow < matrix.length && (endRow % 25000 === 0)) {
+          await pipelineSleep(0); // Yield apenas a cada 25k linhas processadas
+        }
+      }
+      return objetos;
+    }
+
+    // Mantém versão síncrona para compatibilidade (mas não usar em matrizes grandes)
     function matrixParaObjetos(matrix) {
       if (!matrix || matrix.length < 2) return [];
       var headers = matrix[0];
@@ -1771,7 +2247,7 @@
     }
 
     // =====================================================
-    // Processar um ano: ler, transformar, cruzar → retorna matrizes
+    // Processar um ano: ler, transformar, cruzar â†’ retorna matrizes
     // Otimizado: leitura paralela + yield entre operações pesadas
     // =====================================================
     async function processarUmAnoPipeline(anoLabel, arquivos) {
@@ -1795,7 +2271,7 @@
         })(role, file);
       }
       await Promise.all(promises);
-      logPipeline('    → Todos os arquivos lidos!');
+      logPipeline('    â†’ Todos os arquivos lidos!');
 
       // --- Transformar sequencialmente, com yield entre cada para evitar "Página sem resposta" ---
       for (var i = 0; i < roles.length; i++) {
@@ -1822,12 +2298,12 @@
           var resultado = transf.fn(wb);
           matrices[role] = resultado.matrix;
           var stats = resultado.stats || {};
-          logPipeline('    → ' + transf.label + ': ' + (stats.linhasFinal || (matrices[role] ? matrices[role].length - 1 : '?')) + ' linhas');
+          logPipeline('    â†’ ' + transf.label + ': ' + (stats.linhasFinal || (matrices[role] ? matrices[role].length - 1 : '?')) + ' linhas');
           wb = null; resultado = null;
         } else {
           var sheet = wb.Sheets[wb.SheetNames[0]];
           matrices[role] = sheetToMatrix(sheet, { raw: false, defval: '' });
-          logPipeline('    → ' + role + ': ' + (matrices[role].length - 1) + ' linhas');
+          logPipeline('    â†’ ' + role + ': ' + (matrices[role].length - 1) + ' linhas');
           wb = null;
         }
       }
@@ -1868,12 +2344,30 @@
     async function processarBrutos() {
       if (brutosAnos.length === 0) return;
 
+      // Validar que pelo menos um ano está selecionado
+      if (anosReimportar.length === 0) {
+        alert('Selecione pelo menos um ano para importar!');
+        return;
+      }
+
       document.getElementById('btnProcessarBrutos').disabled = true;
       document.getElementById('brutosPhaseLog').innerHTML = '';
       setPipelineProgress(2);
 
       try {
         logPipeline('=== Iniciando Pipeline V2 ===');
+
+        // Informar sobre reimportação seletiva
+        if (anosReimportar.length < brutosAnos.length && brutosAnos[0] !== '_unico') {
+          var anosNaoSelecionados = brutosAnos.filter(function(ano) {
+            return !anosReimportar.includes(ano);
+          });
+          logPipeline('🔄 REIMPORTAÇÃO SELETIVA:');
+          logPipeline('   ✅ Importando: ' + anosReimportar.join(', '));
+          logPipeline('   📦 Preservando: ' + anosNaoSelecionados.join(', '));
+          logPipeline('');
+        }
+
         var t0 = performance.now();
         var abasAcumuladas = null;
         var totalAnos = brutosAnos.length;
@@ -1896,15 +2390,15 @@
           abasAcumuladas = empilharAbas(abasAcumuladas, abasAno);
           abasAno = null;
 
-          logPipeline('  → ' + anoLabel + ' concluído!');
-          await pipelineSleep(20);
+          logPipeline('  â†’ ' + anoLabel + ' concluído!');
+          await pipelineSleep(5);
         }
 
         setPipelineProgress(85);
         logPipeline('');
         logPipeline('=== Salvando no Banco de Dados ===');
 
-        // Converter matrizes acumuladas → objetos → IndexedDB
+        // Converter matrizes acumuladas â†’ objetos â†’ IndexedDB
         var resumoImportacao = [];
         var totalGeral = 0;
         var anosStr = totalAnos > 1 ? ' (' + brutosAnos.join(', ') + ')' : '';
@@ -1919,28 +2413,25 @@
             continue;
           }
 
-          logPipeline('  Salvando ' + aba.nome + ' → ' + storeName + '...');
+          logPipeline('  Salvando ' + aba.nome + ' â†’ ' + storeName + '...');
           setPipelineProgress(85 + Math.round(((s + 1) / abasAcumuladas.length) * 13));
 
           // Yield ao navegador antes da conversão pesada
-          await pipelineSleep(50);
-
-          // Converter matrix → array de objetos
+          // Converter matrix â†’ array de objetos
           // NÃO aplicar converterDatasArray: o pipeline V2 já retorna datas formatadas como strings.
           // converterDatasArray corrompe valores monetários entre 40000-60000 convertendo-os em datas.
-          var dados = matrixParaObjetos(aba.matrix);
+          var dados = await matrixParaObjetosAsync(aba.matrix);
           aba.matrix = null; // liberar matrix original após converter
 
           // Yield antes de salvar no DB
-          await pipelineSleep(50);
 
-          await salvarDadosDB(storeName, dados);
+          await salvarDadosDB(storeName, dados, anosReimportar);
 
           var nomeTipo = storeName.replace('despesas-', 'Despesas ').replace('-', ' ');
-          resumoImportacao.push('✓ ' + nomeTipo + ': ' + dados.length.toLocaleString() + ' registros');
+          resumoImportacao.push('âœ“ ' + nomeTipo + ': ' + dados.length.toLocaleString() + ' registros');
           totalGeral += dados.length;
 
-          logPipeline('    → ' + dados.length.toLocaleString() + ' registros salvos');
+          logPipeline('    â†’ ' + dados.length.toLocaleString() + ' registros salvos');
           dados = null;
         }
 
@@ -1949,7 +2440,7 @@
         // Registrar no histórico
         registrarImportacao(
           'despesas-pipeline-v2',
-          'Pipeline V2 (brutas → transformação → cruzamento)' + anosStr,
+          'Pipeline V2 (brutas -> transformacao -> cruzamento)' + anosStr,
           totalGeral,
           nomeArquivo
         );
@@ -1960,6 +2451,17 @@
         logPipeline('=== Pipeline concluído em ' + tempoSeg + 's! ===');
         logPipeline('Total: ' + totalGeral.toLocaleString() + ' registros importados.' + anosStr);
 
+        // Mensagem de reimportação seletiva
+        var msgSeletiva = '';
+        if (anosReimportar.length < brutosAnos.length && brutosAnos[0] !== '_unico') {
+          var anosNaoSelecionados = brutosAnos.filter(function(ano) {
+            return !anosReimportar.includes(ano);
+          });
+          msgSeletiva = '\n\n🔄 Reimportação seletiva:\n✅ Importados: ' + anosReimportar.join(', ') + '\n📦 Preservados: ' + anosNaoSelecionados.join(', ');
+          logPipeline('');
+          logPipeline('🔄 Anos preservados: ' + anosNaoSelecionados.join(', '));
+        }
+
         mostrarStatus(
           'Importação via Pipeline V2 concluída! ' + totalGeral.toLocaleString() + ' registros em ' + tempoSeg + 's.' + anosStr,
           'success'
@@ -1969,6 +2471,7 @@
           'IMPORTAÇÃO VIA PIPELINE V2 CONCLUÍDA!\n\n' +
           totalGeral.toLocaleString() + ' registros importados' + anosStr + ':\n\n' +
           resumoImportacao.join('\n') +
+          msgSeletiva +
           '\n\nAgora você pode acessar as páginas de despesas para visualizar os dados.'
         );
 
@@ -1983,3 +2486,5 @@
   </script>
 </body>
 </html>
+
+

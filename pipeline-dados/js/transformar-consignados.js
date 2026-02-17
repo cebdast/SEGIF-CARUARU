@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Transformação: Empenhos Retidos/Consignados Analítico por Data de Movimento
  *
  * Estrutura bruta (após desmesclar):
@@ -13,12 +13,12 @@
  *
  * Pipeline:
  *  1. Desmesclar (fillMergedCells)
- *  2. Detectar Unidade gestora → anotar + marcar
+ *  2. Detectar Unidade gestora â†’ anotar + marcar
  *  3. Deletar título (row 0)
  *  4. Remover linhas: sub-cabeçalhos, totais, marcadores UG, vazias
  *  5. Separar colunas mistas: Espécie/Doc fiscal e Despesa/Tipo retenção
  *  6. Fill-down: Data, Nr emp., Espécie, Unid. orçamentária, Despesa, Fonte, Beneficiário, Valor
- *  7. Renomear col 7 → "Valor Retido/Consignado", remover col 9
+ *  7. Renomear col 7 â†’ "Valor Retido/Consignado", remover col 9
  *  8. Formatar datas, Nr emp./ANO
  *  9. Inserir coluna "Unidade gestora"
  */
@@ -41,7 +41,7 @@ function transformarConsignados(workbook) {
 
   var linhasOriginal = matrix.length;
 
-  // ── 1) Detectar Unidade gestora ANTES de qualquer remoção ──
+  // â”€â”€ 1) Detectar Unidade gestora ANTES de qualquer remoção â”€â”€
   {
     var unidadeAtual = null;
     for (var r = 0; r < matrix.length; r++) {
@@ -73,19 +73,19 @@ function transformarConsignados(workbook) {
     }
   }
 
-  // ── 2) Deletar título (row 0: "Valores em R$") ──
+  // â”€â”€ 2) Deletar título (row 0: "Valores em R$") â”€â”€
   matrix.splice(0, 1);
 
   // Agora row 0 = cabeçalho
   // Colunas originais: 0=Data, 1=Nr emp., 2=Espécie, 3=Unid.orç, 4=Despesa,
   //                    5=Fonte, 6=Beneficiário, 7="", 8=Valor, 9=""
 
-  // Renomear Beneficiário → Credor/Fornecedor (para compatibilidade com cruzamentos)
+  // Renomear Beneficiário â†’ Credor/Fornecedor (para compatibilidade com cruzamentos)
   if (matrix[0] && matrix[0][6] && /benefici/i.test(String(matrix[0][6]))) {
     matrix[0][6] = 'Credor/Fornecedor';
   }
 
-  // ── 3) Filtrar linhas ──
+  // â”€â”€ 3) Filtrar linhas â”€â”€
   matrix = matrix.filter(function(row, r) {
     if (r === 0) return true;
 
@@ -111,7 +111,7 @@ function transformarConsignados(workbook) {
     return row.some(function(v) { return !isEmptyCell(v); });
   });
 
-  // ── 4) Separar colunas mistas ANTES do fill-down ──
+  // â”€â”€ 4) Separar colunas mistas ANTES do fill-down â”€â”€
   // Adicionar 2 novas colunas ao final: "Doc/nota fiscal" e "Tipo retenção"
   // Lógica: linhas de DETALHE (Nr emp. vazio, col 1) têm Doc fiscal na col 2 e Tipo retenção na col 4
   //         linhas de EMPENHO (Nr emp. preenchido) têm Espécie na col 2 e Despesa na col 4
@@ -141,7 +141,7 @@ function transformarConsignados(workbook) {
     }
 
     if (isDetalhe) {
-      // Linha de detalhe: mover col 2 → Doc/nota fiscal, col 4 → Tipo retenção
+      // Linha de detalhe: mover col 2 â†’ Doc/nota fiscal, col 4 â†’ Tipo retenção
       matrix[r][colDocFiscal] = matrix[r][2];
       matrix[r][colTipoRet] = matrix[r][4];
       // Limpar col 2 e col 4 para que fill-down preencha com dados do empenho
@@ -153,7 +153,7 @@ function transformarConsignados(workbook) {
     matrix[r]._valorEmpenho = valorEmpenhoAtual;
   }
 
-  // ── 4b) Doc/nota fiscal: subir valores 1 linha + fill-down ──
+  // â”€â”€ 4b) Doc/nota fiscal: subir valores 1 linha + fill-down â”€â”€
   // Os valores de Doc/nota fiscal estão 1 linha abaixo do empenho; subir para alinhar
   for (var r = 1; r < matrix.length - 1; r++) {
     matrix[r][colDocFiscal] = matrix[r + 1][colDocFiscal];
@@ -162,7 +162,7 @@ function transformarConsignados(workbook) {
   // Fill-down na coluna Doc/nota fiscal
   fillDown(matrix, colDocFiscal, 1);
 
-  // ── 5) Fill-down nas colunas chave ──
+  // â”€â”€ 5) Fill-down nas colunas chave â”€â”€
   // Data(0), Nr emp.(1), Espécie(2), Unid. orçamentária(3), Despesa(4), Fonte(5), Beneficiário(6)
   // NÃO inclui Valor (8) — Valor só pertence à linha de empenho
   var fillCols = [0, 1, 2, 3, 4, 5, 6];
@@ -170,7 +170,7 @@ function transformarConsignados(workbook) {
     fillDown(matrix, fillCols[fi], 1);
   }
 
-  // ── 5b) Adicionar coluna "Valor formula" ──
+  // â”€â”€ 5b) Adicionar coluna "Valor formula" â”€â”€
   // Se Valor do empenho é negativo, Valor Retido vira negativo; senão mantém
   var colValorFormula = matrix[0].length;
   for (var r = 0; r < matrix.length; r++) {
@@ -188,7 +188,7 @@ function transformarConsignados(workbook) {
     }
   }
 
-  // ── 6) Excluir colunas: col 9 (vazia), col 8 (Valor), col 7 (Valor Retido/Consignado) ──
+  // â”€â”€ 6) Excluir colunas: col 9 (vazia), col 8 (Valor), col 7 (Valor Retido/Consignado) â”€â”€
   // Deletar do maior índice para o menor para não deslocar
   var colsRemover = [9, 8, 7];
   for (var ci = 0; ci < colsRemover.length; ci++) {
@@ -202,16 +202,16 @@ function transformarConsignados(workbook) {
   colTipoRet -= 3;
   colValorFormula -= 3;
 
-  // Renomear "Valor formula" → "Valor Retido (R$)"
+  // Renomear "Valor formula" â†’ "Valor Retido (R$)"
   matrix[0][colValorFormula] = 'Valor Retido (R$)';
 
-  // ── 7) Filtrar: remover linhas sem Tipo retenção ──
+  // â”€â”€ 7) Filtrar: remover linhas sem Tipo retenção â”€â”€
   matrix = matrix.filter(function(row, r) {
     if (r === 0) return true; // cabeçalho
     return !isEmptyCell(row[colTipoRet]);
   });
 
-  // ── 8) Formatar coluna Data (0) como DD/MM/AAAA ──
+  // â”€â”€ 8) Formatar coluna Data (0) como DD/MM/AAAA â”€â”€
   for (var r = 1; r < matrix.length; r++) {
     var v = matrix[r][0];
     if (!isEmptyCell(v)) {
@@ -219,14 +219,14 @@ function transformarConsignados(workbook) {
     }
   }
 
-  // ── 9) Nr emp. → adicionar /ANO extraído da Data ──
+  // â”€â”€ 9) Nr emp. â†’ adicionar /ANO extraído da Data â”€â”€
   {
     var colNrEmp = 1;
     var colData = 0;
     formatNrEmpComAno(matrix, colNrEmp, colData, 1);
   }
 
-  // ── 10) Inserir coluna "Unidade gestora" na posição 1 ──
+  // â”€â”€ 10) Inserir coluna "Unidade gestora" na posição 1 â”€â”€
   for (var r = 0; r < matrix.length; r++) {
     matrix[r].splice(1, 0, null);
   }
@@ -235,7 +235,7 @@ function transformarConsignados(workbook) {
     matrix[r][1] = matrix[r]._unidadeGestora || null;
   }
 
-  // ── Montar workbook de saída ──
+  // â”€â”€ Montar workbook de saída â”€â”€
   var outSheet = matrixToSheet(matrix);
   var outWb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(outWb, outSheet, 'Consignados');
@@ -250,3 +250,5 @@ function transformarConsignados(workbook) {
     }
   };
 }
+
+

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGEF | Análise por Natureza - Caruaru</title>
+  <link rel="icon" type="image/png" href="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/portal-transparencia.css">
+  <script src="js/auth-check.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .btn-fullscreen {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .btn-fullscreen:hover {
+      background: #f1f5f9;
+      color: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .btn-fullscreen i {
+      font-size: 14px;
+    }
+
+    /* Estilos para modo tela cheia */
+    .fullscreen-mode {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+      background: white !important;
+      padding: 20px !important;
+      margin: 0 !important;
+      max-width: none !important;
+      overflow: auto !important;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .fullscreen-mode>div:last-child {
+      flex: 1;
+      height: auto !important;
+      max-width: none !important;
+    }
+
+    #chartNaturezaContainer {
+      position: relative;
+    }
+
+    #chartNaturezaContainer .btn-fullscreen {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 10;
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><img src="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png"
+          alt="Brasão Caruaru"></div>
+      <h1 class="sidebar-title">Secretaria da Fazenda</h1>
+      <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    <nav class="sidebar-menu" id="sidebarMenu"></nav>
+  </aside>
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <nav class="breadcrumb"><span>Análises</span><i class="fas fa-chevron-right"></i><span>Natureza da
+            Despesa</span></nav>
+      </div>
+      <div class="header-actions">
+        <div class="user-menu">
+          <div class="user-avatar">AD</div>
+          <div class="user-info"><span class="user-name">Administrador</span><span class="user-role">SIGEF</span></div>
+        </div>
+      </div>
+    </header>
+    <section class="page-header">
+      <div class="page-header-content">
+        <h1 class="page-title"><i class="fas fa-sitemap"></i> Análise por Natureza da Despesa</h1>
+        <p class="page-subtitle">Dashboard funcional-programático: Função > SubFunção > Programa > Ação com drill-down
+          interativo</p>
+      </div>
+    </section>
+    <main class="content-area">
+      <div class="filter-section">
+        <div class="filter-title"><i class="fas fa-filter"></i> Filtros</div>
+        <div class="filter-grid">
+          <div class="filter-group"><label class="filter-label">Exercício</label><select id="filtroAno"
+              class="filter-select"></select></div>
+          <div class="filter-group"><label class="filter-label">Nível</label><select id="filtroNivel"
+              class="filter-select" onchange="aplicarFiltros()">
+              <option value="Função">Função</option>
+              <option value="SubFunção">SubFunção</option>
+              <option value="Programa">Programa</option>
+              <option value="Ação">Ação</option>
+              <option value="Natureza da Despesa">Natureza da Despesa</option>
+            </select></div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
+          <button class="btn btn-primary" onclick="aplicarFiltros()"><i class="fas fa-search"></i> Buscar</button>
+        </div>
+      </div>
+
+      <!-- Breadcrumb de drill-down -->
+      <div id="drillBreadcrumb"
+        style="display: none; margin-bottom: 16px; padding: 12px 16px; background: #f1f5f9; border-radius: 8px; font-size: 13px;">
+        <i class="fas fa-layer-group" style="color: var(--color-primary); margin-right: 8px;"></i>
+        <span id="drillPath"></span>
+        <button class="btn btn-sm btn-secondary" onclick="voltarNivel()" style="margin-left: 12px;"><i
+            class="fas fa-arrow-left"></i> Voltar</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-sitemap"></i> <span id="tituloNivel">Distribuição por Função</span>
+          </h2>
+          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i
+                class="fas fa-sync-alt"></i> Carregando...</span></div>
+        </div>
+        <div class="card-body">
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="treemap">Treemap</button>
+            <button class="tab-btn" data-tab="tabela">Tabela</button>
+            <button class="tab-btn" data-tab="grafico">Gráfico</button>
+          </div>
+          <div class="tab-content active" id="treemap">
+            <div class="treemap-container" id="treemapContainer" style="min-height: 400px;"></div>
+          </div>
+          <div class="tab-content" id="tabela">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Classificação</th>
+                    <th style="text-align: center;">Registros</th>
+                    <th style="text-align: right;">Valor Empenhado</th>
+                    <th style="text-align: center;">% do Total</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaNatureza"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="tab-content" id="grafico">
+            <div id="chartNaturezaContainer" style="height: 500px; padding-top: 40px;">
+              <button onclick="toggleFullscreen('chartNaturezaContainer')" class="btn-fullscreen" title="Tela cheia">
+                <i class="fas fa-expand"></i>
+              </button>
+              <canvas id="chartNatureza"></canvas>
+            </div>
+          </div>
+          <div class="export-section">
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosPDF()"><i class="fas fa-file-pdf"></i>
+              PDF</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosExcel()"><i class="fas fa-file-excel"></i>
+              Excel</button>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer class="main-footer">
+      <div class="footer-content">
+        <p class="footer-text">© 2026 Prefeitura Municipal de Caruaru - SIGEF. Todos os direitos reservados.</p>
+      </div>
+    </footer>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="js/portal-transparencia.js"></script>
+  <script src="js/indexeddb-utils.js"></script>
+  <script src="js/exportar-dados.js"></script>
+  <script src="js/sidebar-menu.js"></script>
+  <script>
+    let todosOsDados = [];
+    let dadosFiltrados = [];
+    let nivelAtual = 'Função';
+    let filtrosDrill = {};
+    let charts = {};
+    let dadosExportacao = [];
+    const CORES = ['#3b82f6', '#2D9846', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#f97316', '#14b8a6', '#6366f1', '#84cc16', '#a855f7', '#0ea5e9', '#eab308', '#d946ef'];
+    const NIVEIS = ['Função', 'SubFunção', 'Programa', 'Ação', 'Natureza da Despesa'];
+
+    function formatarMoeda(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
+    function fmt(v) { if (v >= 1e9) return 'R$ ' + (v / 1e9).toFixed(1).replace('.', ',') + ' bi'; if (v >= 1e6) return 'R$ ' + (v / 1e6).toFixed(1).replace('.', ',') + ' mi'; if (v >= 1e3) return 'R$ ' + (v / 1e3).toFixed(1).replace('.', ',') + ' mil'; return formatarMoeda(v); }
+    function getValor(item, ...c) { for (let k of c) if (item[k] !== undefined && item[k] !== null && item[k] !== '') return item[k]; return null; }
+    function extrairAno(d) { if (!d) return null; const s = String(d).trim(); const m = s.match(/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/(\d{4})$/); if (m) return m[1]; if (s.includes('/')) { const p = s.split('/'); if (p.length === 3) return p[2].substring(0, 4); } if (s.includes('-') && !s.includes('/')) return s.substring(0, 4); return null; }
+
+    async function carregarDados() {
+      todosOsDados = await carregarDadosPortal('despesas-empenhados') || [];
+      const anos = new Set();
+      todosOsDados.forEach(d => { const a = extrairAno(getValor(d, 'Data')); if (a) anos.add(a); });
+      const sel = document.getElementById('filtroAno'); sel.innerHTML = '';
+      [...anos].sort().reverse().forEach((a, i) => sel.innerHTML += `<option value="${a}" ${i === 0 ? 'selected' : ''}>${a}</option>`);
+      aplicarFiltros(); atualizarDataUltimaImportacao();
+    }
+
+    function aplicarFiltros() {
+      const ano = document.getElementById('filtroAno').value;
+      nivelAtual = document.getElementById('filtroNivel').value;
+      filtrosDrill = {};
+      dadosFiltrados = todosOsDados.filter(d => extrairAno(getValor(d, 'Data')) === ano);
+      document.getElementById('drillBreadcrumb').style.display = 'none';
+      renderizar();
+    }
+
+    function renderizar() {
+      document.getElementById('tituloNivel').textContent = 'Distribuição por ' + nivelAtual;
+
+      // Aplicar drill-down filters
+      let dadosVisiveis = dadosFiltrados;
+      Object.entries(filtrosDrill).forEach(([campo, valor]) => {
+        dadosVisiveis = dadosVisiveis.filter(d => {
+          const v = getValor(d, campo, campo.replace('ç', 'c').replace('ã', 'a'));
+          return v === valor;
+        });
+      });
+
+      // Agrupar pelo nível atual
+      const agrupado = {};
+      dadosVisiveis.forEach(d => {
+        const chave = getValor(d, nivelAtual, nivelAtual.replace('ç', 'c').replace('ã', 'a'), nivelAtual.replace('Função', 'Funcao')) || 'Não informado';
+        const valor = parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0;
+        if (!agrupado[chave]) agrupado[chave] = { qtd: 0, valor: 0 };
+        agrupado[chave].qtd++;
+        agrupado[chave].valor += valor;
+      });
+
+      const lista = Object.entries(agrupado).map(([nome, v]) => ({ nome, ...v })).sort((a, b) => b.valor - a.valor);
+      const totalGeral = lista.reduce((s, l) => s + l.valor, 0);
+
+      // Treemap
+      const container = document.getElementById('treemapContainer');
+      container.innerHTML = lista.length === 0 ? '<div style="display:flex;align-items:center;justify-content:center;height:400px;color:var(--text-muted);">Nenhum dado encontrado</div>' :
+        lista.map((l, i) => {
+          const pct = totalGeral > 0 ? (l.valor / totalGeral * 100) : 0;
+          const width = Math.max(pct * 2, 8);
+          const height = Math.max(80, Math.min(200, pct * 5));
+          return `<div class="treemap-item" style="flex: ${Math.max(pct, 3)} 1 ${Math.max(120, pct * 3)}px; min-height: ${height}px; background: ${CORES[i % CORES.length]};" onclick="drillDown('${nivelAtual}', '${l.nome.replace(/'/g, "\\'")}')" title="${l.nome}: ${formatarMoeda(l.valor)} (${pct.toFixed(1)}%)">
+            <div class="treemap-label">${l.nome.substring(0, 30)}</div>
+            <div class="treemap-value">${fmt(l.valor)}</div>
+            <div style="font-size:10px;opacity:0.8;">${pct.toFixed(1)}%</div>
+          </div>`;
+        }).join('');
+
+      // Tabela
+      const tbody = document.getElementById('tabelaNatureza');
+      tbody.innerHTML = lista.map((l, i) => {
+        const pct = totalGeral > 0 ? (l.valor / totalGeral * 100) : 0;
+        const proxNivel = NIVEIS[NIVEIS.indexOf(nivelAtual) + 1];
+        return `<tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${CORES[i % CORES.length]};margin-right:8px;"></span>${l.nome}</td><td style="text-align:center;">${l.qtd.toLocaleString()}</td><td class="value" style="text-align:right;">${formatarMoeda(l.valor)}</td><td style="text-align:center;"><div style="display:flex;align-items:center;gap:6px;justify-content:center;"><div style="width:60px;height:6px;background:#e2e8f0;border-radius:3px;"><div style="width:${Math.min(pct, 100)}%;height:100%;background:${CORES[i % CORES.length]};border-radius:3px;"></div></div>${pct.toFixed(1)}%</div></td><td>${proxNivel ? `<button class="btn btn-sm btn-outline" onclick="drillDown('${nivelAtual}','${l.nome.replace(/'/g, "\\'")}')"><i class="fas fa-search-plus"></i></button>` : ''}</td></tr>`;
+      }).join('') || '<tr><td colspan="5" style="text-align:center;padding:40px;">Nenhum dado</td></tr>';
+      if (lista.length > 0) tbody.innerHTML += `<tr class="total-row"><td><strong>TOTAL</strong></td><td style="text-align:center;"><strong>${lista.reduce((s, l) => s + l.qtd, 0).toLocaleString()}</strong></td><td class="value" style="text-align:right;"><strong>${formatarMoeda(totalGeral)}</strong></td><td style="text-align:center;"><strong>100%</strong></td><td></td></tr>`;
+
+      dadosExportacao = lista.map(l => ({ [nivelAtual]: l.nome, 'Registros': l.qtd, 'Valor Empenhado': l.valor, '% do Total': totalGeral > 0 ? (l.valor / totalGeral * 100).toFixed(2) + '%' : '0%' }));
+
+      // Gráfico
+      if (charts.natureza) charts.natureza.destroy();
+      const top15 = lista.slice(0, 15);
+      charts.natureza = new Chart(document.getElementById('chartNatureza'), { type: 'bar', data: { labels: top15.map(l => l.nome.substring(0, 25)), datasets: [{ label: 'Valor Empenhado', data: top15.map(l => l.valor), backgroundColor: top15.map((_, i) => CORES[i % CORES.length]), borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { callback: v => fmt(v) } }, y: { grid: { display: false } } } } });
+    }
+
+    function drillDown(campo, valor) {
+      const proxNivelIdx = NIVEIS.indexOf(nivelAtual) + 1;
+      if (proxNivelIdx >= NIVEIS.length) return;
+      filtrosDrill[campo] = valor;
+      nivelAtual = NIVEIS[proxNivelIdx];
+      document.getElementById('filtroNivel').value = nivelAtual;
+
+      // Breadcrumb
+      const bc = document.getElementById('drillBreadcrumb');
+      bc.style.display = 'block';
+      document.getElementById('drillPath').innerHTML = Object.entries(filtrosDrill).map(([c, v]) => `<strong>${c}:</strong> ${v}`).join(' <i class="fas fa-chevron-right" style="font-size:10px;margin:0 6px;color:#94a3b8;"></i> ');
+      renderizar();
+    }
+
+    function voltarNivel() {
+      const keys = Object.keys(filtrosDrill);
+      if (keys.length > 0) {
+        const lastKey = keys[keys.length - 1];
+        delete filtrosDrill[lastKey];
+        nivelAtual = lastKey;
+        document.getElementById('filtroNivel').value = nivelAtual;
+      }
+      if (Object.keys(filtrosDrill).length === 0) document.getElementById('drillBreadcrumb').style.display = 'none';
+      else document.getElementById('drillPath').innerHTML = Object.entries(filtrosDrill).map(([c, v]) => `<strong>${c}:</strong> ${v}`).join(' <i class="fas fa-chevron-right" style="font-size:10px;margin:0 6px;color:#94a3b8;"></i> ');
+      renderizar();
+    }
+
+    function exportarDadosExcel() { exportarExcel(dadosExportacao, 'natureza-despesa'); }
+    function exportarDadosPDF() { exportarPDF(dadosExportacao, 'natureza-despesa', 'Análise por Natureza da Despesa - ' + nivelAtual); }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof renderSidebarMenu === 'function') renderSidebarMenu('despesas-natureza.html');
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', function () { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); this.classList.add('active'); document.getElementById(this.dataset.tab).classList.add('active'); }));
+      carregarDados();
+    });
+
+    // Função para alternar tela cheia
+    function toggleFullscreen(containerId) {
+      const container = document.getElementById(containerId);
+      const btn = container.querySelector('.btn-fullscreen i');
+
+      if (!container.classList.contains('fullscreen-mode')) {
+        container.classList.add('fullscreen-mode');
+        // Ajustar padding no modo tela cheia
+        container.style.paddingTop = '60px';
+        btn.classList.remove('fa-expand');
+        btn.classList.add('fa-compress');
+
+        // Redimensionar gráfico após entrar em tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      } else {
+        container.classList.remove('fullscreen-mode');
+        container.style.paddingTop = '40px';
+        btn.classList.remove('fa-compress');
+        btn.classList.add('fa-expand');
+
+        // Redimensionar gráfico após sair de tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      }
+
+      // Fechar tela cheia com ESC
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && container.classList.contains('fullscreen-mode')) {
+          toggleFullscreen(containerId);
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>

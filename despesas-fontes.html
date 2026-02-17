@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGEF | Controle por Fonte de Recursos - Caruaru</title>
+  <link rel="icon" type="image/png" href="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/portal-transparencia.css">
+  <script src="js/auth-check.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .btn-fullscreen {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .btn-fullscreen:hover {
+      background: #f1f5f9;
+      color: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .btn-fullscreen i {
+      font-size: 14px;
+    }
+
+    /* Estilos para modo tela cheia */
+    .fullscreen-mode {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+      background: white !important;
+      padding: 20px !important;
+      margin: 0 !important;
+      max-width: none !important;
+      overflow: auto !important;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .fullscreen-mode>div:last-child {
+      flex: 1;
+      height: auto !important;
+      max-width: none !important;
+    }
+
+    #chartFontesContainer {
+      position: relative;
+    }
+
+    #chartFontesContainer .btn-fullscreen {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 10;
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><img src="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png"
+          alt="Brasão Caruaru"></div>
+      <h1 class="sidebar-title">Secretaria da Fazenda</h1>
+      <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    <nav class="sidebar-menu" id="sidebarMenu"></nav>
+  </aside>
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <nav class="breadcrumb"><span>Análises</span><i class="fas fa-chevron-right"></i><span>Fontes de Recursos</span>
+        </nav>
+      </div>
+      <div class="header-actions">
+        <div class="user-menu">
+          <div class="user-avatar">AD</div>
+          <div class="user-info"><span class="user-name">Administrador</span><span class="user-role">SIGEF</span></div>
+        </div>
+      </div>
+    </header>
+    <section class="page-header">
+      <div class="page-header-content">
+        <h1 class="page-title"><i class="fas fa-layer-group"></i> Controle por Fonte de Recursos</h1>
+        <p class="page-subtitle">Cruzamento de receitas arrecadadas vs despesas empenhadas por fonte</p>
+      </div>
+    </section>
+    <main class="content-area">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-layer-group"></i></div>
+          <div class="stat-content">
+            <div class="stat-label">Total de Fontes</div>
+            <div class="stat-value" id="kpiTotalFontes">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-content">
+            <div class="stat-label">Fontes com Saldo Positivo</div>
+            <div class="stat-value" id="kpiFontesPositivas">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="stat-content">
+            <div class="stat-label">Fontes com Saldo Negativo</div>
+            <div class="stat-value" id="kpiFontesNegativas">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-money-bill-wave"></i></div>
+          <div class="stat-content">
+            <div class="stat-label">Total Empenhado</div>
+            <div class="stat-value" id="kpiTotalEmpFonte">R$ 0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-title"><i class="fas fa-filter"></i> Filtros</div>
+        <div class="filter-grid">
+          <div class="filter-group"><label class="filter-label">Exercício</label><select id="filtroAno"
+              class="filter-select"></select></div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
+          <button class="btn btn-primary" onclick="aplicarFiltros()"><i class="fas fa-search"></i> Buscar</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-layer-group"></i> Despesas por Fonte de Recursos</h2>
+          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i
+                class="fas fa-sync-alt"></i> Carregando...</span></div>
+        </div>
+        <div class="card-body">
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="tabela">Tabela</button>
+            <button class="tab-btn" data-tab="grafico">Gráfico</button>
+          </div>
+          <div class="tab-content active" id="tabela">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Fonte de Recursos</th>
+                    <th style="text-align: right;">Empenhado</th>
+                    <th style="text-align: right;">Liquidado</th>
+                    <th style="text-align: right;">Pago</th>
+                    <th style="text-align: center;">% Execução</th>
+                    <th style="text-align: center;">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaFontes"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="tab-content" id="grafico">
+            <div id="chartFontesContainer" style="height: 500px; padding-top: 40px;">
+              <button onclick="toggleFullscreen('chartFontesContainer')" class="btn-fullscreen" title="Tela cheia">
+                <i class="fas fa-expand"></i>
+              </button>
+              <canvas id="chartFontes"></canvas>
+            </div>
+          </div>
+          <div class="export-section">
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosPDF()"><i class="fas fa-file-pdf"></i>
+              PDF</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosExcel()"><i class="fas fa-file-excel"></i>
+              Excel</button>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer class="main-footer">
+      <div class="footer-content">
+        <p class="footer-text">© 2026 Prefeitura Municipal de Caruaru - SIGEF. Todos os direitos reservados.</p>
+      </div>
+    </footer>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="js/portal-transparencia.js"></script>
+  <script src="js/indexeddb-utils.js"></script>
+  <script src="js/exportar-dados.js"></script>
+  <script src="js/sidebar-menu.js"></script>
+  <script>
+    let dados = { empenhados: [], liquidados: [], pagos: [] };
+    let charts = {};
+    let dadosExportacao = [];
+    function formatarMoeda(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
+    function fmt(v) { if (v >= 1e9) return 'R$ ' + (v / 1e9).toFixed(1).replace('.', ',') + ' bi'; if (v >= 1e6) return 'R$ ' + (v / 1e6).toFixed(1).replace('.', ',') + ' mi'; if (v >= 1e3) return 'R$ ' + (v / 1e3).toFixed(1).replace('.', ',') + ' mil'; return formatarMoeda(v); }
+    function getValor(item, ...campos) { for (let c of campos) if (item[c] !== undefined && item[c] !== null && item[c] !== '') return item[c]; return null; }
+    function extrairAno(d) { if (!d) return null; const s = String(d).trim(); const m = s.match(/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/(\d{4})$/); if (m) return m[1]; if (s.includes('/')) { const p = s.split('/'); if (p.length === 3) return p[2].substring(0, 4); } if (s.includes('-') && !s.includes('/')) return s.substring(0, 4); return null; }
+
+    async function carregarDados() {
+      const [emp, liq, pag] = await Promise.all([carregarDadosPortal('despesas-empenhados'), carregarDadosPortal('despesas-liquidados'), carregarDadosPortal('despesas-pagos')]);
+      dados.empenhados = emp || []; dados.liquidados = liq || []; dados.pagos = pag || [];
+      const anos = new Set();
+      dados.empenhados.forEach(d => { const a = extrairAno(getValor(d, 'Data')); if (a) anos.add(a); });
+      const sel = document.getElementById('filtroAno');
+      sel.innerHTML = '';
+      [...anos].sort().reverse().forEach((a, i) => sel.innerHTML += `<option value="${a}" ${i === 0 ? 'selected' : ''}>${a}</option>`);
+      aplicarFiltros();
+      atualizarDataUltimaImportacao();
+    }
+
+    function aplicarFiltros() {
+      const ano = document.getElementById('filtroAno').value;
+      const porFonte = {};
+
+      ['empenhados', 'liquidados', 'pagos'].forEach(tipo => {
+        const campo = tipo === 'empenhados' ? 'empenhado' : tipo === 'liquidados' ? 'liquidado' : 'pago';
+        dados[tipo].filter(d => extrairAno(getValor(d, 'Data')) === ano).forEach(d => {
+          const fonte = getValor(d, 'Fonte de recursos', 'Fonte de Recursos') || 'Não informado';
+          if (!porFonte[fonte]) porFonte[fonte] = { empenhado: 0, liquidado: 0, pago: 0 };
+          porFonte[fonte][campo] += parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0;
+        });
+      });
+
+      const lista = Object.entries(porFonte).map(([nome, v]) => ({ nome, ...v, pctExec: v.empenhado > 0 ? v.pago / v.empenhado * 100 : 0 })).sort((a, b) => b.empenhado - a.empenhado);
+
+      let totalEmp = 0, fontesPos = 0, fontesNeg = 0;
+      lista.forEach(l => { totalEmp += l.empenhado; if (l.empenhado - l.pago > 0) fontesPos++; else fontesNeg++; });
+
+      document.getElementById('kpiTotalFontes').textContent = lista.length;
+      document.getElementById('kpiFontesPositivas').textContent = fontesPos;
+      document.getElementById('kpiFontesNegativas').textContent = fontesNeg;
+      document.getElementById('kpiTotalEmpFonte').textContent = fmt(totalEmp);
+      document.getElementById('kpiTotalEmpFonte').title = formatarMoeda(totalEmp);
+
+      const tbody = document.getElementById('tabelaFontes');
+      tbody.innerHTML = lista.map(l => {
+        const cor = l.pctExec > 90 ? '#ef4444' : l.pctExec > 70 ? '#f59e0b' : '#2D9846';
+        return `<tr><td title="${l.nome}">${l.nome.substring(0, 50)}</td><td class="value" style="text-align:right;">${formatarMoeda(l.empenhado)}</td><td class="value" style="text-align:right;">${formatarMoeda(l.liquidado)}</td><td class="value" style="text-align:right;">${formatarMoeda(l.pago)}</td>
+        <td style="text-align:center;"><div style="display:flex;align-items:center;gap:6px;justify-content:center;"><div style="width:50px;height:6px;background:#e2e8f0;border-radius:3px;"><div style="width:${Math.min(l.pctExec, 100)}%;height:100%;background:${cor};border-radius:3px;"></div></div>${l.pctExec.toFixed(1)}%</div></td>
+        <td style="text-align:center;"><span class="badge" style="background:${cor}15;color:${cor};">${l.pctExec > 90 ? 'Atenção' : 'Normal'}</span></td></tr>`;
+      }).join('') || '<tr><td colspan="6" style="text-align:center;padding:40px;">Nenhum dado encontrado</td></tr>';
+
+      dadosExportacao = lista.map(l => ({ 'Fonte': l.nome, 'Empenhado': l.empenhado, 'Liquidado': l.liquidado, 'Pago': l.pago, '% Execução': l.pctExec.toFixed(2) + '%' }));
+
+      if (charts.fontes) charts.fontes.destroy();
+      const top10 = lista.slice(0, 10);
+      charts.fontes = new Chart(document.getElementById('chartFontes'), {
+        type: 'bar', data: {
+          labels: top10.map(l => l.nome.substring(0, 30)), datasets: [
+            { label: 'Empenhado', data: top10.map(l => l.empenhado), backgroundColor: '#3b82f6', borderRadius: 4 },
+            { label: 'Pago', data: top10.map(l => l.pago), backgroundColor: '#2D9846', borderRadius: 4 }
+          ]
+        }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } }, scales: { x: { grid: { display: false } }, y: { grid: { display: false }, ticks: { callback: v => fmt(v) } } } }
+      });
+    }
+
+    function exportarDadosExcel() { exportarExcel(dadosExportacao, 'fontes-recursos'); }
+    function exportarDadosPDF() { exportarPDF(dadosExportacao, 'fontes-recursos', 'Controle por Fonte de Recursos'); }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof renderSidebarMenu === 'function') renderSidebarMenu('despesas-fontes.html');
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', function () {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        this.classList.add('active'); document.getElementById(this.dataset.tab).classList.add('active');
+      }));
+      carregarDados();
+    });
+
+    // Função para alternar tela cheia
+    function toggleFullscreen(containerId) {
+      const container = document.getElementById(containerId);
+      const btn = container.querySelector('.btn-fullscreen i');
+
+      if (!container.classList.contains('fullscreen-mode')) {
+        container.classList.add('fullscreen-mode');
+        // Ajustar padding no modo tela cheia
+        container.style.paddingTop = '60px';
+        btn.classList.remove('fa-expand');
+        btn.classList.add('fa-compress');
+
+        // Redimensionar gráfico após entrar em tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      } else {
+        container.classList.remove('fullscreen-mode');
+        container.style.paddingTop = '40px';
+        btn.classList.remove('fa-compress');
+        btn.classList.add('fa-expand');
+
+        // Redimensionar gráfico após sair de tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      }
+
+      // Fechar tela cheia com ESC
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && container.classList.contains('fullscreen-mode')) {
+          toggleFullscreen(containerId);
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>

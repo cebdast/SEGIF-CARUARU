@@ -1,10 +1,10 @@
-/**
+﻿/**
  * Transformação: Relação de Credores/Fornecedores
  * Port de CPFECNPJ.py
  *
  * Pipeline:
  * 1. Ler planilha como texto (preservar zeros à esquerda)
- * 2. Extrair CPF/CNPJ da coluna "CPF/CNPJ" → apenas 11 ou 14 dígitos
+ * 2. Extrair CPF/CNPJ da coluna "CPF/CNPJ" â†’ apenas 11 ou 14 dígitos
  * 3. Criar coluna Tipo (CPF ou CNPJ)
  * 4. Remover linhas sem CPF/CNPJ válido
  * 5. Manter apenas colunas: Código, Credor/Fornecedor, CPF/CNPJ, Cidade - UF, CPF_CNPJ, Tipo
@@ -64,3 +64,4 @@ function transformarCredores(workbook) {
     }
   };
 }
+

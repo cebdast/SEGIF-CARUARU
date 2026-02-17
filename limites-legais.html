@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGEF | Limites Legais - Caruaru</title>
+  <link rel="icon" type="image/png" href="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/portal-transparencia.css">
+  <script src="js/auth-check.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 28px 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .limits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .limit-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+      text-align: center;
+    }
+
+    .limit-card .lc-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .limit-card .circular-progress {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    .limit-card .progress-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .limit-card .progress-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .limit-card .progress-label {
+      font-size: 9px;
+      color: #94a3b8;
+    }
+
+    .limit-card .lc-detail {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .limit-card .lc-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-top: 8px;
+    }
+
+    .status-cumprido {
+      background: #f0fdf4;
+      color: #16a34a;
+    }
+
+    .status-alerta {
+      background: #fffbeb;
+      color: #d97706;
+    }
+
+    .status-descumprido {
+      background: #fef2f2;
+      color: #dc2626;
+    }
+
+    .hist-chart-container {
+      height: 60px;
+      margin-top: 10px;
+    }
+
+    .equil-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+    }
+
+    .equil-card .eq-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .equil-card .eq-row:last-child {
+      border-bottom: none;
+    }
+
+    .eq-label {
+      font-size: 13px;
+      color: #475569;
+      font-weight: 500;
+    }
+
+    .eq-value {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .eq-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 12px;
+    }
+
+    .btn-fullscreen {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 4px 8px;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: -30px;
+      right: 0;
+    }
+
+    .btn-fullscreen:hover {
+      background: #f1f5f9;
+      color: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .btn-fullscreen i {
+      font-size: 12px;
+    }
+
+    /* Estilos para modo tela cheia */
+    .fullscreen-mode {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+      background: white !important;
+      padding: 20px !important;
+      margin: 0 !important;
+      max-width: none !important;
+      overflow: auto !important;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .fullscreen-mode canvas {
+      height: 100% !important;
+      width: 100% !important;
+    }
+
+    .limit-card {
+      position: relative;
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><img src="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png"
+          alt="Brasão Caruaru"></div>
+      <h1 class="sidebar-title">Secretaria da Fazenda</h1>
+      <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    <nav class="sidebar-menu" id="sidebarMenu"></nav>
+  </aside>
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <nav class="breadcrumb"><span>Análises</span><i class="fas fa-chevron-right"></i><span>Limites Legais</span>
+        </nav>
+      </div>
+      <div class="header-actions">
+        <div class="user-menu">
+          <div class="user-avatar">AD</div>
+          <div class="user-info"><span class="user-name">Administrador</span><span class="user-role">SIGEF</span></div>
+        </div>
+      </div>
+    </header>
+    <section class="page-header">
+      <div class="page-header-content">
+        <h1 class="page-title"><i class="fas fa-gavel"></i> Painel de Limites Legais</h1>
+        <p class="page-subtitle">Monitoramento dos limites constitucionais e legais - TCE-PE</p>
+      </div>
+    </section>
+    <main class="content-area">
+      <!-- Info RCL -->
+      <div
+        style="background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%); border: 1px solid #fde047; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <i class="fas fa-info-circle" style="color: #ca8a04; font-size: 18px;"></i>
+          <div>
+            <strong style="color: #854d0e;">Nota:</strong>
+            <span style="color: #713f12; font-size: 13px;">Os percentuais são calculados com base nos dados importados.
+              Para valores precisos de RCL, informe abaixo.</span>
+          </div>
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <div class="filter-group" style="margin: 0;">
+              <label style="font-size: 11px; font-weight: 600; color: #854d0e;">Exercício:</label>
+              <select id="filtroAno" class="filter-select" style="min-width: 80px;" onchange="recalcular()"></select>
+            </div>
+            <div class="filter-group" style="margin: 0;">
+              <label style="font-size: 11px; font-weight: 600; color: #854d0e;">RCL (R$):</label>
+              <input type="text" id="inputRCL" class="filter-input" style="width: 180px;"
+                placeholder="Ex: 1.348.606.032" oninput="recalcular()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEÇÃO: Limites Constitucionais -->
+      <div class="section-title"><i class="fas fa-landmark" style="color: #3b82f6;"></i> Limites Constitucionais</div>
+      <div class="limits-grid">
+        <!-- Pessoal -->
+        <div class="limit-card">
+          <div class="lc-title"><i class="fas fa-users" style="color: #3b82f6;"></i> Despesa com Pessoal</div>
+          <div class="circular-progress">
+            <svg width="110" height="110">
+              <circle cx="55" cy="55" r="45" fill="none" stroke="#e2e8f0" stroke-width="9" />
+              <circle id="circPessoal" cx="55" cy="55" r="45" fill="none" stroke="#2D9846" stroke-width="9"
+                stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round" transform="rotate(-90 55 55)" />
+            </svg>
+            <div class="progress-text">
+              <div class="progress-value" id="pctPessoal">-</div>
+              <div class="progress-label">máx 54% RCL</div>
+            </div>
+          </div>
+          <div class="lc-detail" id="detPessoal">Art. 20, LRF</div>
+          <div class="lc-status" id="statusPessoal">-</div>
+          <div style="position: relative;">
+            <div id="histPessoalContainer" class="hist-chart-container">
+              <canvas id="histPessoal"></canvas>
+            </div>
+            <button onclick="toggleFullscreen('histPessoalContainer')" class="btn-fullscreen" title="Tela cheia"
+              style="top: 0; right: 0;">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
+        </div>
+        <!-- Educação -->
+        <div class="limit-card">
+          <div class="lc-title"><i class="fas fa-graduation-cap" style="color: #f59e0b;"></i> Manutenção do Ensino</div>
+          <div class="circular-progress">
+            <svg width="110" height="110">
+              <circle cx="55" cy="55" r="45" fill="none" stroke="#e2e8f0" stroke-width="9" />
+              <circle id="circEducacao" cx="55" cy="55" r="45" fill="none" stroke="#2D9846" stroke-width="9"
+                stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round" transform="rotate(-90 55 55)" />
+            </svg>
+            <div class="progress-text">
+              <div class="progress-value" id="pctEducacao">-</div>
+              <div class="progress-label">mín 25%</div>
+            </div>
+          </div>
+          <div class="lc-detail" id="detEducacao">Art. 212, CF</div>
+          <div class="lc-status" id="statusEducacao">-</div>
+          <div style="position: relative;">
+            <div id="histEducacaoContainer" class="hist-chart-container">
+              <canvas id="histEducacao"></canvas>
+            </div>
+            <button onclick="toggleFullscreen('histEducacaoContainer')" class="btn-fullscreen" title="Tela cheia"
+              style="top: 0; right: 0;">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
+        </div>
+        <!-- Saúde -->
+        <div class="limit-card">
+          <div class="lc-title"><i class="fas fa-heartbeat" style="color: #ef4444;"></i> Ações de Saúde</div>
+          <div class="circular-progress">
+            <svg width="110" height="110">
+              <circle cx="55" cy="55" r="45" fill="none" stroke="#e2e8f0" stroke-width="9" />
+              <circle id="circSaude" cx="55" cy="55" r="45" fill="none" stroke="#2D9846" stroke-width="9"
+                stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round" transform="rotate(-90 55 55)" />
+            </svg>
+            <div class="progress-text">
+              <div class="progress-value" id="pctSaude">-</div>
+              <div class="progress-label">mín 15%</div>
+            </div>
+          </div>
+          <div class="lc-detail" id="detSaude">Art. 7°, LC 141/2012</div>
+          <div class="lc-status" id="statusSaude">-</div>
+          <div style="position: relative;">
+            <div id="histSaudeContainer" class="hist-chart-container">
+              <canvas id="histSaude"></canvas>
+            </div>
+            <button onclick="toggleFullscreen('histSaudeContainer')" class="btn-fullscreen" title="Tela cheia"
+              style="top: 0; right: 0;">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEÇÃO: Equilíbrio Fiscal -->
+      <div class="section-title"><i class="fas fa-balance-scale" style="color: #8b5cf6;"></i> Equilíbrio Fiscal</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px;">
+        <div class="equil-card">
+          <h3 style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 12px;"><i
+              class="fas fa-exchange-alt" style="color: #8b5cf6; margin-right: 6px;"></i> Relação DC/RC (Art. 167-A, CF)
+          </h3>
+          <div class="eq-row">
+            <span class="eq-label">Despesa Corrente</span>
+            <span class="eq-value" id="valDC">-</span>
+          </div>
+          <div class="eq-row">
+            <span class="eq-label">Receita Corrente</span>
+            <span class="eq-value" id="valRC">-</span>
+          </div>
+          <div class="eq-row">
+            <span class="eq-label">Relação DC/RC</span>
+            <span class="eq-value" id="valDCRC">-</span>
+          </div>
+          <div class="eq-row">
+            <span class="eq-label">Situação (limite 95%)</span>
+            <span id="statusDCRC"><span class="eq-badge" style="background: #f1f5f9; color: #64748b;">-</span></span>
+          </div>
+        </div>
+        <div class="equil-card">
+          <h3 style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 12px;"><i
+              class="fas fa-chart-line" style="color: #22c55e; margin-right: 6px;"></i> Resultado Orçamentário</h3>
+          <div class="eq-row">
+            <span class="eq-label">Receita Arrecadada</span>
+            <span class="eq-value" id="valRecArr">-</span>
+          </div>
+          <div class="eq-row">
+            <span class="eq-label">Despesa Empenhada</span>
+            <span class="eq-value" id="valDespEmp">-</span>
+          </div>
+          <div class="eq-row">
+            <span class="eq-label">Resultado</span>
+            <span class="eq-value" id="valResultado">-</span>
+          </div>
+          <div class="eq-row">
+            <span class="eq-label">QDA (Arrecadado/Previsto)</span>
+            <span class="eq-value" id="valQDA">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela por Função -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-table"></i> Detalhamento por Função</h2>
+          <div class="card-actions">
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosPDF()"><i class="fas fa-file-pdf"></i>
+              PDF</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosExcel()"><i class="fas fa-file-excel"></i>
+              Excel</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Função</th>
+                  <th style="text-align:right;">Empenhado</th>
+                  <th style="text-align:right;">Liquidado</th>
+                  <th style="text-align:right;">Pago</th>
+                  <th style="text-align:center;">% do Total</th>
+                  <th style="text-align:center;">Status</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaFuncoes"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer class="main-footer">
+      <div class="footer-content">
+        <p class="footer-text">© 2026 Prefeitura Municipal de Caruaru - SIGEF. Todos os direitos reservados.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="js/portal-transparencia.js"></script>
+  <script src="js/indexeddb-utils.js"></script>
+  <script src="js/exportar-dados.js"></script>
+  <script src="js/sidebar-menu.js"></script>
+  <script>
+    let dados = { empenhados: [], liquidados: [], pagos: [], recArrecadacao: [], recPrevisao: [] };
+    let dadosExportacao = [];
+    let histCharts = {};
+    const CIRC = 2 * Math.PI * 45;
+
+    function formatarMoeda(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
+    function fmt(v) { if (Math.abs(v) >= 1e9) return 'R$ ' + (v / 1e9).toFixed(2).replace('.', ',') + ' bi'; if (Math.abs(v) >= 1e6) return 'R$ ' + (v / 1e6).toFixed(1).replace('.', ',') + ' mi'; if (Math.abs(v) >= 1e3) return 'R$ ' + (v / 1e3).toFixed(0).replace('.', ',') + ' mil'; return formatarMoeda(v); }
+    function getValor(item, ...c) { for (let k of c) if (item[k] !== undefined && item[k] !== null && item[k] !== '') return item[k]; return null; }
+    function extrairAno(d) { if (!d) return null; const s = String(d).trim(); const m = s.match(/(\d{4})/); return m ? m[1] : null; }
+    function parseValor(item, ...campos) { const v = getValor(item, ...campos); if (v === null) return 0; if (typeof v === 'number') return v; const s = String(v).replace(/[R$\s]/g, ''); if (s.includes(',') && s.includes('.')) return parseFloat(s.replace(/\./g, '').replace(',', '.')); if (s.includes(',')) return parseFloat(s.replace(',', '.')); return parseFloat(s) || 0; }
+
+    function setCircular(id, pct, cor) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.strokeDashoffset = CIRC - (Math.min(Math.max(pct, 0), 100) / 100 * CIRC);
+      el.style.stroke = cor;
+    }
+    function corLimite(pct, tipo) {
+      if (tipo === 'max') return pct > 90 ? '#ef4444' : pct > 70 ? '#f59e0b' : '#2D9846';
+      return pct >= 100 ? '#2D9846' : pct >= 80 ? '#f59e0b' : '#ef4444';
+    }
+    function statusHTML(ok, tipo) {
+      if (tipo === 'max') {
+        if (ok) return '<span class="lc-status status-cumprido"><i class="fas fa-check-circle"></i> Cumprido</span>';
+        return '<span class="lc-status status-descumprido"><i class="fas fa-times-circle"></i> Descumprido</span>';
+      }
+      if (ok) return '<span class="lc-status status-cumprido"><i class="fas fa-check-circle"></i> Cumprido</span>';
+      return '<span class="lc-status status-descumprido"><i class="fas fa-exclamation-triangle"></i> Abaixo do mínimo</span>';
+    }
+
+    async function carregarDados() {
+      const [emp, liq, pag, recA, recP] = await Promise.all([
+        carregarDadosPortal('despesas-empenhados'), carregarDadosPortal('despesas-liquidados'),
+        carregarDadosPortal('despesas-pagos'), carregarDadosPortal('receitas-arrecadacao'), carregarDadosPortal('receitas-previsao')
+      ]);
+      dados.empenhados = emp || []; dados.liquidados = liq || []; dados.pagos = pag || [];
+      dados.recArrecadacao = recA || []; dados.recPrevisao = recP || [];
+
+      const anos = new Set();
+      dados.empenhados.forEach(d => { const a = extrairAno(getValor(d, 'Data')); if (a) anos.add(a); });
+      dados.recArrecadacao.forEach(d => { const a = extrairAno(getValor(d, 'Data')); if (a) anos.add(a); });
+      const sel = document.getElementById('filtroAno'); sel.innerHTML = '';
+      [...anos].sort().reverse().forEach((a, i) => sel.innerHTML += `<option value="${a}" ${i === 0 ? 'selected' : ''}>${a}</option>`);
+      recalcular();
+    }
+
+    function calcularPorFuncaoAno(ano) {
+      const porFuncao = {};
+      let totEmp = 0, totLiq = 0, totPag = 0;
+      ['empenhados', 'liquidados', 'pagos'].forEach(tipo => {
+        const campo = tipo === 'empenhados' ? 'empenhado' : tipo === 'liquidados' ? 'liquidado' : 'pago';
+        dados[tipo].filter(d => extrairAno(getValor(d, 'Data')) === ano).forEach(d => {
+          const f = getValor(d, 'Função') || 'Não informado';
+          if (!porFuncao[f]) porFuncao[f] = { empenhado: 0, liquidado: 0, pago: 0 };
+          const v = parseValor(d, 'Valor (R$)', 'Valor(R$)', 'Valor', 'Valor retido');
+          porFuncao[f][campo] += v;
+          if (campo === 'empenhado') totEmp += v;
+          if (campo === 'liquidado') totLiq += v;
+          if (campo === 'pago') totPag += v;
+        });
+      });
+      return { porFuncao, totEmp, totLiq, totPag };
+    }
+
+    function recalcular() {
+      const ano = document.getElementById('filtroAno').value;
+      const rclInput = document.getElementById('inputRCL').value.replace(/\D/g, '');
+      const rcl = rclInput ? parseFloat(rclInput) : 0;
+
+      const { porFuncao, totEmp, totLiq, totPag } = calcularPorFuncaoAno(ano);
+      const base = rcl > 0 ? rcl : totEmp;
+      const baseLabel = rcl > 0 ? 'RCL' : 'total emp.';
+
+      // Detectar funções
+      const educKeys = Object.keys(porFuncao).filter(k => k.toLowerCase().includes('educa'));
+      const saudeKeys = Object.keys(porFuncao).filter(k => k.toLowerCase().includes('saúde') || k.toLowerCase().includes('saude'));
+      const pessoalKeys = Object.keys(porFuncao).filter(k => k.toLowerCase().includes('pessoal') || k.toLowerCase().includes('administra'));
+
+      let totEduc = 0, totSaude = 0, totPessoal = 0;
+      educKeys.forEach(k => totEduc += porFuncao[k].empenhado);
+      saudeKeys.forEach(k => totSaude += porFuncao[k].empenhado);
+      pessoalKeys.forEach(k => totPessoal += porFuncao[k].empenhado);
+
+      const pctP = base > 0 ? (totPessoal / base * 100) : 0;
+      const pctE = base > 0 ? (totEduc / base * 100) : 0;
+      const pctS = base > 0 ? (totSaude / base * 100) : 0;
+
+      // Pessoal
+      document.getElementById('pctPessoal').textContent = pctP.toFixed(1) + '%';
+      setCircular('circPessoal', Math.min(pctP / 54 * 100, 100), corLimite(pctP / 54 * 100, 'max'));
+      document.getElementById('detPessoal').innerHTML = `${fmt(totPessoal)} de ${fmt(base * 0.54)} (54% ${baseLabel})`;
+      document.getElementById('statusPessoal').innerHTML = statusHTML(pctP <= 54, 'max');
+
+      // Educação
+      document.getElementById('pctEducacao').textContent = pctE.toFixed(1) + '%';
+      setCircular('circEducacao', Math.min(pctE / 25 * 100, 100), corLimite(pctE / 25 * 100, 'min'));
+      document.getElementById('detEducacao').innerHTML = `${fmt(totEduc)} de ${fmt(base * 0.25)} (25% ${baseLabel})`;
+      document.getElementById('statusEducacao').innerHTML = statusHTML(pctE >= 25, 'min');
+
+      // Saúde
+      document.getElementById('pctSaude').textContent = pctS.toFixed(1) + '%';
+      setCircular('circSaude', Math.min(pctS / 15 * 100, 100), corLimite(pctS / 15 * 100, 'min'));
+      document.getElementById('detSaude').innerHTML = `${fmt(totSaude)} de ${fmt(base * 0.15)} (15% ${baseLabel})`;
+      document.getElementById('statusSaude').innerHTML = statusHTML(pctS >= 15, 'min');
+
+      // Série histórica
+      renderizarHistoricos(ano);
+
+      // Equilíbrio Fiscal - DC/RC
+      const recArrAno = dados.recArrecadacao.filter(d => extrairAno(getValor(d, 'Data')) === ano);
+      const recPrevAno = dados.recPrevisao.filter(d => extrairAno(getValor(d, 'Data')) === ano);
+      const totalRecArr = recArrAno.reduce((s, d) => s + parseValor(d, 'Valor (R$)', 'Valor(R$)', 'Valor', 'Valor retido', 'Valor retido (R$)'), 0);
+      const totalRecPrev = recPrevAno.reduce((s, d) => s + parseValor(d, 'Valor (R$)', 'Valor(R$)', 'Valor', 'Valor retido', 'Valor retido (R$)'), 0);
+
+      // DC = despesas correntes (aproximação: total empenhado - investimentos)
+      // RC = receitas correntes (aproximação: total arrecadado)
+      const dcrc = totalRecArr > 0 ? (totEmp / totalRecArr * 100) : 0;
+      document.getElementById('valDC').textContent = fmt(totEmp);
+      document.getElementById('valRC').textContent = fmt(totalRecArr);
+      document.getElementById('valDCRC').textContent = dcrc.toFixed(2) + '%';
+      document.getElementById('valDCRC').style.color = dcrc > 95 ? '#dc2626' : dcrc > 85 ? '#d97706' : '#16a34a';
+
+      if (dcrc > 95) document.getElementById('statusDCRC').innerHTML = '<span class="eq-badge status-descumprido"><i class="fas fa-times-circle"></i> Acima de 95%</span>';
+      else if (dcrc > 85) document.getElementById('statusDCRC').innerHTML = '<span class="eq-badge status-alerta"><i class="fas fa-exclamation-triangle"></i> Faixa de alerta (85-95%)</span>';
+      else document.getElementById('statusDCRC').innerHTML = '<span class="eq-badge status-cumprido"><i class="fas fa-check-circle"></i> Cumprido (&lt; 85%)</span>';
+
+      // Resultado Orçamentário
+      const resultado = totalRecArr - totEmp;
+      document.getElementById('valRecArr').textContent = fmt(totalRecArr);
+      document.getElementById('valDespEmp').textContent = fmt(totEmp);
+      document.getElementById('valResultado').textContent = fmt(resultado);
+      document.getElementById('valResultado').style.color = resultado >= 0 ? '#16a34a' : '#dc2626';
+      const qda = totalRecPrev > 0 ? (totalRecArr / totalRecPrev * 100) : 0;
+      document.getElementById('valQDA').textContent = qda.toFixed(1) + '%';
+      document.getElementById('valQDA').style.color = qda >= 90 ? '#16a34a' : qda >= 70 ? '#d97706' : '#dc2626';
+
+      // Tabela
+      const lista = Object.entries(porFuncao).map(([nome, v]) => ({ nome, ...v })).sort((a, b) => b.empenhado - a.empenhado);
+      const tbody = document.getElementById('tabelaFuncoes');
+      tbody.innerHTML = lista.map(l => {
+        const pct = totEmp > 0 ? (l.empenhado / totEmp * 100) : 0;
+        const fl = l.nome.toLowerCase();
+        let tag = '';
+        if (fl.includes('educa')) tag = '<span style="background:#fef3c7;color:#92400e;font-size:9px;padding:2px 6px;border-radius:8px;">MDE</span>';
+        else if (fl.includes('saúde') || fl.includes('saude')) tag = '<span style="background:#fee2e2;color:#991b1b;font-size:9px;padding:2px 6px;border-radius:8px;">ASPS</span>';
+        else if (fl.includes('pessoal') || fl.includes('administra')) tag = '<span style="background:#dbeafe;color:#1e40af;font-size:9px;padding:2px 6px;border-radius:8px;">DTP</span>';
+        return `<tr><td>${l.nome} ${tag}</td><td class="value" style="text-align:right;">${formatarMoeda(l.empenhado)}</td><td class="value" style="text-align:right;">${formatarMoeda(l.liquidado)}</td><td class="value" style="text-align:right;">${formatarMoeda(l.pago)}</td><td style="text-align:center;"><div style="display:flex;align-items:center;gap:6px;justify-content:center;"><div style="width:50px;height:6px;background:#e2e8f0;border-radius:3px;"><div style="width:${Math.min(pct, 100)}%;height:100%;background:#3b82f6;border-radius:3px;"></div></div>${pct.toFixed(1)}%</div></td><td style="text-align:center;">${tag}</td></tr>`;
+      }).join('');
+      tbody.innerHTML += `<tr class="total-row"><td><strong>TOTAL</strong></td><td class="value" style="text-align:right;"><strong>${formatarMoeda(totEmp)}</strong></td><td class="value" style="text-align:right;"><strong>${formatarMoeda(totLiq)}</strong></td><td class="value" style="text-align:right;"><strong>${formatarMoeda(totPag)}</strong></td><td style="text-align:center;"><strong>100%</strong></td><td></td></tr>`;
+      dadosExportacao = lista.map(l => ({ 'Função': l.nome, 'Empenhado': l.empenhado, 'Liquidado': l.liquidado, 'Pago': l.pago, '% do Total': totEmp > 0 ? (l.empenhado / totEmp * 100).toFixed(2) + '%' : '0%' }));
+    }
+
+    function renderizarHistoricos(anoAtual) {
+      // Calcular percentuais para todos os anos disponíveis
+      const anos = new Set();
+      dados.empenhados.forEach(d => { const a = extrairAno(getValor(d, 'Data')); if (a) anos.add(a); });
+      const anosArr = [...anos].sort();
+      if (anosArr.length < 1) return;
+
+      const histP = [], histE = [], histS = [], labels = [];
+      anosArr.forEach(a => {
+        const { porFuncao, totEmp } = calcularPorFuncaoAno(a);
+        const rclInput = document.getElementById('inputRCL').value.replace(/\D/g, '');
+        const base = (rclInput && a === anoAtual) ? parseFloat(rclInput) : totEmp;
+        if (base <= 0) return;
+        let tP = 0, tE = 0, tS = 0;
+        Object.entries(porFuncao).forEach(([f, v]) => {
+          const fl = f.toLowerCase();
+          if (fl.includes('pessoal') || fl.includes('administra')) tP += v.empenhado;
+          if (fl.includes('educa')) tE += v.empenhado;
+          if (fl.includes('saúde') || fl.includes('saude')) tS += v.empenhado;
+        });
+        labels.push(a);
+        histP.push(+(tP / base * 100).toFixed(1));
+        histE.push(+(tE / base * 100).toFixed(1));
+        histS.push(+(tS / base * 100).toFixed(1));
+      });
+
+      const opts = (limiteVal, cores) => ({
+        type: 'bar', data: { labels, datasets: [{ data: cores.data, backgroundColor: cores.data.map((v, i) => labels[i] === anoAtual ? cores.main : cores.light), borderRadius: 3 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.y + '%' } } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 9 } } }, y: { display: false, grid: { display: false } } } }
+      });
+
+      ['histPessoal', 'histEducacao', 'histSaude'].forEach(k => { if (histCharts[k]) histCharts[k].destroy(); });
+      if (labels.length > 0) {
+        histCharts.histPessoal = new Chart(document.getElementById('histPessoal'), opts(54, { data: histP, main: '#3b82f6', light: '#bfdbfe' }));
+        histCharts.histEducacao = new Chart(document.getElementById('histEducacao'), opts(25, { data: histE, main: '#f59e0b', light: '#fde68a' }));
+        histCharts.histSaude = new Chart(document.getElementById('histSaude'), opts(15, { data: histS, main: '#ef4444', light: '#fecaca' }));
+      }
+    }
+
+    function exportarDadosExcel() { if (typeof exportarExcel === 'function') exportarExcel(dadosExportacao, 'limites-legais'); }
+    function exportarDadosPDF() { if (typeof exportarPDF === 'function') exportarPDF(dadosExportacao, 'limites-legais', 'Limites Legais - Detalhamento por Função'); }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof renderSidebarMenu === 'function') renderSidebarMenu('limites-legais.html');
+      carregarDados();
+    });
+
+    // Função para alternar tela cheia
+    function toggleFullscreen(containerId) {
+      const container = document.getElementById(containerId);
+      // O botão está fora do container neste caso, então buscamos pelo onclick ou estruturamos diferente.
+      // Vou buscar o botão irmão ou dentro do parent
+      const btn = container.parentElement.querySelector('.btn-fullscreen i');
+
+      if (!container.classList.contains('fullscreen-mode')) {
+        container.classList.add('fullscreen-mode');
+        if (btn) {
+          btn.classList.remove('fa-expand');
+          btn.classList.add('fa-compress');
+          // Mover botão para dentro do container ou ajustar posição fixed se necessário
+          // Para simplificar, vou deixar o botão como está, pois o container vai cobrir a tela.
+          // O container cobrindo a tela vai esconder o botão se ele não estiver dentro.
+          // Vamos ajustar o z-index do botão também?
+          btn.parentElement.style.zIndex = '10000';
+          btn.parentElement.style.position = 'fixed';
+          btn.parentElement.style.top = '10px';
+          btn.parentElement.style.right = '10px';
+        }
+
+        // Redimensionar gráfico após entrar em tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      } else {
+        container.classList.remove('fullscreen-mode');
+        if (btn) {
+          btn.classList.remove('fa-compress');
+          btn.classList.add('fa-expand');
+          btn.parentElement.style.zIndex = '';
+          btn.parentElement.style.position = 'absolute';
+          btn.parentElement.style.top = '0';
+          btn.parentElement.style.right = '0';
+        }
+
+        // Redimensionar gráfico após sair de tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      }
+
+      // Fechar tela cheia com ESC
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && container.classList.contains('fullscreen-mode')) {
+          toggleFullscreen(containerId);
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>

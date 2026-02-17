@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Cruzamento de Dados SIGEF
  * Port de "Cruzamentos de dados.py" para JavaScript (browser)
  *
@@ -14,8 +14,8 @@
 
 /**
  * Extrai código numérico antes do hífen.
- * Ex: "123 - Manutenção predial" → "123"
- *     "456" → "456"
+ * Ex: "123 - Manutenção predial" â†’ "123"
+ *     "456" â†’ "456"
  */
 function extractBeforeHyphen(value) {
   if (value == null) return '';
@@ -26,7 +26,7 @@ function extractBeforeHyphen(value) {
 
 /**
  * Extrai texto depois do hífen.
- * Ex: "123 - Manutenção predial" → "Manutenção predial"
+ * Ex: "123 - Manutenção predial" â†’ "Manutenção predial"
  */
 function extractAfterHyphen(value) {
   if (value == null) return '';
@@ -37,7 +37,7 @@ function extractAfterHyphen(value) {
 
 /**
  * Remove todos os não-dígitos.
- * Ex: "12.345.678/0001-90" → "12345678000190"
+ * Ex: "12.345.678/0001-90" â†’ "12345678000190"
  */
 function onlyDigits(value) {
   if (value == null) return '';
@@ -88,13 +88,13 @@ function normKey(value) {
 // =========================================================
 
 /**
- * Constrói um Map(chave → objeto com valores) a partir de uma matrix.
+ * Constrói um Map(chave â†’ objeto com valores) a partir de uma matrix.
  *
  * @param {Array[]} matrix       - Matrix 2D (row 0 = header)
  * @param {string}  keyColName   - Nome da coluna-chave no header
  * @param {Function} keyTransform - Função de transformação da chave (ex: extractBeforeHyphen)
  * @param {string[]} valueColNames - Nomes das colunas cujos valores queremos capturar
- * @returns {Map} chave → { col1: val, col2: val, ... } (último valor prevalece)
+ * @returns {Map} chave â†’ { col1: val, col2: val, ... } (último valor prevalece)
  */
 function buildLookupMap(matrix, keyColName, keyTransform, valueColNames) {
   var header = matrix[0] || [];
@@ -125,7 +125,7 @@ function buildLookupMap(matrix, keyColName, keyTransform, valueColNames) {
 }
 
 /**
- * Constrói um Map(chave → objeto) usando índice de coluna diretamente.
+ * Constrói um Map(chave â†’ objeto) usando índice de coluna diretamente.
  * Útil quando a coluna-chave é identificada por índice.
  */
 function buildLookupByIdx(matrix, keyIdx, keyTransform, valueSpecs) {
@@ -153,7 +153,7 @@ function buildLookupByIdx(matrix, keyIdx, keyTransform, valueSpecs) {
  * @param {Array[]} matrix         - Matrix alvo (modificada in-place)
  * @param {string}  keyColName     - Nome da coluna-chave na matrix alvo
  * @param {Function} keyTransform  - Função de transformação da chave
- * @param {Map}     lookupMap      - Map(chave → { col1: val, ... })
+ * @param {Map}     lookupMap      - Map(chave â†’ { col1: val, ... })
  * @param {string[]} newColNames   - Nomes das novas colunas a adicionar
  */
 function applyLookup(matrix, keyColName, keyTransform, lookupMap, newColNames) {
@@ -335,7 +335,7 @@ function cruzarComRetidos(targetMatrix, retWorkbook, valorColName) {
     // Retorna decimal bruto (0.30 = 30%). O formato % é aplicado na célula do Excel.
     var pct = function(a, b) {
       if (b === 0) return 0;
-      return a / b; // Ex: 0.30 → Excel exibe "30,00%"
+      return a / b; // Ex: 0.30 â†’ Excel exibe "30,00%"
     };
 
     var textos = '';
@@ -380,7 +380,7 @@ function adicionarDespesaRetidos(retidosMatrix, liquidadosMatrix) {
   var srcDespIdx = findColumn(srcHeader, 'Despesa');
   if (srcKeyIdx < 0 || srcDespIdx < 0) return;
 
-  // Construir lookup: Seq. liq. → Despesa
+  // Construir lookup: Seq. liq. â†’ Despesa
   var lookup = new Map();
   for (var r = 1; r < liquidadosMatrix.length; r++) {
     var row = liquidadosMatrix[r] || [];
@@ -416,7 +416,7 @@ function adicionarDespesaRetidos(retidosMatrix, liquidadosMatrix) {
 /**
  * Adiciona Município, CNPJ&CPF, Tipo de Cadastro a partir do arquivo Credores.
  *
- * Chave: "Credor/Fornecedor" → extrai código antes de " - "
+ * Chave: "Credor/Fornecedor" â†’ extrai código antes de " - "
  * Lookup: Credores."Código"
  */
 function cruzarComCredor(targetMatrix, credoresMatrix) {
@@ -480,8 +480,8 @@ function cruzarComCredor(targetMatrix, credoresMatrix) {
 /**
  * Adiciona dados do Simples Nacional via CNPJ.
  *
- * Chave: "CNPJ&CPF" (ou "CNPJ" para retidos) → somente dígitos
- * Lookup: Simples coluna 0 → somente dígitos
+ * Chave: "CNPJ&CPF" (ou "CNPJ" para retidos) â†’ somente dígitos
+ * Lookup: Simples coluna 0 â†’ somente dígitos
  */
 function cruzarComSimples(targetMatrix, simplesMatrix) {
   var simpHeader = simplesMatrix[0] || [];
@@ -546,7 +546,7 @@ function cruzarComSimples(targetMatrix, simplesMatrix) {
 /**
  * Adiciona Ação, Natureza da Despesa, Função, SubFunção, Programa.
  *
- * Chave no target: "Despesa" → extrai código antes de " - "
+ * Chave no target: "Despesa" â†’ extrai código antes de " - "
  * Chave no Balancete: busca coluna por nome, fallback índice 6
  */
 function cruzarComBalancete(targetMatrix, balanceteMatrix) {
@@ -581,7 +581,7 @@ function cruzarComBalancete(targetMatrix, balanceteMatrix) {
   // Aplicar ao target via coluna "Despesa"
   var tHeader = targetMatrix[0] || [];
   var tDespIdx = findColumn(tHeader, 'Despesa');
-  if (tDespIdx < 0) return; // Sem coluna Despesa → pular
+  if (tDespIdx < 0) return; // Sem coluna Despesa â†’ pular
 
   var newCols = ['Ação', 'Natureza da Despesa', 'Função', 'SubFunção', 'Programa'];
   var startCol = tHeader.length;
@@ -612,7 +612,7 @@ function cruzarComBalancete(targetMatrix, balanceteMatrix) {
 /**
  * Adiciona Detalhamento despesa.
  *
- * Chave no target: "Despesa" → extrai texto depois de " - "
+ * Chave no target: "Despesa" â†’ extrai texto depois de " - "
  * Chave no Detalhamento: primeira coluna
  */
 function cruzarComDetalhamento(targetMatrix, detalhamentoMatrix) {
@@ -636,7 +636,7 @@ function cruzarComDetalhamento(targetMatrix, detalhamentoMatrix) {
   // Aplicar ao target via coluna "Despesa" (texto após o hífen)
   var tHeader = targetMatrix[0] || [];
   var tDespIdx = findColumn(tHeader, 'Despesa');
-  if (tDespIdx < 0) return; // Sem coluna Despesa → pular
+  if (tDespIdx < 0) return; // Sem coluna Despesa â†’ pular
 
   tHeader.push('Detalhamento despesa');
   for (var r2 = 1; r2 < targetMatrix.length; r2++) {
@@ -1008,3 +1008,4 @@ if (typeof window !== 'undefined') {
     _CRUZAR_ALVOS: _CRUZAR_ALVOS
   };
 }
+

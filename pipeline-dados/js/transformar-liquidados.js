@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Transformação: Empenhos Liquidados
  * Port de Empenhos Liquidados.py (39 etapas)
  *
@@ -127,7 +127,7 @@ function transformarLiquidados(workbook) {
   const linhasOriginal = matrix.length - 1;
 
   // Pre-Step: Detectar Unidade gestora e anotar em cada linha ANTES de qualquer processamento
-  // Busca "Unidade gestora:" em QUALQUER coluna → nome da unidade em outra célula da mesma linha
+  // Busca "Unidade gestora:" em QUALQUER coluna â†’ nome da unidade em outra célula da mesma linha
   {
     let unidadeAtual = null;
     for (let r = 1; r < matrix.length; r++) {
@@ -163,6 +163,16 @@ function transformarLiquidados(workbook) {
 
   // Step 4: Delete row 2 (Unidade gestora:)
   if (matrix.length >= 2) matrix.splice(1, 1);
+
+  // Detectar linha de cabeçalho (pula títulos extras como "Prefeitura Municipal...")
+  const headerRowIdx = detectHeaderRow(matrix);
+  console.log(`[Liquidados] Usando linha ${headerRowIdx} como cabeçalho`);
+
+  // Remove linhas de título antes do cabeçalho
+  if (headerRowIdx > 0) {
+    console.log(`[Liquidados] Removendo ${headerRowIdx} linhas de título`);
+    matrix.splice(0, headerRowIdx);
+  }
 
   // Criar ColTracker a partir do cabeçalho
   // Esperado: Data, Nr emp., Seq. liq., Espécie, Unidade orçamentária, [vazio],
@@ -243,7 +253,7 @@ function transformarLiquidados(workbook) {
     ct.insertAt(seqIdx, '_aux_seq_liq');
   }
 
-  // Step 14: Valor não-vazio E Seq.liq. não-vazio → _aux_seq_liq = Seq.liq., Seq.liq. = null
+  // Step 14: Valor não-vazio E Seq.liq. não-vazio â†’ _aux_seq_liq = Seq.liq., Seq.liq. = null
   {
     const iValor = ct.idx('Valor (R$)');
     const iSeq = ct.idx('Seq. liq.');
@@ -263,7 +273,7 @@ function transformarLiquidados(workbook) {
     ct.insertAt(seqIdx, '_aux_doc');
   }
 
-  // Step 16: _empty_0 não-vazio E Seq.liq. não-vazio → _aux_doc = Seq.liq., Seq.liq. = null
+  // Step 16: _empty_0 não-vazio E Seq.liq. não-vazio â†’ _aux_doc = Seq.liq., Seq.liq. = null
   {
     const iEmpty0 = ct.idx('_empty_0');
     const iSeq = ct.idx('Seq. liq.');
@@ -276,7 +286,7 @@ function transformarLiquidados(workbook) {
     }
   }
 
-  // Step 17: Valor vazio E Seq.liq. não-vazio → coluna trabalho = Seq.liq., Seq.liq. = null
+  // Step 17: Valor vazio E Seq.liq. não-vazio â†’ coluna trabalho = Seq.liq., Seq.liq. = null
   {
     const iValor = ct.idx('Valor (R$)');
     const iSeq = ct.idx('Seq. liq.');
@@ -310,7 +320,7 @@ function transformarLiquidados(workbook) {
     }
   }
 
-  // Step 21: _work_hist_emp(r) e (r+1) ambos não-vazios → nova col(r) = hist_emp(r), hist_emp(r) = null
+  // Step 21: _work_hist_emp(r) e (r+1) ambos não-vazios â†’ nova col(r) = hist_emp(r), hist_emp(r) = null
   {
     const iN = ct.idx('_work_hist_emp');
     const iO = ct.length();
@@ -341,7 +351,7 @@ function transformarLiquidados(workbook) {
     }
   }
 
-  // Step 24: hist_emp e Valor ambos não-vazios → nova col = hist_emp, hist_emp = null
+  // Step 24: hist_emp e Valor ambos não-vazios â†’ nova col = hist_emp, hist_emp = null
   {
     const iP = ct.length();
     ct.insertAt(iP, '_work_P');
@@ -378,7 +388,7 @@ function transformarLiquidados(workbook) {
     }
   }
 
-  // Step 27: hist_emp(r) não-vazio E _aux_doc(r-1) não-vazio → _aux_doc(r)=_aux_doc(r-1), _aux_doc(r-1)=null
+  // Step 27: hist_emp(r) não-vazio E _aux_doc(r-1) não-vazio â†’ _aux_doc(r)=_aux_doc(r-1), _aux_doc(r-1)=null
   {
     const iD = ct.idx('_aux_doc');
     const iN = ct.idx('_work_hist_emp');
@@ -646,3 +656,4 @@ function transformarLiquidados(workbook) {
     }
   };
 }
+

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGEF | Análise de Credores - Caruaru</title>
+  <link rel="icon" type="image/png" href="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/portal-transparencia.css">
+  <script src="js/auth-check.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .btn-fullscreen {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .btn-fullscreen:hover {
+      background: #f1f5f9;
+      color: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .btn-fullscreen i {
+      font-size: 14px;
+    }
+
+    /* Estilos para modo tela cheia */
+    .fullscreen-mode {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+      background: white !important;
+      padding: 20px !important;
+      margin: 0 !important;
+      max-width: none !important;
+      overflow: auto !important;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .fullscreen-mode>div:last-child {
+      flex: 1;
+      height: auto !important;
+      max-width: none !important;
+    }
+
+    #chartParetoContainer {
+      position: relative;
+    }
+
+    #chartParetoContainer .btn-fullscreen {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 10;
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><img src="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png"
+          alt="Brasão Caruaru"></div>
+      <h1 class="sidebar-title">Secretaria da Fazenda</h1>
+      <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    <nav class="sidebar-menu" id="sidebarMenu"></nav>
+  </aside>
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <nav class="breadcrumb"><span>Análises</span><i
+            class="fas fa-chevron-right"></i><span>Credores/Fornecedores</span></nav>
+      </div>
+      <div class="header-actions">
+        <div class="user-menu">
+          <div class="user-avatar">AD</div>
+          <div class="user-info"><span class="user-name">Administrador</span><span class="user-role">SIGEF</span></div>
+        </div>
+      </div>
+    </header>
+    <section class="page-header">
+      <div class="page-header-content">
+        <h1 class="page-title"><i class="fas fa-users"></i> Análise de Credores/Fornecedores</h1>
+        <p class="page-subtitle">Top credores, concentração de gastos e análise de Pareto (80/20)</p>
+      </div>
+    </section>
+    <main class="content-area">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+          <div class="stat-content">
+            <div class="stat-label">Total de Credores</div>
+            <div class="stat-value" id="kpiTotalCredores">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-money-bill-wave"></i></div>
+          <div class="stat-content">
+            <div class="stat-label">Total Empenhado</div>
+            <div class="stat-value" id="kpiTotalEmp">R$ 0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="fas fa-chart-pie"></i></div>
+          <div class="stat-content">
+            <div class="stat-label">% Top 10</div>
+            <div class="stat-value" id="kpiTop10">0%</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-chart-pie"></i></div>
+          <div class="stat-content">
+            <div class="stat-label">% Top 50</div>
+            <div class="stat-value" id="kpiTop50">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-title"><i class="fas fa-filter"></i> Filtros</div>
+        <div class="filter-grid">
+          <div class="filter-group"><label class="filter-label">Exercício</label><select id="filtroAno"
+              class="filter-select"></select></div>
+          <div class="filter-group"><label class="filter-label">Tipo de Despesa</label><select id="filtroTipo"
+              class="filter-select">
+              <option value="empenhados">Empenhados</option>
+              <option value="liquidados">Liquidados</option>
+              <option value="pagos">Pagos</option>
+            </select></div>
+          <div class="filter-group"><label class="filter-label">Tipo de Pessoa</label><select id="filtroTipoPessoa"
+              class="filter-select">
+              <option value="">Todos</option>
+              <option value="pj">Pessoa Jurídica (CNPJ)</option>
+              <option value="pf">Pessoa Física (CPF)</option>
+            </select></div>
+          <div class="filter-group"><label class="filter-label">Buscar Credor</label><input type="text"
+              id="filtroCredor" class="filter-input" placeholder="Nome do credor..."></div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
+          <button class="btn btn-primary" onclick="aplicarFiltros()"><i class="fas fa-search"></i> Buscar</button>
+          <button class="btn btn-secondary" onclick="limparFiltros()"><i class="fas fa-times"></i> Limpar</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-users"></i> Ranking de Credores</h2>
+          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i
+                class="fas fa-sync-alt"></i> Carregando...</span></div>
+        </div>
+        <div class="card-body">
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="ranking">Ranking</button>
+            <button class="tab-btn" data-tab="pareto">Pareto (80/20)</button>
+            <button class="tab-btn" data-tab="detalhes">Detalhes</button>
+          </div>
+          <div class="tab-content active" id="ranking">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Credor/Fornecedor</th>
+                    <th>CNPJ/CPF</th>
+                    <th style="text-align: center;">Empenhos</th>
+                    <th style="text-align: right;">Valor Total</th>
+                    <th style="text-align: center;">% do Total</th>
+                    <th style="text-align: center;">% Acumulado</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaRanking"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="tab-content" id="pareto">
+            <div id="chartParetoContainer" style="height: 500px; padding-top: 40px;">
+              <button onclick="toggleFullscreen('chartParetoContainer')" class="btn-fullscreen" title="Tela cheia">
+                <i class="fas fa-expand"></i>
+              </button>
+              <canvas id="chartPareto"></canvas>
+            </div>
+          </div>
+          <div class="tab-content" id="detalhes">
+            <div style="margin-bottom: 16px;">
+              <label style="font-weight: 600; color: var(--text-secondary);">Selecionar credor:</label>
+              <select id="seletorCredor" class="filter-select" style="min-width: 300px; margin-left: 12px;"
+                onchange="mostrarDetalhes()">
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+            <div id="detalhesCredor"></div>
+          </div>
+          <div class="export-section">
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosPDF()"><i class="fas fa-file-pdf"></i>
+              PDF</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosExcel()"><i class="fas fa-file-excel"></i>
+              Excel</button>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer class="main-footer">
+      <div class="footer-content">
+        <p class="footer-text">© 2026 Prefeitura Municipal de Caruaru - SIGEF. Todos os direitos reservados.</p>
+      </div>
+    </footer>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="js/portal-transparencia.js"></script>
+  <script src="js/indexeddb-utils.js"></script>
+  <script src="js/exportar-dados.js"></script>
+  <script src="js/sidebar-menu.js"></script>
+  <script>
+    let dados = { empenhados: [], liquidados: [], pagos: [] };
+    let listaCredores = [];
+    let charts = {};
+    let dadosExportacao = [];
+    let dadosBrutos = [];
+
+    function formatarMoeda(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
+    function fmt(v) { if (v >= 1e9) return 'R$ ' + (v / 1e9).toFixed(1).replace('.', ',') + ' bi'; if (v >= 1e6) return 'R$ ' + (v / 1e6).toFixed(1).replace('.', ',') + ' mi'; if (v >= 1e3) return 'R$ ' + (v / 1e3).toFixed(1).replace('.', ',') + ' mil'; return formatarMoeda(v); }
+    function getValor(item, ...c) { for (let k of c) if (item[k] !== undefined && item[k] !== null && item[k] !== '') return item[k]; return null; }
+    function extrairAno(d) { if (!d) return null; const s = String(d).trim(); const m = s.match(/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/(\d{4})$/); if (m) return m[1]; if (s.includes('/')) { const p = s.split('/'); if (p.length === 3) return p[2].substring(0, 4); } if (s.includes('-') && !s.includes('/')) return s.substring(0, 4); return null; }
+
+    async function carregarDados() {
+      const [emp, liq, pag] = await Promise.all([carregarDadosPortal('despesas-empenhados'), carregarDadosPortal('despesas-liquidados'), carregarDadosPortal('despesas-pagos')]);
+      dados.empenhados = emp || []; dados.liquidados = liq || []; dados.pagos = pag || [];
+      const anos = new Set();
+      dados.empenhados.forEach(d => { const a = extrairAno(getValor(d, 'Data')); if (a) anos.add(a); });
+      const sel = document.getElementById('filtroAno'); sel.innerHTML = '';
+      [...anos].sort().reverse().forEach((a, i) => sel.innerHTML += `<option value="${a}" ${i === 0 ? 'selected' : ''}>${a}</option>`);
+      aplicarFiltros(); atualizarDataUltimaImportacao();
+    }
+
+    function aplicarFiltros() {
+      const ano = document.getElementById('filtroAno').value;
+      const tipo = document.getElementById('filtroTipo').value;
+      const tipoPessoa = document.getElementById('filtroTipoPessoa').value;
+      const credorFiltro = document.getElementById('filtroCredor').value.toLowerCase().trim();
+
+      dadosBrutos = dados[tipo].filter(d => {
+        if (extrairAno(getValor(d, 'Data')) !== ano) return false;
+        if (credorFiltro && !(getValor(d, 'Credor/Fornecedor') || '').toLowerCase().includes(credorFiltro)) return false;
+        if (tipoPessoa) {
+          const doc = String(getValor(d, 'CNPJ/CPF', 'CNPJ', 'CPF', 'CNPJ&CPF') || '').replace(/\D/g, '');
+          if (tipoPessoa === 'pj' && doc.length < 14) return false;
+          if (tipoPessoa === 'pf' && doc.length > 11) return false;
+        }
+        return true;
+      });
+
+      const porCredor = {};
+      dadosBrutos.forEach(d => {
+        const nome = getValor(d, 'Credor/Fornecedor') || 'Não informado';
+        const doc = getValor(d, 'CNPJ/CPF', 'CNPJ', 'CPF', 'CNPJ&CPF') || '-';
+        const valor = parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0;
+        if (!porCredor[nome]) porCredor[nome] = { doc, qtd: 0, valor: 0, empenhos: [] };
+        porCredor[nome].qtd++;
+        porCredor[nome].valor += valor;
+        porCredor[nome].empenhos.push(d);
+      });
+
+      listaCredores = Object.entries(porCredor).map(([nome, v]) => ({ nome, ...v })).sort((a, b) => b.valor - a.valor);
+      const totalGeral = listaCredores.reduce((s, c) => s + c.valor, 0);
+
+      // KPIs
+      document.getElementById('kpiTotalCredores').textContent = listaCredores.length.toLocaleString();
+      document.getElementById('kpiTotalEmp').textContent = fmt(totalGeral); document.getElementById('kpiTotalEmp').title = formatarMoeda(totalGeral);
+      const top10Val = listaCredores.slice(0, 10).reduce((s, c) => s + c.valor, 0);
+      const top50Val = listaCredores.slice(0, 50).reduce((s, c) => s + c.valor, 0);
+      document.getElementById('kpiTop10').textContent = totalGeral > 0 ? (top10Val / totalGeral * 100).toFixed(1) + '%' : '0%';
+      document.getElementById('kpiTop50').textContent = totalGeral > 0 ? (top50Val / totalGeral * 100).toFixed(1) + '%' : '0%';
+
+      // Tabela Ranking
+      let acumulado = 0;
+      const tbody = document.getElementById('tabelaRanking');
+      tbody.innerHTML = listaCredores.slice(0, 100).map((c, i) => {
+        const pct = totalGeral > 0 ? (c.valor / totalGeral * 100) : 0;
+        acumulado += pct;
+        return `<tr><td><strong>${i + 1}</strong></td><td title="${c.nome}">${c.nome.substring(0, 35)}</td><td>${c.doc}</td><td style="text-align:center;">${c.qtd}</td><td class="value" style="text-align:right;">${formatarMoeda(c.valor)}</td><td style="text-align:center;">${pct.toFixed(2)}%</td><td style="text-align:center;"><div style="display:flex;align-items:center;gap:6px;justify-content:center;"><div style="width:50px;height:6px;background:#e2e8f0;border-radius:3px;"><div style="width:${Math.min(acumulado, 100)}%;height:100%;background:#3b82f6;border-radius:3px;"></div></div>${acumulado.toFixed(1)}%</div></td></tr>`;
+      }).join('') || '<tr><td colspan="7" style="text-align:center;padding:40px;">Nenhum dado</td></tr>';
+
+      dadosExportacao = listaCredores.map((c, i) => ({ '#': i + 1, 'Credor': c.nome, 'CNPJ/CPF': c.doc, 'Empenhos': c.qtd, 'Valor Total': c.valor }));
+
+      // Seletor de detalhes
+      const selCred = document.getElementById('seletorCredor');
+      selCred.innerHTML = '<option value="">Selecione...</option>';
+      listaCredores.slice(0, 100).forEach(c => selCred.innerHTML += `<option value="${c.nome}">${c.nome.substring(0, 50)} (${formatarMoeda(c.valor)})</option>`);
+
+      // Gráfico Pareto
+      renderizarPareto(totalGeral);
+    }
+
+    function renderizarPareto(totalGeral) {
+      const top30 = listaCredores.slice(0, 30);
+      let acum = 0;
+      const acumulados = top30.map(c => { acum += totalGeral > 0 ? (c.valor / totalGeral * 100) : 0; return acum; });
+
+      if (charts.pareto) charts.pareto.destroy();
+      charts.pareto = new Chart(document.getElementById('chartPareto'), {
+        type: 'bar', data: {
+          labels: top30.map((c, i) => `${i + 1}. ${c.nome.substring(0, 20)}`),
+          datasets: [
+            { type: 'bar', label: 'Valor', data: top30.map(c => c.valor), backgroundColor: '#3b82f6', borderRadius: 4, yAxisID: 'y' },
+            { type: 'line', label: '% Acumulado', data: acumulados, borderColor: '#ef4444', borderWidth: 2, tension: 0.3, pointRadius: 3, yAxisID: 'y1' }
+          ]
+        }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } }, scales: { x: { grid: { display: false } }, y: { grid: { display: false }, ticks: { callback: v => fmt(v) } }, y1: { position: 'right', min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { display: false, drawOnChartArea: false } } } }
+      });
+    }
+
+    function mostrarDetalhes() {
+      const nome = document.getElementById('seletorCredor').value;
+      const el = document.getElementById('detalhesCredor');
+      if (!nome) { el.innerHTML = ''; return; }
+      const credor = listaCredores.find(c => c.nome === nome);
+      if (!credor) return;
+      el.innerHTML = `<div style="background:#f8fafc;border-radius:12px;padding:20px;margin-bottom:16px;"><h3 style="margin-bottom:8px;">${credor.nome}</h3><p style="color:var(--text-muted);">CNPJ/CPF: ${credor.doc} | Total: ${formatarMoeda(credor.valor)} | ${credor.qtd} empenho(s)</p></div>
+      <div class="table-container"><table class="data-table"><thead><tr><th>Nr Emp.</th><th>Data</th><th>Unidade Orç.</th><th style="text-align:right;">Valor</th></tr></thead><tbody>${credor.empenhos.slice(0, 50).map(d => `<tr><td>${getValor(d, 'Nr emp.', 'Nr Emp.') || '-'}</td><td>${getValor(d, 'Data') || '-'}</td><td title="${getValor(d, 'Unidade orçamentária', 'Unidade Orçamentária') || '-'}">${(getValor(d, 'Unidade orçamentária', 'Unidade Orçamentária') || '-').substring(0, 35)}</td><td class="value" style="text-align:right;">${formatarMoeda(parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0)}</td></tr>`).join('')}</tbody></table></div>`;
+    }
+
+    function limparFiltros() { document.getElementById('filtroCredor').value = ''; document.getElementById('filtroTipoPessoa').value = ''; aplicarFiltros(); }
+    function exportarDadosExcel() { exportarExcel(dadosExportacao, 'credores-fornecedores'); }
+    function exportarDadosPDF() { exportarPDF(dadosExportacao, 'credores-fornecedores', 'Análise de Credores/Fornecedores'); }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof renderSidebarMenu === 'function') renderSidebarMenu('despesas-credores.html');
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', function () { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); this.classList.add('active'); document.getElementById(this.dataset.tab).classList.add('active'); if (this.dataset.tab === 'pareto') setTimeout(() => renderizarPareto(listaCredores.reduce((s, c) => s + c.valor, 0)), 100); }));
+      carregarDados();
+    });
+
+    // Função para alternar tela cheia
+    function toggleFullscreen(containerId) {
+      const container = document.getElementById(containerId);
+      const btn = container.querySelector('.btn-fullscreen i');
+
+      if (!container.classList.contains('fullscreen-mode')) {
+        container.classList.add('fullscreen-mode');
+        // Ajustar padding no modo tela cheia
+        container.style.paddingTop = '60px';
+        btn.classList.remove('fa-expand');
+        btn.classList.add('fa-compress');
+
+        // Redimensionar gráfico após entrar em tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      } else {
+        container.classList.remove('fullscreen-mode');
+        container.style.paddingTop = '40px';
+        btn.classList.remove('fa-compress');
+        btn.classList.add('fa-expand');
+
+        // Redimensionar gráfico após sair de tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      }
+
+      // Fechar tela cheia com ESC
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && container.classList.contains('fullscreen-mode')) {
+          toggleFullscreen(containerId);
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>

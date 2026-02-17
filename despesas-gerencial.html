@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,46 +9,146 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="css/portal-transparencia.css">
+  <script src="js/auth-check.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .btn-fullscreen {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-fullscreen:hover {
+      background: #f1f5f9;
+      color: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .btn-fullscreen i {
+      font-size: 14px;
+    }
+
+    /* Estilos para modo tela cheia */
+    .fullscreen-mode {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+      background: white !important;
+      padding: 20px !important;
+      margin: 0 !important;
+      max-width: none !important;
+    }
+
+    .fullscreen-mode>div:last-child {
+      height: calc(100vh - 100px) !important;
+      max-width: none !important;
+    }
+  </style>
 </head>
+
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-logo"><img src="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png" alt="Brasão Caruaru"></div>
+      <div class="sidebar-logo"><img src="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png"
+          alt="Brasão Caruaru"></div>
       <h1 class="sidebar-title">Secretaria da Fazenda</h1>
       <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i></button>
     </div>
     <nav class="sidebar-menu">
       <div class="menu-section">
-        <div class="menu-section-title" onclick="toggleSection(this)"><i class="fas fa-hand-holding-usd"></i><span>Receitas</span><i class="fas fa-chevron-right section-arrow"></i></div>
+        <div class="menu-section-title" onclick="toggleSection(this)"><i class="fas fa-tachometer-alt"></i><span>Visão
+            Geral</span><i class="fas fa-chevron-right section-arrow"></i></div>
         <ul>
-          <li class="menu-item"><a href="receitas-previsao.html" class="menu-link"><i class="fas fa-chart-line"></i><span>Previsão</span></a></li>
-          <li class="menu-item"><a href="receitas-arrecadacao.html" class="menu-link"><i class="fas fa-money-bill-wave"></i><span>Arrecadação</span></a></li>
-          <li class="menu-item"><a href="receitas-retencoes.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retenções</span></a></li>
-          <li class="menu-item"><a href="receitas-deducoes.html" class="menu-link"><i class="fas fa-minus-circle"></i><span>Deduções</span></a></li>
-          <li class="menu-item"><a href="receitas-gerencial.html" class="menu-link"><i class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
-          <li class="menu-item"><a href="receitas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
-        </ul>
-      </div>
-      <div class="menu-section expanded">
-        <div class="menu-section-title" onclick="toggleSection(this)"><i class="fas fa-file-invoice-dollar"></i><span>Despesas</span><i class="fas fa-chevron-right section-arrow"></i></div>
-        <ul>
-          <li class="menu-item"><a href="despesas-empenhados.html" class="menu-link"><i class="fas fa-file-invoice"></i><span>Empenhados</span></a></li>
-          <li class="menu-item"><a href="despesas-liquidados.html" class="menu-link"><i class="fas fa-check-circle"></i><span>Liquidados</span></a></li>
-          <li class="menu-item"><a href="despesas-retidos.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retidos</span></a></li>
-          <li class="menu-item"><a href="despesas-pagos.html" class="menu-link"><i class="fas fa-money-check-alt"></i><span>Pagos</span></a></li>
-          <li class="menu-item"><a href="despesas-a-pagar.html" class="menu-link"><i class="fas fa-clock"></i><span>A Pagar</span></a></li>
-          <li class="menu-item"><a href="despesas-gerencial.html" class="menu-link active"><i class="fas fa-chart-line"></i><span>Gerencial</span></a></li>
-          <li class="menu-item"><a href="despesas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+          <li class="menu-item"><a href="dashboard.html" class="menu-link"><i class="fas fa-home"></i><span>Dashboard
+                Executivo</span></a></li>
+          <li class="menu-item"><a href="resultado-orcamentario.html" class="menu-link"><i
+                class="fas fa-chart-pie"></i><span>Resultado Orçamentário</span></a></li>
         </ul>
       </div>
       <div class="menu-section">
-        <div class="menu-section-title" onclick="toggleSection(this)"><i class="fas fa-database"></i><span>Banco de Dados</span><i class="fas fa-chevron-right section-arrow"></i></div>
+        <div class="menu-section-title" onclick="toggleSection(this)"><i
+            class="fas fa-hand-holding-usd"></i><span>Receitas</span><i class="fas fa-chevron-right section-arrow"></i>
+        </div>
         <ul>
-          <li class="menu-item"><a href="banco-importar-dados.html" class="menu-link"><i class="fas fa-file-import"></i><span>Importar Dados</span></a></li>
-          <li class="menu-item"><a href="banco-historico.html" class="menu-link"><i class="fas fa-history"></i><span>Histórico</span></a></li>
+          <li class="menu-item"><a href="receitas-previsao.html" class="menu-link"><i
+                class="fas fa-chart-line"></i><span>Previsão</span></a></li>
+          <li class="menu-item"><a href="receitas-arrecadacao.html" class="menu-link"><i
+                class="fas fa-money-bill-wave"></i><span>Arrecadação</span></a></li>
+          <li class="menu-item"><a href="receitas-retencoes.html" class="menu-link"><i
+                class="fas fa-hand-holding-usd"></i><span>Retenções</span></a></li>
+          <li class="menu-item"><a href="receitas-deducoes.html" class="menu-link"><i
+                class="fas fa-minus-circle"></i><span>Deduções</span></a></li>
+          <li class="menu-item"><a href="receitas-gerencial.html" class="menu-link"><i
+                class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="receitas-comparativos.html" class="menu-link"><i
+                class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section expanded">
+        <div class="menu-section-title" onclick="toggleSection(this)"><i
+            class="fas fa-file-invoice-dollar"></i><span>Despesas</span><i
+            class="fas fa-chevron-right section-arrow"></i></div>
+        <ul>
+          <li class="menu-item"><a href="despesas-empenhados.html" class="menu-link"><i
+                class="fas fa-file-invoice"></i><span>Empenhados</span></a></li>
+          <li class="menu-item"><a href="despesas-liquidados.html" class="menu-link"><i
+                class="fas fa-check-circle"></i><span>Liquidados</span></a></li>
+          <li class="menu-item"><a href="despesas-retidos.html" class="menu-link"><i
+                class="fas fa-hand-holding-usd"></i><span>Retidos</span></a></li>
+          <li class="menu-item"><a href="despesas-pagos.html" class="menu-link"><i
+                class="fas fa-money-check-alt"></i><span>Pagos</span></a></li>
+          <li class="menu-item"><a href="despesas-a-pagar.html" class="menu-link"><i class="fas fa-clock"></i><span>A
+                Pagar</span></a></li>
+          <li class="menu-item"><a href="despesas-gerencial.html" class="menu-link active"><i
+                class="fas fa-chart-line"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="despesas-comparativos.html" class="menu-link"><i
+                class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)"><i
+            class="fas fa-search-dollar"></i><span>Análises</span><i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="despesas-analise.html" class="menu-link"><i
+                class="fas fa-chart-pie"></i><span>Análise Financeira</span></a></li>
+          <li class="menu-item"><a href="despesas-execucao.html" class="menu-link"><i
+                class="fas fa-chart-bar"></i><span>Execução Orçamentária</span></a></li>
+          <li class="menu-item"><a href="despesas-fontes.html" class="menu-link"><i
+                class="fas fa-layer-group"></i><span>Fontes de Recursos</span></a></li>
+          <li class="menu-item"><a href="despesas-credores.html" class="menu-link"><i
+                class="fas fa-users"></i><span>Credores</span></a></li>
+          <li class="menu-item"><a href="despesas-natureza.html" class="menu-link"><i
+                class="fas fa-sitemap"></i><span>Natureza da Despesa</span></a></li>
+          <li class="menu-item"><a href="limites-legais.html" class="menu-link"><i
+                class="fas fa-gavel"></i><span>Limites Legais</span></a></li>
+          <li class="menu-item"><a href="despesas-alertas.html" class="menu-link"><i
+                class="fas fa-exclamation-triangle"></i><span>Alertas</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)"><i class="fas fa-database"></i><span>Banco de
+            Dados</span><i class="fas fa-chevron-right section-arrow"></i></div>
+        <ul>
+          <li class="menu-item"><a href="banco-importar-dados.html" class="menu-link"><i
+                class="fas fa-file-import"></i><span>Importar Dados</span></a></li>
+          <li class="menu-item"><a href="banco-historico.html" class="menu-link"><i
+                class="fas fa-history"></i><span>Histórico</span></a></li>
+          <li class="menu-item"><a href="admin-usuarios.html" class="menu-link"><i
+                class="fas fa-user-shield"></i><span>Usuários</span></a></li>
         </ul>
       </div>
     </nav>
@@ -103,8 +204,15 @@
             </select>
           </div>
           <div class="filter-group">
+            <label class="filter-label">Nr Empenho</label>
+            <input type="text" id="filtroNumEmp" class="filter-input" placeholder="Digite o Nr Empenho..."
+              autocomplete="off" oninput="filtrarEmpenhoSugestoes(this.value)">
+            <datalist id="listaNumEmpenhos"></datalist>
+          </div>
+          <div class="filter-group">
             <label class="filter-label">Credor/Fornecedor</label>
-            <input type="text" id="filtroCredor" class="filter-input" placeholder="Digite 2+ letras..." autocomplete="off" oninput="filtrarCredorSugestoes(this.value)">
+            <input type="text" id="filtroCredor" class="filter-input" placeholder="Digite 2+ letras..."
+              autocomplete="off" oninput="filtrarCredorSugestoes(this.value)">
             <datalist id="listaCredores"></datalist>
           </div>
           <div class="filter-group">
@@ -127,7 +235,9 @@
           </div>
           <div class="filter-group">
             <label class="filter-label">CNPJ/CPF</label>
-            <input type="text" id="filtroCNPJCPF" class="filter-input" placeholder="Digite CNPJ/CPF..." autocomplete="off">
+            <input type="text" id="filtroCNPJCPF" class="filter-input" placeholder="Digite CNPJ/CPF..."
+              autocomplete="off" oninput="filtrarCnpjCpfSugestoes(this.value)">
+            <datalist id="listaCnpjsCpfs"></datalist>
           </div>
           <div class="filter-group">
             <label class="filter-label">Município</label>
@@ -161,7 +271,9 @@
           </div>
           <div class="filter-group">
             <label class="filter-label">Detalhamento Despesa</label>
-            <input type="text" id="filtroDetalhamentoDespesa" class="filter-input" placeholder="Digite detalhamento..." autocomplete="off">
+            <input type="text" id="filtroDetalhamentoDespesa" class="filter-input" placeholder="Digite detalhamento..."
+              autocomplete="off" oninput="filtrarDetalhamentoSugestoes(this.value)">
+            <datalist id="listaDetalhamentos"></datalist>
           </div>
         </div>
         <div style="display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
@@ -174,7 +286,8 @@
       <div class="card">
         <div class="card-header">
           <h2 class="card-title"><i class="fas fa-chart-bar"></i> Comparativo por Quantidade de Registros</h2>
-          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i class="fas fa-sync-alt"></i> Carregando...</span></div>
+          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i
+                class="fas fa-sync-alt"></i> Carregando...</span></div>
         </div>
         <div class="card-body">
           <div class="tabs">
@@ -182,25 +295,14 @@
             <button class="tab-btn" data-tab="detalhado">Detalhado</button>
             <button class="tab-btn" data-tab="grafico">Gráfico</button>
           </div>
-          
+
           <!-- Tab Resumo -->
           <div class="tab-content active" id="resumo">
-            <!-- Filtro de Anos para Resumo -->
-            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; border: 1px solid #bae6fd;">
-              <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <i class="fas fa-calendar-alt" style="color: #0284c7; font-size: 16px;"></i>
-                  <label style="font-weight: 600; color: #0369a1;">Comparar Anos:</label>
-                </div>
-                <div id="checkboxesAnos" style="display: flex; gap: 12px; flex-wrap: wrap;"></div>
-                <button class="btn btn-primary btn-sm" onclick="aplicarFiltroAnosResumo()" style="margin-left: auto;">
-                  <i class="fas fa-sync-alt"></i> Atualizar
-                </button>
-              </div>
-            </div>
+
             <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
               <label style="font-weight: 600; color: var(--text-secondary);">Agrupar por:</label>
-              <select id="colunaAgrupamento" class="filter-select" style="min-width: 200px;" onchange="renderizarResumo()">
+              <select id="colunaAgrupamento" class="filter-select" style="min-width: 200px;"
+                onchange="renderizarResumo()">
                 <option value="Unidade gestora">Unidade Gestora</option>
                 <option value="Unidade orçamentária">Unidade Orçamentária</option>
                 <option value="Função">Função</option>
@@ -237,7 +339,7 @@
               </table>
             </div>
           </div>
-          
+
           <!-- Tab Detalhado -->
           <div class="tab-content" id="detalhado">
             <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
@@ -277,21 +379,38 @@
                 <tbody id="tabelaDetalhado"></tbody>
               </table>
             </div>
-            <div id="paginacaoControles" style="margin-top: 16px; display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;"></div>
+            <div id="paginacaoControles"
+              style="margin-top: 16px; display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;">
+            </div>
           </div>
-          
+
           <!-- Tab Gráfico -->
           <div class="tab-content" id="grafico">
             <div style="display: flex; flex-direction: column; gap: 40px;">
-              <div>
-                <h4 style="margin-bottom: 16px; color: var(--text-dark); font-size: 16px;"><i class="fas fa-chart-bar" style="color: var(--color-primary); margin-right: 8px;"></i> Comparativo de Quantidade por Etapa</h4>
+              <div id="chartComparativoContainer">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                  <h4 style="margin: 0; color: var(--text-dark); font-size: 16px;"><i class="fas fa-chart-bar"
+                      style="color: var(--color-primary); margin-right: 8px;"></i> Comparativo de Quantidade por Etapa
+                  </h4>
+                  <button onclick="toggleFullscreen('chartComparativoContainer')" class="btn-fullscreen"
+                    title="Tela cheia">
+                    <i class="fas fa-expand"></i>
+                  </button>
+                </div>
                 <div style="height: 450px;"><canvas id="chartComparativo"></canvas></div>
               </div>
-              <div>
-                <h4 style="color: var(--text-dark); font-size: 16px; margin-bottom: 12px;"><i class="fas fa-chart-line" style="color: var(--color-primary); margin-right: 8px;"></i> Evolução Mensal</h4>
+              <div id="chartMensalContainer">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <h4 style="margin: 0; color: var(--text-dark); font-size: 16px;"><i class="fas fa-chart-line"
+                      style="color: var(--color-primary); margin-right: 8px;"></i> Evolução Mensal</h4>
+                  <button onclick="toggleFullscreen('chartMensalContainer')" class="btn-fullscreen" title="Tela cheia">
+                    <i class="fas fa-expand"></i>
+                  </button>
+                </div>
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
                   <label style="font-weight: 600; color: var(--text-secondary);">Tipo de Despesa:</label>
-                  <select id="tipoGraficoMensal" class="filter-select" style="min-width: 150px;" onchange="atualizarGraficoMensal()">
+                  <select id="tipoGraficoMensal" class="filter-select" style="min-width: 150px;"
+                    onchange="atualizarGraficoMensal()">
                     <option value="empenhados">Empenhados</option>
                     <option value="liquidados">Liquidados</option>
                     <option value="pagos">Pagos</option>
@@ -301,10 +420,18 @@
                 </div>
                 <div style="height: 450px;"><canvas id="chartMensal"></canvas></div>
               </div>
-              <div>
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-                  <h4 style="color: var(--text-dark); font-size: 16px; margin: 0;"><i class="fas fa-chart-pie" style="color: var(--color-primary); margin-right: 8px;"></i> Distribuição por Tipo</h4>
-                  <select id="anoGraficoPizza" class="filter-select" style="min-width: 120px;" onchange="atualizarGraficoPizza()">
+              <div id="chartPizzaContainer">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <h4 style="margin: 0; color: var(--text-dark); font-size: 16px;"><i class="fas fa-chart-pie"
+                      style="color: var(--color-primary); margin-right: 8px;"></i> Distribuição por Tipo</h4>
+                  <button onclick="toggleFullscreen('chartPizzaContainer')" class="btn-fullscreen" title="Tela cheia">
+                    <i class="fas fa-expand"></i>
+                  </button>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                  <label style="font-weight: 600; color: var(--text-secondary);">Ano:</label>
+                  <select id="anoGraficoPizza" class="filter-select" style="min-width: 150px;"
+                    onchange="atualizarGraficoPizza()">
                     <option value="todos">Todos os Anos</option>
                   </select>
                 </div>
@@ -312,14 +439,16 @@
               </div>
             </div>
           </div>
-          
+
           <div class="export-section">
-            <button class="btn btn-secondary btn-sm" onclick="exportarDadosPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
-            <button class="btn btn-secondary btn-sm" onclick="exportarDadosExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosPDF()"><i class="fas fa-file-pdf"></i>
+              PDF</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosExcel()"><i class="fas fa-file-excel"></i>
+              Excel</button>
           </div>
         </div>
       </div>
-      
+
     </main>
     <footer class="main-footer">
       <div class="footer-content">
@@ -332,15 +461,20 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <script src="js/portal-transparencia.js"></script>
   <script src="js/indexeddb-utils.js"></script>
+  <script src="js/renderizacao-otimizada.js"></script>
+  <script src="js/chart-variacao-plugin.js"></script>
   <script src="js/exportar-dados.js"></script>
   <script>
     // Dados globais
     let dados = { empenhados: [], liquidados: [], pagos: [], retidos: [], 'a-pagar': [] };
-    let dadosFiltrados = { 
-      base: { empenhados: [], liquidados: [], pagos: [], retidos: [], 'a-pagar': [] }, 
-      comp: { empenhados: [], liquidados: [], pagos: [], retidos: [], 'a-pagar': [] } 
+    let dadosFiltrados = {
+      base: { empenhados: [], liquidados: [], pagos: [], retidos: [], 'a-pagar': [] },
+      comp: { empenhados: [], liquidados: [], pagos: [], retidos: [], 'a-pagar': [] }
     };
     let listaCredoresUnicos = [];
+    let listaCnpjsCpfsUnicos = [];
+    let listaNumEmpenhosUnicos = [];
+    let listaDetalhamentosUnicos = [];
     let charts = {};
     let paginaAtual = 1;
 
@@ -377,21 +511,22 @@
     }
     function formatarData(dataStr) {
       if (!dataStr || dataStr === '-') return '-';
-      if (dataStr instanceof Date) { const d = dataStr; return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
-      if (typeof dataStr === 'number' && dataStr > 40000 && dataStr < 60000) { const d = new Date((dataStr - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`; }
+      if (dataStr instanceof Date) { const d = dataStr; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; }
+      if (typeof dataStr === 'number' && dataStr > 40000 && dataStr < 60000) { const d = new Date((dataStr - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`; }
       const str = String(dataStr).trim();
       if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) return str;
       if (/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/\d{4}$/.test(str)) { const m = str.match(/^(\d{2})\s+\d{2}:\d{2}:\d{2}\/(\d{2})\/(\d{4})$/); if (m) return `${m[1]}/${m[2]}/${m[3]}`; }
-      const num = parseFloat(str); if (!isNaN(num) && num > 40000 && num < 60000) { const d = new Date((num - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`; }
+      const num = parseFloat(str); if (!isNaN(num) && num > 40000 && num < 60000) { const d = new Date((num - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`; }
       if (str.includes('-')) { const p = str.split('T')[0].split(' ')[0].split('-'); if (p.length === 3 && p[0].length === 4) return `${p[2]}/${p[1]}/${p[0]}`; }
-      try { const d = new Date(str); if (!isNaN(d.getTime()) && d.getFullYear() > 1990) return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; } catch(e) {}
+      try { const d = new Date(str); if (!isNaN(d.getTime()) && d.getFullYear() > 1990) return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; } catch (e) { }
       return str;
     }
     function getCampoValor(tipo) {
-      if (tipo === 'retidos') return ['Valor retido', 'Valor'];
-      return ['Valor (R$)', 'Valor'];
+      if (tipo === 'retidos') return ['Valor retido', 'Valor retido (R$)', 'Valor Retido (R$)', 'Valor (R$)', 'Valor'];
+      if (tipo === 'a-pagar') return ['Valor(R$)', 'Valor (R$)', 'Valor a pagar', 'Valor'];
+      return ['Valor (R$)', 'Valor(R$)', 'Valor'];
     }
-    
+
     function filtrarCredorSugestoes(termo) {
       const datalist = document.getElementById('listaCredores');
       const input = document.getElementById('filtroCredor');
@@ -402,12 +537,46 @@
       matches.forEach(c => { const opt = document.createElement('option'); opt.value = c; datalist.appendChild(opt); });
     }
 
+    function filtrarCnpjCpfSugestoes(termo) {
+      const datalist = document.getElementById('listaCnpjsCpfs');
+      const input = document.getElementById('filtroCNPJCPF');
+      datalist.innerHTML = '';
+      if (termo.length < 2) { input.removeAttribute('list'); return; }
+      input.setAttribute('list', 'listaCnpjsCpfs');
+      const termoDigits = termo.replace(/\D/g, '');
+      const matches = listaCnpjsCpfsUnicos.filter(c => c.toLowerCase().includes(termo.toLowerCase()) || c.replace(/\D/g, '').includes(termoDigits)).slice(0, 15);
+      matches.forEach(c => { const opt = document.createElement('option'); opt.value = c; datalist.appendChild(opt); });
+    }
+
+    function filtrarEmpenhoSugestoes(termo) {
+      const datalist = document.getElementById('listaNumEmpenhos');
+      const input = document.getElementById('filtroNumEmp');
+      datalist.innerHTML = '';
+      if (termo.length < 2) { input.removeAttribute('list'); return; }
+      input.setAttribute('list', 'listaNumEmpenhos');
+      const termoLower = termo.toLowerCase();
+      const matches = listaNumEmpenhosUnicos.filter(n => n.toLowerCase().includes(termoLower)).slice(0, 15);
+      matches.forEach(n => { const opt = document.createElement('option'); opt.value = n; datalist.appendChild(opt); });
+    }
+
+    function filtrarDetalhamentoSugestoes(termo) {
+      const datalist = document.getElementById('listaDetalhamentos');
+      const input = document.getElementById('filtroDetalhamentoDespesa');
+      datalist.innerHTML = '';
+      if (termo.length < 2) { input.removeAttribute('list'); return; }
+      input.setAttribute('list', 'listaDetalhamentos');
+      const termoLower = termo.toLowerCase();
+      const matches = listaDetalhamentosUnicos.filter(v => v.toLowerCase().includes(termoLower)).slice(0, 15);
+      matches.forEach(v => { const opt = document.createElement('option'); opt.value = v; datalist.appendChild(opt); });
+    }
+
     // Cache de dados indexados por ano para evitar re-filtragem
     let indicePorAno = {}; // { tipo: { ano: [registros] } }
     let cacheFiltragem = {}; // Cache de resultados de filtrarDadosPorAno
     let cacheFiltrosKey = ''; // Key para invalidar cache quando filtros mudam
 
     function construirIndicePorAno() {
+      const inicio = performance.now();
       indicePorAno = {};
       ['empenhados', 'liquidados', 'pagos', 'retidos', 'a-pagar'].forEach(tipo => {
         indicePorAno[tipo] = {};
@@ -419,6 +588,8 @@
           }
         });
       });
+      const fim = performance.now();
+      console.log(`[Performance] Índice por ano construído em ${(fim - inicio).toFixed(0)}ms`);
     }
 
     function invalidarCacheFiltragem() {
@@ -428,18 +599,29 @@
 
     async function carregarDados() {
       try {
+        console.log('[Performance] Iniciando carregamento de dados...');
+        const inicio = performance.now();
+
+        // Usa cache de 30 segundos para performance
         const [emp, liq, pag, ret, apg] = await Promise.all([
-          carregarDadosPortal('despesas-empenhados'),
-          carregarDadosPortal('despesas-liquidados'),
-          carregarDadosPortal('despesas-pagos'),
-          carregarDadosPortal('despesas-retidos'),
-          carregarDadosPortal('despesas-a-pagar')
+          carregarDadosComCache('despesas-empenhados'),
+          carregarDadosComCache('despesas-liquidados'),
+          carregarDadosComCache('despesas-pagos'),
+          carregarDadosComCache('despesas-retidos'),
+          carregarDadosComCache('despesas-a-pagar')
         ]);
+
         dados.empenhados = emp || [];
         dados.liquidados = liq || [];
         dados.pagos = pag || [];
         dados.retidos = ret || [];
         dados['a-pagar'] = apg || [];
+
+        const total = dados.empenhados.length + dados.liquidados.length +
+          dados.pagos.length + dados.retidos.length + dados['a-pagar'].length;
+
+        const fim = performance.now();
+        console.log(`[Performance] ${total.toLocaleString('pt-BR')} registros carregados em ${(fim - inicio).toFixed(0)}ms`);
 
         construirIndicePorAno();
         popularFiltros();
@@ -494,26 +676,13 @@
         const programa = getValor(d, 'Programa');
         if (programa) todosProgramas.add(programa);
       });
-      
+
       const anosOrdenados = [...todosAnos].sort().reverse();
-      
-      // Popular checkboxes de anos para o Resumo
-      const checkboxesContainer = document.getElementById('checkboxesAnos');
-      checkboxesContainer.innerHTML = '';
-      anosOrdenados.forEach((ano, idx) => {
-        const checked = idx < 2; // Seleciona os 2 mais recentes por padrão
-        const bgColor = checked ? '#3b82f6' : '#f1f5f9';
-        const textColor = checked ? '#ffffff' : '#64748b';
-        checkboxesContainer.innerHTML += `
-          <label onclick="toggleAnoCheckbox(this, '${ano}')" 
-                 style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; cursor: pointer; 
-                        background: ${bgColor}; color: ${textColor}; font-weight: 500; font-size: 14px; transition: all 0.2s; user-select: none;"
-                 data-ano="${ano}" data-checked="${checked}">
-            <i class="fas ${checked ? 'fa-check-square' : 'fa-square'}" style="font-size: 14px;"></i>
-            ${ano}
-          </label>`;
-      });
-      
+
+
+      // Inicializar anosSelecionados com os 2 mais recentes (padrão)
+      anosSelecionados = anosOrdenados.slice(0, 2);
+
       ['anoBase', 'anoComparacao'].forEach((id, idx) => {
         const sel = document.getElementById(id);
         sel.innerHTML = '';
@@ -521,97 +690,86 @@
           sel.innerHTML += `<option value="${ano}" ${i === idx ? 'selected' : ''}>${ano}</option>`;
         });
       });
-      
+
       const selUnidadeGestora = document.getElementById('filtroUnidadeGestora');
       selUnidadeGestora.innerHTML = '<option value="">Todas</option>';
       [...todasUnidadesGestoras].sort().forEach(u => selUnidadeGestora.innerHTML += `<option value="${u}">${u.length > 40 ? u.substring(0, 40) + '...' : u}</option>`);
-      
+
       const selUnidade = document.getElementById('filtroUnidade');
       selUnidade.innerHTML = '<option value="">Todas</option>';
       [...todasUnidades].sort().forEach(u => selUnidade.innerHTML += `<option value="${u}">${u.length > 40 ? u.substring(0, 40) + '...' : u}</option>`);
-      
+
       const selEspecie = document.getElementById('filtroEspecie');
       selEspecie.innerHTML = '<option value="">Todas</option>';
       [...todasEspecies].sort().forEach(e => selEspecie.innerHTML += `<option value="${e}">${e}</option>`);
-      
+
       const selTipo = document.getElementById('filtroTipo');
       selTipo.innerHTML = '<option value="">Todos</option>';
       [...todosTipos].sort().forEach(t => selTipo.innerHTML += `<option value="${t}">${t}</option>`);
-      
+
       const selFuncao = document.getElementById('filtroFuncao');
       selFuncao.innerHTML = '<option value="">Todas</option>';
       [...todasFuncoes].sort().forEach(f => selFuncao.innerHTML += `<option value="${f}">${f}</option>`);
-      
+
       const selMunicipio = document.getElementById('filtroMunicipio');
       selMunicipio.innerHTML = '<option value="">Todos</option>';
       [...todosMunicipios].sort().forEach(m => selMunicipio.innerHTML += `<option value="${m}">${m}</option>`);
-      
+
       const selAcao = document.getElementById('filtroAcao');
       selAcao.innerHTML = '<option value="">Todas</option>';
       [...todasAcoes].sort().forEach(a => selAcao.innerHTML += `<option value="${a}">${a}</option>`);
-      
+
       const selNaturezaDespesa = document.getElementById('filtroNaturezaDespesa');
       selNaturezaDespesa.innerHTML = '<option value="">Todas</option>';
       [...todasNaturezasDespesa].sort().forEach(n => selNaturezaDespesa.innerHTML += `<option value="${n}">${n}</option>`);
-      
+
       const selSubFuncao = document.getElementById('filtroSubFuncao');
       selSubFuncao.innerHTML = '<option value="">Todas</option>';
       [...todasSubFuncoes].sort().forEach(sf => selSubFuncao.innerHTML += `<option value="${sf}">${sf}</option>`);
-      
+
       const selPrograma = document.getElementById('filtroPrograma');
       selPrograma.innerHTML = '<option value="">Todos</option>';
       [...todosProgramas].sort().forEach(p => selPrograma.innerHTML += `<option value="${p}">${p}</option>`);
-      
+
       listaCredoresUnicos = [...new Set(dados.empenhados.map(d => getValor(d, 'Credor/Fornecedor')).filter(v => v))].sort();
-      
+      listaCnpjsCpfsUnicos = [...new Set(dados.empenhados.map(d => getValor(d, 'CNPJ/CPF', 'CNPJ', 'CPF', 'CNPJ&CPF', 'CNPJ/CPF do Credor')).filter(v => v && v !== '-'))].sort();
+      listaNumEmpenhosUnicos = [...new Set(dados.empenhados.map(d => String(getValor(d, 'Nr emp.', 'Nr Emp.', 'Empenho'))).filter(v => v && v !== '-' && v !== 'null' && v !== 'undefined'))].sort();
+      listaDetalhamentosUnicos = [...new Set(dados.empenhados.map(d => String(getValor(d, 'Detalhamento Despesa', 'Detalhamento despesa', 'Detalhamento'))).filter(v => v && v !== '-' && v !== 'null' && v !== 'undefined'))].sort();
+
       // Popular select de anos para o gráfico de pizza
       const selAnoPizza = document.getElementById('anoGraficoPizza');
       selAnoPizza.innerHTML = '<option value="todos">Todos os Anos</option>';
       anosOrdenados.forEach(ano => selAnoPizza.innerHTML += `<option value="${ano}">${ano}</option>`);
     }
-    
-    // Funções para gerenciar checkboxes de anos
-    function toggleAnoCheckbox(label, ano) {
-      const isChecked = label.dataset.checked === 'true';
-      const newChecked = !isChecked;
-      label.dataset.checked = newChecked;
-      label.style.background = newChecked ? '#3b82f6' : '#f1f5f9';
-      label.style.color = newChecked ? '#ffffff' : '#64748b';
-      label.querySelector('i').className = newChecked ? 'fas fa-check-square' : 'fas fa-square';
-    }
-    
+
+    // Variável global
+    let anosSelecionados = [];
+
     function getAnosSelecionados() {
-      const labels = document.querySelectorAll('#checkboxesAnos label');
-      const anos = [];
-      labels.forEach(label => {
-        if (label.dataset.checked === 'true') {
-          anos.push(label.dataset.ano);
-        }
-      });
-      return anos.sort().reverse();
-    }
-    
-    function aplicarFiltroAnosResumo() {
-      const anos = getAnosSelecionados();
-      if (anos.length < 2) {
-        alert('Selecione pelo menos 2 anos para comparar.');
-        return;
+      // Retorna os anos selecionados globalmente
+      // Se não houver seleção (ex: filtro removido), usa os do select
+      if (!anosSelecionados || anosSelecionados.length === 0) {
+        return [];
       }
-      invalidarCacheFiltragem();
-      renderizarResumo();
-      atualizarGraficosMultiAnos();
+      return anosSelecionados;
     }
 
-    function aplicarFiltrosLista(lista, ano, unidadeGestora, unidade, credor, especie, tipo, funcao, cnpjcpf, municipio, acao, naturezaDespesa, subFuncao, programa, detalhamentoDespesa) {
+
+    function aplicarFiltrosLista(lista, ano, unidadeGestora, unidade, numEmp, credor, especie, tipo, funcao, cnpjcpf, municipio, acao, naturezaDespesa, subFuncao, programa, detalhamentoDespesa) {
       return lista.filter(d => {
         if (ano && extrairAno(getValor(d, 'Data')) !== ano) return false;
         if (unidadeGestora && getValor(d, 'Unidade gestora', 'Unidade Gestora') !== unidadeGestora) return false;
         if (unidade && getValor(d, 'Unidade orçamentária', 'Unidade Orçamentária') !== unidade) return false;
+        if (numEmp && !String(getValor(d, 'Nr emp.', 'Nr Emp.', 'Empenho') || '').includes(numEmp)) return false;
         if (credor && !String(getValor(d, 'Credor/Fornecedor') || '').toLowerCase().includes(credor.toLowerCase())) return false;
         if (especie && getValor(d, 'Espécie') !== especie) return false;
         if (tipo && getValor(d, 'Tipo') !== tipo) return false;
         if (funcao && getValor(d, 'Função') !== funcao) return false;
-        if (cnpjcpf && !String(getValor(d, 'CNPJ/CPF', 'CNPJ', 'CPF', 'CNPJ&CPF') || '').toLowerCase().includes(cnpjcpf.toLowerCase())) return false;
+        if (cnpjcpf) {
+          const doc = String(getValor(d, 'CNPJ/CPF', 'CNPJ', 'CPF', 'CNPJ&CPF', 'CNPJ/CPF do Credor') || '').replace(/\D/g, '');
+          const filtroDoc = cnpjcpf.replace(/\D/g, '');
+          if (!doc.includes(filtroDoc)) return false;
+        }
         if (municipio && getValor(d, 'Município', 'Municipio') !== municipio) return false;
         if (acao && getValor(d, 'Ação', 'Acao') !== acao) return false;
         if (naturezaDespesa && getValor(d, 'Natureza da Despesa', 'Natureza da despesa', 'Natureza Despesa') !== naturezaDespesa) return false;
@@ -621,12 +779,13 @@
         return true;
       });
     }
-    
+
     // Função auxiliar para aplicar filtros sem filtrar por ano específico
     function getFiltrosAtuais() {
       return {
         unidadeGestora: document.getElementById('filtroUnidadeGestora').value,
         unidade: document.getElementById('filtroUnidade').value,
+        numEmp: document.getElementById('filtroNumEmp').value.trim(),
         credor: document.getElementById('filtroCredor').value.trim(),
         especie: document.getElementById('filtroEspecie').value,
         tipo: document.getElementById('filtroTipo').value,
@@ -640,7 +799,7 @@
         detalhamentoDespesa: document.getElementById('filtroDetalhamentoDespesa').value.trim()
       };
     }
-    
+
     // Filtra dados por ano e pelos filtros atuais - com cache
     function filtrarDadosPorAno(lista, ano, tipo) {
       const filtros = getFiltrosAtuais();
@@ -661,13 +820,13 @@
       const dadosDoAno = (indicePorAno[tipoKey] && indicePorAno[tipoKey][ano]) || [];
 
       // Se não há filtros ativos, retornar direto do índice
-      const temFiltros = filtros.unidadeGestora || filtros.unidade || filtros.credor || filtros.especie || filtros.tipo || filtros.funcao || filtros.cnpjcpf || filtros.municipio || filtros.acao || filtros.naturezaDespesa || filtros.subFuncao || filtros.programa || filtros.detalhamentoDespesa;
+      const temFiltros = filtros.unidadeGestora || filtros.unidade || filtros.numEmp || filtros.credor || filtros.especie || filtros.tipo || filtros.funcao || filtros.cnpjcpf || filtros.municipio || filtros.acao || filtros.naturezaDespesa || filtros.subFuncao || filtros.programa || filtros.detalhamentoDespesa;
 
       let resultado;
       if (!temFiltros) {
         resultado = dadosDoAno;
       } else {
-        resultado = aplicarFiltrosLista(dadosDoAno, null, filtros.unidadeGestora, filtros.unidade, filtros.credor, filtros.especie, filtros.tipo, filtros.funcao, filtros.cnpjcpf, filtros.municipio, filtros.acao, filtros.naturezaDespesa, filtros.subFuncao, filtros.programa, filtros.detalhamentoDespesa);
+        resultado = aplicarFiltrosLista(dadosDoAno, null, filtros.unidadeGestora, filtros.unidade, filtros.numEmp, filtros.credor, filtros.especie, filtros.tipo, filtros.funcao, filtros.cnpjcpf, filtros.municipio, filtros.acao, filtros.naturezaDespesa, filtros.subFuncao, filtros.programa, filtros.detalhamentoDespesa);
       }
 
       cacheFiltragem[cacheKey] = resultado;
@@ -694,6 +853,7 @@
       invalidarCacheFiltragem();
       document.getElementById('filtroUnidadeGestora').value = '';
       document.getElementById('filtroUnidade').value = '';
+      document.getElementById('filtroNumEmp').value = '';
       document.getElementById('filtroCredor').value = '';
       document.getElementById('filtroEspecie').value = '';
       document.getElementById('filtroTipo').value = '';
@@ -717,10 +877,10 @@
         anos.length = 0;
         anos.push(anoBase, anoComp);
       }
-      
+
       const agrupamento = document.getElementById('colunaAgrupamento').value;
       const tipo = document.getElementById('tipoResumo').value;
-      
+
       // Agrupar dados por ano - usando filtros e cache
       const agrupadoPorAno = {};
       anos.forEach(ano => {
@@ -744,13 +904,20 @@
           agrupadoPorAno[ano][chave] = (agrupadoPorAno[ano][chave] || 0) + 1;
         });
       });
-      
+
       // Encontrar todas as chaves
       const todasChaves = new Set();
       anos.forEach(ano => {
         Object.keys(agrupadoPorAno[ano]).forEach(chave => todasChaves.add(chave));
       });
-      
+
+      // Calcular totais por ano (para a linha de TOTAL)
+      const totaisPorAno = {};
+      anos.forEach(ano => {
+        const dadosFiltradosAno = filtrarDadosPorAno(dados[tipo], ano, tipo);
+        totaisPorAno[ano] = dadosFiltradosAno.length;
+      });
+
       // Construir resumo
       const resumo = [...todasChaves].map(chave => {
         const item = { nome: chave };
@@ -759,7 +926,7 @@
         });
         return item;
       }).sort((a, b) => (b[anos[0]] || 0) - (a[anos[0]] || 0));
-      
+
       // Atualizar cabeçalho da tabela dinamicamente
       const headerResumo = document.getElementById('headerResumo');
       let headerHtml = `<tr><th id="thAgrupamento">${agrupamento}</th>`;
@@ -768,7 +935,7 @@
       });
       headerHtml += `<th style="text-align: center;">Variação</th></tr>`;
       headerResumo.innerHTML = headerHtml;
-      
+
       // Atualizar dados do resumo para exportação
       dadosResumoGlobal = resumo.map(r => {
         const exportItem = { 'Agrupamento': r.nome };
@@ -780,19 +947,20 @@
         exportItem['Variação (%)'] = calcVariacao(r[primeiroAno], r[ultimoAno]).toFixed(2) + '%';
         return exportItem;
       });
-      
+
       // Renderizar tabela
       const tbody = document.getElementById('tabelaResumo');
       const colunas = anos.length + 2; // Agrupamento + anos + Variação
-      
-      tbody.innerHTML = resumo.map(r => {
+
+      // Criar linhas de agrupamento
+      const htmlLinhas = resumo.map(r => {
         const primeiroAno = anos[0];
         const ultimoAno = anos[anos.length - 1];
         const variacao = calcVariacao(r[primeiroAno], r[ultimoAno]);
         const corFundo = variacao > 0 ? 'rgba(45, 152, 70, 0.1)' : variacao < 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)';
         const corTexto = variacao > 0 ? '#2D9846' : variacao < 0 ? '#ef4444' : '#3b82f6';
         const sinal = variacao >= 0 ? '+' : '';
-        
+
         let html = `<tr><td title="${r.nome}" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">${r.nome.length > 40 ? r.nome.substring(0, 40) + '...' : r.nome}</td>`;
         anos.forEach((ano, idx) => {
           const badgeClass = idx === 0 ? 'badge-info' : 'badge-secondary';
@@ -800,22 +968,39 @@
         });
         html += `<td style="text-align: center;"><span class="badge" style="background: ${corFundo}; color: ${corTexto};">${sinal}${variacao.toFixed(1)}%</span></td></tr>`;
         return html;
-      }).join('') || `<tr><td colspan="${colunas}" style="text-align: center; padding: 40px;">Nenhum dado encontrado</td></tr>`;
-      
+      }).join('');
+
+      // Criar linha de TOTAL no final com mesmo estilo das outras linhas
+      const primeiroAnoTotal = anos[0];
+      const ultimoAnoTotal = anos[anos.length - 1];
+      const variacaoTotal = calcVariacao(totaisPorAno[primeiroAnoTotal], totaisPorAno[ultimoAnoTotal]);
+      const corFundoTotal = variacaoTotal > 0 ? 'rgba(45, 152, 70, 0.1)' : variacaoTotal < 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)';
+      const corTextoTotal = variacaoTotal > 0 ? '#2D9846' : variacaoTotal < 0 ? '#ef4444' : '#3b82f6';
+      const sinalTotal = variacaoTotal >= 0 ? '+' : '';
+
+      let htmlTotal = `<tr><td title="TOTAL GERAL" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; font-weight: 700;"><strong>TOTAL GERAL</strong></td>`;
+      anos.forEach((ano, idx) => {
+        const badgeClass = idx === 0 ? 'badge-info' : 'badge-secondary';
+        htmlTotal += `<td style="text-align: center;"><span class="badge ${badgeClass}" style="font-weight: 700;">${formatarNumero(totaisPorAno[ano])}</span></td>`;
+      });
+      htmlTotal += `<td style="text-align: center;"><span class="badge" style="background: ${corFundoTotal}; color: ${corTextoTotal}; font-weight: 700;">${sinalTotal}${variacaoTotal.toFixed(1)}%</span></td></tr>`;
+
+      tbody.innerHTML = htmlLinhas + htmlTotal || `<tr><td colspan="${colunas}" style="text-align: center; padding: 40px;">Nenhum dado encontrado</td></tr>`;
+
       document.getElementById('totalAgrupamentos').textContent = `${resumo.length} grupo(s) encontrado(s)`;
     }
-    
+
     function atualizarGraficosMultiAnos() {
       const anos = getAnosSelecionados();
       if (anos.length < 2) return;
-      
+
       // Cores para os anos
       const cores = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899'];
-      
+
       // Dados por etapa para cada ano
       const etapas = ['Empenhados', 'Liquidados', 'Pagos', 'A Pagar', 'Retidos'];
       const tiposMap = { 'Empenhados': 'empenhados', 'Liquidados': 'liquidados', 'Pagos': 'pagos', 'A Pagar': 'a-pagar', 'Retidos': 'retidos' };
-      
+
       const datasets = anos.map((ano, idx) => {
         const qtds = etapas.map(etapa => {
           const tipo = tiposMap[etapa];
@@ -830,7 +1015,7 @@
           borderRadius: 6
         };
       });
-      
+
       if (charts.comparativo) charts.comparativo.destroy();
       charts.comparativo = new Chart(document.getElementById('chartComparativo'), {
         type: 'bar',
@@ -838,23 +1023,25 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          layout: { padding: { bottom: 32 } },
           plugins: { legend: { position: 'top' } },
-          scales: { y: { ticks: { callback: v => formatarNumero(v) } } }
-        }
+          scales: { x: { grid: { display: false } }, y: { ticks: { callback: v => formatarNumero(v) }, grid: { display: false } } }
+        },
+        plugins: [pluginVariacaoPercentual]
       });
-      
+
       // Atualizar gráfico mensal
       atualizarGraficoMensal();
     }
-    
+
     function atualizarGraficoMensal() {
       const anos = getAnosSelecionados();
       if (anos.length < 2) return;
-      
+
       const tipoSelecionado = document.getElementById('tipoGraficoMensal').value;
       const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
       const cores = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899'];
-      
+
       // Mostrar um tipo específico com linhas por ano
       const dadosPorAnoMes = {};
       anos.forEach(ano => {
@@ -862,7 +1049,7 @@
         for (let m = 1; m <= 12; m++) {
           dadosPorAnoMes[ano][m.toString().padStart(2, '0')] = 0;
         }
-        
+
         // Filtrar dados por ano e pelos filtros atuais - com cache
         const dadosFiltradosAno = filtrarDadosPorAno(dados[tipoSelecionado], ano, tipoSelecionado);
         dadosFiltradosAno.forEach(d => {
@@ -872,7 +1059,7 @@
           }
         });
       });
-      
+
       const datasetsMensal = anos.map((ano, idx) => ({
         label: ano,
         data: nomesMeses.map((_, i) => dadosPorAnoMes[ano][(i + 1).toString().padStart(2, '0')] || 0),
@@ -880,35 +1067,36 @@
         backgroundColor: cores[idx % cores.length] + '30',
         fill: true,
         tension: 0.3,
-        borderWidth: 2
+        borderWidth: 2,
+        borderDash: idx === 1 ? [5, 5] : []  // Segunda linha pontilhada
       }));
-      
+
       if (charts.mensal) charts.mensal.destroy();
       charts.mensal = new Chart(document.getElementById('chartMensal'), {
         type: 'line',
-        data: { 
-          labels: nomesMeses, 
+        data: {
+          labels: nomesMeses,
           datasets: datasetsMensal
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: { legend: { display: true, position: 'top' } },
-          scales: { y: { ticks: { callback: v => formatarNumero(v) } } }
+          scales: { x: { grid: { display: false } }, y: { ticks: { callback: v => formatarNumero(v) }, grid: { display: false } } }
         }
       });
-      
+
       // Atualizar também o gráfico de pizza
       atualizarGraficoPizza();
     }
-    
+
     function atualizarGraficoPizza() {
       const anoSelecionado = document.getElementById('anoGraficoPizza').value;
       const anos = getAnosSelecionados();
       const tipos = ['empenhados', 'liquidados', 'pagos', 'a-pagar', 'retidos'];
       const nomesTipos = ['Empenhados', 'Liquidados', 'Pagos', 'A Pagar', 'Retidos'];
       const coresTipos = ['#3b82f6', '#10b981', '#22c55e', '#f59e0b', '#ef4444'];
-      
+
       const valores = tipos.map(tipo => {
         let total = 0;
         if (anoSelecionado === 'todos') {
@@ -922,7 +1110,7 @@
         }
         return total;
       });
-      
+
       if (charts.pizza) charts.pizza.destroy();
       charts.pizza = new Chart(document.getElementById('chartPizza'), {
         type: 'pie',
@@ -938,11 +1126,16 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          layout: {
+            padding: {
+              bottom: 20
+            }
+          },
           plugins: {
             legend: { display: true, position: 'bottom' },
             tooltip: {
               callbacks: {
-                label: function(ctx) {
+                label: function (ctx) {
                   const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
                   const valor = ctx.raw;
                   const pct = total > 0 ? ((valor / total) * 100).toFixed(1) : 0;
@@ -1040,25 +1233,25 @@
       const container = document.getElementById('paginacaoControles');
       container.innerHTML = '';
       if (totalPaginas <= 1) return;
-      
+
       const btnPrim = document.createElement('button');
       btnPrim.className = 'btn btn-secondary btn-sm';
       btnPrim.innerHTML = '<i class="fas fa-angle-double-left"></i>';
       btnPrim.disabled = paginaAtual === 1;
       btnPrim.onclick = () => { paginaAtual = 1; renderizarDetalhado(); };
       container.appendChild(btnPrim);
-      
+
       const btnAnt = document.createElement('button');
       btnAnt.className = 'btn btn-secondary btn-sm';
       btnAnt.innerHTML = '<i class="fas fa-angle-left"></i>';
       btnAnt.disabled = paginaAtual === 1;
       btnAnt.onclick = () => { paginaAtual--; renderizarDetalhado(); };
       container.appendChild(btnAnt);
-      
+
       let inicioP = Math.max(1, paginaAtual - 2);
       let fimP = Math.min(totalPaginas, inicioP + 4);
       if (fimP - inicioP < 4) inicioP = Math.max(1, fimP - 4);
-      
+
       for (let i = inicioP; i <= fimP; i++) {
         const btn = document.createElement('button');
         btn.className = `btn btn-sm ${i === paginaAtual ? 'btn-primary' : 'btn-secondary'}`;
@@ -1066,14 +1259,14 @@
         btn.onclick = () => { paginaAtual = i; renderizarDetalhado(); };
         container.appendChild(btn);
       }
-      
+
       const btnProx = document.createElement('button');
       btnProx.className = 'btn btn-secondary btn-sm';
       btnProx.innerHTML = '<i class="fas fa-angle-right"></i>';
       btnProx.disabled = paginaAtual === totalPaginas;
       btnProx.onclick = () => { paginaAtual++; renderizarDetalhado(); };
       container.appendChild(btnProx);
-      
+
       const btnUlt = document.createElement('button');
       btnUlt.className = 'btn btn-secondary btn-sm';
       btnUlt.innerHTML = '<i class="fas fa-angle-double-right"></i>';
@@ -1088,10 +1281,10 @@
     }
 
     document.addEventListener('DOMContentLoaded', carregarDados);
-    
+
     // Dados para exportação
     let dadosResumoGlobal = [];
-    
+
     // Funções de exportação
     function getDadosDetalhado() {
       const tipo = document.getElementById('tipoDespesa').value;
@@ -1102,7 +1295,7 @@
         ...dadosFiltrados.comp[tipo].map(d => ({ ...d, Exercicio: anoComp }))
       ];
     }
-    
+
     // =====================================================
     // Seletor de colunas dinâmico
     // =====================================================
@@ -1136,7 +1329,7 @@
             colunasSelecionadas = new Set(arr.filter(c => colunasDisponiveis.includes(c)));
           }
         }
-      } catch(e) {}
+      } catch (e) { }
 
       if (colunasSelecionadas.size === 0) {
         colunasSelecionadas = new Set(COLUNAS_PADRAO.filter(c => colunasDisponiveis.includes(c)));
@@ -1161,7 +1354,7 @@
       document.getElementById('colSelectorDropdown').classList.toggle('show');
     }
 
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       const dd = document.getElementById('colSelectorDropdown');
       if (dd && !e.target.closest('.col-selector-wrap')) dd.classList.remove('show');
     });
@@ -1206,12 +1399,12 @@
       thead.innerHTML = html;
     }
     const colunasResumo = ['Agrupamento', 'Qtd Base', 'Qtd Comparação', 'Variação (%)'];
-    
+
     function getAbaAtiva() {
       const btnAtivo = document.querySelector('.tab-btn.active');
       return btnAtivo ? btnAtivo.dataset.tab : 'grafico';
     }
-    
+
     function exportarDadosExcel() {
       const aba = getAbaAtiva();
       if (aba === 'resumo') {
@@ -1229,19 +1422,20 @@
         exportarPDF(getDadosDetalhado(), 'gerencial-detalhado', 'Gerencial - Detalhado', getColunasAtivas());
       }
     }
-    
+
+    // Controlar visibilidade dos filtros por aba
     // Controlar visibilidade dos filtros por aba
     function atualizarVisibilidadeFiltros(tabId) {
       const filtrosSection = document.getElementById('filtrosSection');
       if (filtrosSection) {
-        filtrosSection.style.display = tabId === 'resumo' ? 'none' : 'block';
+        filtrosSection.style.display = 'block';
       }
     }
-    
+
     // Sobrescrever comportamento das tabs para controlar filtros
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
           const tabId = this.getAttribute('data-tab');
           document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
           document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -1254,7 +1448,48 @@
           }
         });
       });
+      atualizarVisibilidadeFiltros('resumo');
     });
+
+    // Função para alternar tela cheia
+    function toggleFullscreen(containerId) {
+      const container = document.getElementById(containerId);
+      const btn = container.querySelector('.btn-fullscreen i');
+
+      if (!container.classList.contains('fullscreen-mode')) {
+        container.classList.add('fullscreen-mode');
+        btn.classList.remove('fa-expand');
+        btn.classList.add('fa-compress');
+
+        // Redimensionar gráfico após entrar em tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas && charts[canvas.id.replace('chart', '').toLowerCase()]) {
+            charts[canvas.id.replace('chart', '').toLowerCase()].resize();
+          }
+        }, 100);
+      } else {
+        container.classList.remove('fullscreen-mode');
+        btn.classList.remove('fa-compress');
+        btn.classList.add('fa-expand');
+
+        // Redimensionar gráfico após sair de tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas && charts[canvas.id.replace('chart', '').toLowerCase()]) {
+            charts[canvas.id.replace('chart', '').toLowerCase()].resize();
+          }
+        }, 100);
+      }
+
+      // Fechar tela cheia com ESC
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && container.classList.contains('fullscreen-mode')) {
+          toggleFullscreen(containerId);
+        }
+      });
+    }
   </script>
 </body>
+
 </html>

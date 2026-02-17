@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGEF | Resultado Orçamentário - Caruaru</title>
+  <link rel="icon" type="image/png" href="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/portal-transparencia.css">
+  <script src="js/auth-check.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .result-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .result-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+    }
+
+    .result-card .rc-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .result-card .rc-label {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .result-card .rc-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 4px 0;
+    }
+
+    .result-card .rc-sub {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .chart-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+    }
+
+    .chart-box h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chart-box.full {
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 1024px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .btn-fullscreen {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 4px 8px;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: auto;
+    }
+
+    .btn-fullscreen:hover {
+      background: #f1f5f9;
+      color: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .btn-fullscreen i {
+      font-size: 14px;
+    }
+
+    /* Estilos para modo tela cheia */
+    .fullscreen-mode {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+      background: white !important;
+      padding: 20px !important;
+      margin: 0 !important;
+      max-width: none !important;
+      overflow: auto !important;
+    }
+
+    .fullscreen-mode>div:last-child {
+      height: calc(100vh - 100px) !important;
+      max-width: none !important;
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><img src="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png"
+          alt="Brasão Caruaru"></div>
+      <h1 class="sidebar-title">Secretaria da Fazenda</h1>
+      <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    <nav class="sidebar-menu" id="sidebarMenu"></nav>
+  </aside>
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <nav class="breadcrumb"><span>Visão Geral</span><i class="fas fa-chevron-right"></i><span>Resultado
+            Orçamentário</span></nav>
+      </div>
+      <div class="header-actions">
+        <div class="user-menu">
+          <div class="user-avatar">AD</div>
+          <div class="user-info"><span class="user-name">Administrador</span><span class="user-role">SIGEF</span></div>
+        </div>
+      </div>
+    </header>
+    <section class="page-header">
+      <div class="page-header-content">
+        <h1 class="page-title"><i class="fas fa-chart-pie"></i> Resultado Orçamentário</h1>
+        <p class="page-subtitle">Análise do equilíbrio entre Receitas e Despesas</p>
+      </div>
+    </section>
+    <main class="content-area">
+      <!-- Filtros -->
+      <div class="filter-section" style="margin-bottom: 20px;">
+        <div class="filter-grid">
+          <div class="filter-group"><label class="filter-label">Exercício</label><select id="filtroAno"
+              class="filter-select" onchange="atualizar()"></select></div>
+        </div>
+      </div>
+
+      <!-- Cards -->
+      <div class="result-cards">
+        <div class="result-card">
+          <div class="rc-icon" style="background: #eff6ff; color: #3b82f6;"><i class="fas fa-file-invoice-dollar"></i>
+          </div>
+          <div class="rc-label">Receita Prevista</div>
+          <div class="rc-value" id="cardRecPrev">-</div>
+          <div class="rc-sub" id="cardRecPrevSub">-</div>
+        </div>
+        <div class="result-card">
+          <div class="rc-icon" style="background: #f0fdf4; color: #22c55e;"><i class="fas fa-money-bill-wave"></i></div>
+          <div class="rc-label">Receita Arrecadada</div>
+          <div class="rc-value" id="cardRecArr">-</div>
+          <div class="rc-sub" id="cardRecArrSub">-</div>
+        </div>
+        <div class="result-card">
+          <div class="rc-icon" style="background: #fef3c7; color: #f59e0b;"><i class="fas fa-file-invoice"></i></div>
+          <div class="rc-label">Despesa Empenhada</div>
+          <div class="rc-value" id="cardDespEmp">-</div>
+          <div class="rc-sub" id="cardDespEmpSub">-</div>
+        </div>
+        <div class="result-card" id="cardResultadoBox">
+          <div class="rc-icon" id="cardResIcon" style="background: #f0fdf4; color: #22c55e;"><i
+              class="fas fa-balance-scale"></i></div>
+          <div class="rc-label">Resultado</div>
+          <div class="rc-value" id="cardResultado">-</div>
+          <div class="rc-sub" id="cardResultadoSub">-</div>
+        </div>
+      </div>
+
+      <!-- Gráficos -->
+      <div class="charts-grid">
+        <div class="chart-box full" id="chartMensalContainer">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="margin: 0;"><i class="fas fa-chart-bar" style="color: #3b82f6;"></i> Receita vs Despesa por Mês
+              (com Resultado Acumulado)</h3>
+            <button onclick="toggleFullscreen('chartMensalContainer')" class="btn-fullscreen" title="Tela cheia">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
+          <div style="position: relative; height: 340px;"><canvas id="chartMensal"></canvas></div>
+        </div>
+        <div class="chart-box" id="chartRecCategoriaContainer">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="margin: 0;"><i class="fas fa-chart-pie" style="color: #22c55e;"></i> Receita por Categoria</h3>
+            <button onclick="toggleFullscreen('chartRecCategoriaContainer')" class="btn-fullscreen" title="Tela cheia">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
+          <div style="position: relative; height: 300px;"><canvas id="chartRecCategoria"></canvas></div>
+        </div>
+        <div class="chart-box" id="chartDespFuncaoContainer">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="margin: 0;"><i class="fas fa-chart-pie" style="color: #f59e0b;"></i> Despesa por Função (Top 8)
+            </h3>
+            <button onclick="toggleFullscreen('chartDespFuncaoContainer')" class="btn-fullscreen" title="Tela cheia">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
+          <div style="position: relative; height: 300px;"><canvas id="chartDespFuncao"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Tabela Mensal -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-table"></i> Resumo Mensal</h2>
+          <div class="card-actions">
+            <button class="btn btn-secondary btn-sm" onclick="exportarExcelRes()"><i class="fas fa-file-excel"></i>
+              Excel</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportarPDFRes()"><i class="fas fa-file-pdf"></i>
+              PDF</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Mês</th>
+                  <th style="text-align: right;">Rec. Prevista</th>
+                  <th style="text-align: right;">Rec. Arrecadada</th>
+                  <th style="text-align: center;">% Arrec.</th>
+                  <th style="text-align: right;">Desp. Empenhada</th>
+                  <th style="text-align: right;">Desp. Paga</th>
+                  <th style="text-align: right;">Resultado Mensal</th>
+                  <th style="text-align: right;">Acumulado</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaMensal"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer class="main-footer">
+      <div class="footer-content">
+        <p class="footer-text">© 2026 Prefeitura Municipal de Caruaru - SIGEF. Todos os direitos reservados.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="js/portal-transparencia.js"></script>
+  <script src="js/indexeddb-utils.js"></script>
+  <script src="js/exportar-dados.js"></script>
+  <script src="js/sidebar-menu.js"></script>
+  <script>
+    let dados = {};
+    let charts = {};
+    let dadosExport = [];
+    let camposDetectados = {};
+    const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    const MESES_ABR = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+    function formatarMoeda(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
+    function fmt(v) { if (Math.abs(v) >= 1e9) return 'R$ ' + (v / 1e9).toFixed(2).replace('.', ',') + ' bi'; if (Math.abs(v) >= 1e6) return 'R$ ' + (v / 1e6).toFixed(1).replace('.', ',') + ' mi'; if (Math.abs(v) >= 1e3) return 'R$ ' + (v / 1e3).toFixed(0).replace('.', ',') + ' mil'; return formatarMoeda(v); }
+    function getValor(item, ...campos) { for (const c of campos) { const v = item[c]; if (v !== undefined && v !== null && v !== '') return v; } return null; }
+
+    // Detectar nome do campo de data em um array de registros
+    function detectarCampoData(arr) {
+      if (!arr || arr.length === 0) return 'Data';
+      const cols = Object.keys(arr[0]);
+      return cols.find(c => c.toLowerCase() === 'data') ||
+        cols.find(c => c.toLowerCase().includes('data')) ||
+        'Data';
+    }
+    // Detectar nome do campo de valor em um array de registros
+    function detectarCampoValor(arr) {
+      if (!arr || arr.length === 0) return 'Valor (R$)';
+      const cols = Object.keys(arr[0]);
+      return cols.find(c => c === 'Valor (R$)') ||
+        cols.find(c => c === 'Valor(R$)') ||
+        cols.find(c => c.toLowerCase().includes('valor')) ||
+        'Valor';
+    }
+    function detectarCampos(nomeStore, arr) {
+      camposDetectados[nomeStore] = { data: detectarCampoData(arr), valor: detectarCampoValor(arr) };
+      console.log(`[Resultado] Campos detectados para ${nomeStore}:`, camposDetectados[nomeStore],
+        arr.length > 0 ? `| Amostra: data="${arr[0][camposDetectados[nomeStore].data]}", valor="${arr[0][camposDetectados[nomeStore].valor]}"` : '| (vazio)');
+    }
+
+    // Extrair ano - suporta DD/MM/YYYY, YYYY-MM-DD, "02 00:00:00/01/2024", serial Excel
+    function extrairAno(d) {
+      if (d === null || d === undefined || d === '' || d === '-') return null;
+      if (typeof d === 'number' && d > 40000 && d < 60000) {
+        const dt = new Date((d - 25569) * 86400 * 1000);
+        return String(dt.getUTCFullYear());
+      }
+      const s = String(d).trim();
+      const matchEsp = s.match(/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/(\d{4})$/);
+      if (matchEsp) return matchEsp[1];
+      if (s.includes('/')) {
+        const p = s.split('/');
+        if (p.length === 3) { const u = p[2].substring(0, 4); if (/^\d{4}$/.test(u)) return u; }
+      }
+      const mIso = s.match(/^(\d{4})-/);
+      if (mIso) return mIso[1];
+      const m = s.match(/(\d{4})/);
+      return m ? m[1] : null;
+    }
+
+    // Extrair mês (0-based) - suporta DD/MM/YYYY, YYYY-MM-DD, "02 00:00:00/01/2024", serial Excel
+    function extrairMes(d) {
+      if (d === null || d === undefined || d === '' || d === '-') return null;
+      if (typeof d === 'number' && d > 40000 && d < 60000) {
+        const dt = new Date((d - 25569) * 86400 * 1000);
+        return dt.getUTCMonth();
+      }
+      const s = String(d).trim();
+      const matchEsp = s.match(/^\d{2}\s+\d{2}:\d{2}:\d{2}\/(\d{2})\/\d{4}$/);
+      if (matchEsp) return parseInt(matchEsp[1]) - 1;
+      if (s.includes('/')) { const p = s.split('/'); if (p.length >= 2) return parseInt(p[1]) - 1; }
+      if (s.includes('-')) { const p = s.split('-'); if (p.length >= 2) return parseInt(p[1]) - 1; }
+      return null;
+    }
+
+    function parseValor(item, ...campos) {
+      const v = getValor(item, ...campos);
+      if (v === null) return 0;
+      if (typeof v === 'number') return v;
+      const s = String(v).replace(/[R$\s]/g, '');
+      if (s.includes(',') && s.includes('.')) return parseFloat(s.replace(/\./g, '').replace(',', '.'));
+      if (s.includes(',')) return parseFloat(s.replace(',', '.'));
+      return parseFloat(s) || 0;
+    }
+
+    function agruparPorMes(arr, storeName) {
+      const campoData = (camposDetectados[storeName] || {}).data || 'Data';
+      const campoValor = (camposDetectados[storeName] || {}).valor || 'Valor (R$)';
+      const m = new Array(12).fill(0);
+      arr.forEach(d => {
+        const mes = extrairMes(d[campoData]);
+        if (mes !== null && mes >= 0 && mes < 12) m[mes] += parseValor(d, campoValor, 'Valor (R$)', 'Valor(R$)', 'Valor', 'Valor retido', 'Valor retido (R$)');
+      });
+      return m;
+    }
+    function filtrar(arr, ano, storeName) {
+      const campoData = (camposDetectados[storeName] || {}).data || 'Data';
+      return arr.filter(d => extrairAno(d[campoData]) === ano);
+    }
+
+    async function carregarDados() {
+      const storeNames = ['despesas-empenhados', 'despesas-liquidados', 'despesas-pagos', 'receitas-previsao', 'receitas-arrecadacao'];
+      const keys = ['empenhados', 'liquidados', 'pagos', 'recPrevisao', 'recArrecadacao'];
+      const results = await Promise.all(storeNames.map(s => carregarDadosPortal(s)));
+      keys.forEach((k, i) => {
+        dados[k] = results[i] || [];
+        detectarCampos(storeNames[i], dados[k]);
+      });
+
+      console.log('[Resultado] Resumo de dados carregados:');
+      keys.forEach((k, i) => console.log(`  ${storeNames[i]}: ${dados[k].length} registros`));
+
+      const anos = new Set();
+      keys.forEach((k, i) => {
+        const campoData = camposDetectados[storeNames[i]]?.data || 'Data';
+        dados[k].forEach(d => { const y = extrairAno(d[campoData]); if (y) anos.add(y); });
+      });
+      const sel = document.getElementById('filtroAno');
+      [...anos].sort().reverse().forEach((a, i) => sel.innerHTML += `<option value="${a}" ${i === 0 ? 'selected' : ''}>${a}</option>`);
+      atualizar();
+    }
+
+    function atualizar() {
+      const ano = document.getElementById('filtroAno').value;
+      if (!ano) return;
+      const emp = filtrar(dados.empenhados, ano, 'despesas-empenhados');
+      const pag = filtrar(dados.pagos, ano, 'despesas-pagos');
+      const recP = filtrar(dados.recPrevisao, ano, 'receitas-previsao');
+      const recA = filtrar(dados.recArrecadacao, ano, 'receitas-arrecadacao');
+
+      console.log(`[Resultado] Ano=${ano} | Emp=${emp.length} | Pag=${pag.length} | RecP=${recP.length} | RecA=${recA.length}`);
+
+      const cvEmp = (camposDetectados['despesas-empenhados'] || {}).valor || 'Valor (R$)';
+      const cvPag = (camposDetectados['despesas-pagos'] || {}).valor || 'Valor (R$)';
+      const cvRecP = (camposDetectados['receitas-previsao'] || {}).valor || 'Valor (R$)';
+      const cvRecA = (camposDetectados['receitas-arrecadacao'] || {}).valor || 'Valor (R$)';
+      const allValorCampos = ['Valor (R$)', 'Valor(R$)', 'Valor', 'Valor retido', 'Valor retido (R$)'];
+
+      const totalRecP = recP.reduce((s, d) => s + parseValor(d, cvRecP, ...allValorCampos), 0);
+      const totalRecA = recA.reduce((s, d) => s + parseValor(d, cvRecA, ...allValorCampos), 0);
+      const totalEmp = emp.reduce((s, d) => s + parseValor(d, cvEmp, ...allValorCampos), 0);
+      const totalPag = pag.reduce((s, d) => s + parseValor(d, cvPag, ...allValorCampos), 0);
+      const resultado = totalRecA - totalEmp;
+      const qda = totalRecP > 0 ? (totalRecA / totalRecP * 100) : 0;
+
+      // Cards
+      document.getElementById('cardRecPrev').textContent = fmt(totalRecP);
+      document.getElementById('cardRecPrevSub').textContent = recP.length.toLocaleString() + ' registros';
+      document.getElementById('cardRecArr').textContent = fmt(totalRecA);
+      document.getElementById('cardRecArrSub').textContent = `QDA: ${qda.toFixed(1)}% (Arrecadado/Previsto)`;
+      document.getElementById('cardDespEmp').textContent = fmt(totalEmp);
+      document.getElementById('cardDespEmpSub').textContent = emp.length.toLocaleString() + ' empenhos';
+      document.getElementById('cardResultado').textContent = fmt(resultado);
+      document.getElementById('cardResultado').style.color = resultado >= 0 ? '#16a34a' : '#dc2626';
+      document.getElementById('cardResultadoSub').textContent = resultado >= 0 ? 'Superávit de ' + (totalRecA > 0 ? (resultado / totalRecA * 100).toFixed(2) : 0) + '% da receita' : 'Déficit orçamentário';
+      document.getElementById('cardResIcon').style.background = resultado >= 0 ? '#f0fdf4' : '#fef2f2';
+      document.getElementById('cardResIcon').style.color = resultado >= 0 ? '#22c55e' : '#ef4444';
+
+      // Gráfico Mensal
+      const recPMes = agruparPorMes(recP, 'receitas-previsao');
+      const recAMes = agruparPorMes(recA, 'receitas-arrecadacao');
+      const empMes = agruparPorMes(emp, 'despesas-empenhados');
+      const pagMes = agruparPorMes(pag, 'despesas-pagos');
+      let acum = 0;
+      const acumulado = recAMes.map((v, i) => { acum += v - empMes[i]; return acum; });
+
+      if (charts.mensal) charts.mensal.destroy();
+      charts.mensal = new Chart(document.getElementById('chartMensal'), {
+        type: 'bar',
+        data: {
+          labels: MESES_ABR,
+          datasets: [
+            { label: 'Receita Arrecadada', data: recAMes, backgroundColor: 'rgba(34,197,94,0.7)', borderRadius: 4, order: 2 },
+            { label: 'Despesa Empenhada', data: empMes, backgroundColor: 'rgba(245,158,11,0.7)', borderRadius: 4, order: 2 },
+            { label: 'Resultado Acumulado', data: acumulado, type: 'line', borderColor: acumulado[acumulado.length - 1] >= 0 ? '#16a34a' : '#dc2626', backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: acumulado.map(v => v >= 0 ? '#16a34a' : '#dc2626'), tension: 0.3, order: 1, yAxisID: 'y1' }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 16, font: { size: 11 } } } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { grid: { display: false }, ticks: { callback: v => fmt(v), font: { size: 10 } } },
+            y1: { position: 'right', display: false, grid: { drawOnChartArea: false } }
+          }
+        }
+      });
+
+      // Gráfico Receita por Categoria
+      const catRec = {};
+      recA.forEach(d => {
+        const rec = getValor(d, 'Receita', 'Descrição', 'Histórico') || 'Outros';
+        let cat = 'Outros';
+        const rl = rec.toLowerCase();
+        if (rl.includes('transfer')) cat = 'Transferências';
+        else if (rl.includes('imposto') || rl.includes('taxa') || rl.includes('contribui') || rl.includes('tribut')) cat = 'Tributária';
+        else if (rl.includes('patrimon')) cat = 'Patrimonial';
+        else if (rl.includes('serviço') || rl.includes('servico')) cat = 'Serviços';
+        else if (rl.includes('capital') || rl.includes('operaç') || rl.includes('alienac') || rl.includes('amortiz')) cat = 'Capital';
+        else if (rl.includes('deduç') || rl.includes('deduc')) cat = 'Deduções';
+        else if (rl.includes('intra')) cat = 'Intraorçamentária';
+        if (!catRec[cat]) catRec[cat] = 0;
+        catRec[cat] += parseValor(d, cvRecA, ...allValorCampos);
+      });
+      const coresRec = ['#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#ef4444', '#6366f1'];
+      const catEntries = Object.entries(catRec).sort((a, b) => b[1] - a[1]);
+      if (charts.recCat) charts.recCat.destroy();
+      charts.recCat = new Chart(document.getElementById('chartRecCategoria'), {
+        type: 'doughnut',
+        data: { labels: catEntries.map(([k]) => k), datasets: [{ data: catEntries.map(([, v]) => v), backgroundColor: coresRec.slice(0, catEntries.length), borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 10, font: { size: 10 } } } } }
+      });
+
+      // Gráfico Despesa por Função
+      const funcoes = {};
+      emp.forEach(d => { const f = getValor(d, 'Função', 'Funcao', 'FUNÇÃO') || 'Outros'; if (!funcoes[f]) funcoes[f] = 0; funcoes[f] += parseValor(d, cvEmp, ...allValorCampos); });
+      const topFunc = Object.entries(funcoes).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      const coresFunc = ['#f59e0b', '#3b82f6', '#ef4444', '#22c55e', '#8b5cf6', '#ec4899', '#14b8a6', '#6366f1'];
+      if (charts.despFunc) charts.despFunc.destroy();
+      charts.despFunc = new Chart(document.getElementById('chartDespFuncao'), {
+        type: 'doughnut',
+        data: { labels: topFunc.map(([k]) => k.length > 18 ? k.substring(0, 18) + '...' : k), datasets: [{ data: topFunc.map(([, v]) => v), backgroundColor: coresFunc, borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 10, font: { size: 10 } } } } }
+      });
+
+      // Tabela Mensal
+      dadosExport = [];
+      const tbody = document.getElementById('tabelaMensal');
+      let acumTab = 0;
+      let htmlRows = '';
+      for (let i = 0; i < 12; i++) {
+        const pctArr = recPMes[i] > 0 ? (recAMes[i] / recPMes[i] * 100) : 0;
+        const resMes = recAMes[i] - empMes[i];
+        acumTab += resMes;
+        const corRes = resMes >= 0 ? '#16a34a' : '#dc2626';
+        const corAcum = acumTab >= 0 ? '#16a34a' : '#dc2626';
+        htmlRows += `<tr>
+          <td><strong>${MESES[i]}</strong></td>
+          <td style="text-align:right;">${formatarMoeda(recPMes[i])}</td>
+          <td style="text-align:right;">${formatarMoeda(recAMes[i])}</td>
+          <td style="text-align:center;">${pctArr.toFixed(1)}%</td>
+          <td style="text-align:right;">${formatarMoeda(empMes[i])}</td>
+          <td style="text-align:right;">${formatarMoeda(pagMes[i])}</td>
+          <td style="text-align:right; color:${corRes}; font-weight:600;">${formatarMoeda(resMes)}</td>
+          <td style="text-align:right; color:${corAcum}; font-weight:600;">${formatarMoeda(acumTab)}</td>
+        </tr>`;
+        dadosExport.push({ 'Mês': MESES[i], 'Rec. Prevista': recPMes[i], 'Rec. Arrecadada': recAMes[i], '% Arrec.': pctArr.toFixed(1) + '%', 'Desp. Empenhada': empMes[i], 'Desp. Paga': pagMes[i], 'Resultado': resMes, 'Acumulado': acumTab });
+      }
+      // Total
+      const totRP = recPMes.reduce((a, b) => a + b, 0);
+      const totRA = recAMes.reduce((a, b) => a + b, 0);
+      const totEm = empMes.reduce((a, b) => a + b, 0);
+      const totPg = pagMes.reduce((a, b) => a + b, 0);
+      htmlRows += `<tr class="total-row"><td><strong>TOTAL</strong></td><td style="text-align:right;"><strong>${formatarMoeda(totRP)}</strong></td><td style="text-align:right;"><strong>${formatarMoeda(totRA)}</strong></td><td style="text-align:center;"><strong>${totRP > 0 ? (totRA / totRP * 100).toFixed(1) : 0}%</strong></td><td style="text-align:right;"><strong>${formatarMoeda(totEm)}</strong></td><td style="text-align:right;"><strong>${formatarMoeda(totPg)}</strong></td><td style="text-align:right; font-weight:700; color:${resultado >= 0 ? '#16a34a' : '#dc2626'};"><strong>${formatarMoeda(resultado)}</strong></td><td style="text-align:right; font-weight:700; color:${acumTab >= 0 ? '#16a34a' : '#dc2626'};"><strong>${formatarMoeda(acumTab)}</strong></td></tr>`;
+      tbody.innerHTML = htmlRows;
+    }
+
+    function exportarExcelRes() { if (typeof exportarExcel === 'function') exportarExcel(dadosExport, 'resultado-orcamentario'); }
+    function exportarPDFRes() { if (typeof exportarPDF === 'function') exportarPDF(dadosExport, 'resultado-orcamentario', 'Resultado Orçamentário - Resumo Mensal'); }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof renderSidebarMenu === 'function') renderSidebarMenu('resultado-orcamentario.html');
+      carregarDados();
+    });
+
+    // Função para alternar tela cheia
+    function toggleFullscreen(containerId) {
+      const container = document.getElementById(containerId);
+      const btn = container.querySelector('.btn-fullscreen i');
+
+      if (!container.classList.contains('fullscreen-mode')) {
+        container.classList.add('fullscreen-mode');
+        btn.classList.remove('fa-expand');
+        btn.classList.add('fa-compress');
+
+        // Redimensionar gráfico após entrar em tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      } else {
+        container.classList.remove('fullscreen-mode');
+        btn.classList.remove('fa-compress');
+        btn.classList.add('fa-expand');
+
+        // Redimensionar gráfico após sair de tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      }
+
+      // Fechar tela cheia com ESC
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && container.classList.contains('fullscreen-mode')) {
+          toggleFullscreen(containerId);
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>

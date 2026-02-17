@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +9,57 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="css/portal-transparencia.css">
+  <script src="js/auth-check.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .btn-fullscreen {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-fullscreen:hover {
+      background: #f1f5f9;
+      color: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .btn-fullscreen i {
+      font-size: 14px;
+    }
+
+    /* Estilos para modo tela cheia */
+    .fullscreen-mode {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+      background: white !important;
+      padding: 20px !important;
+      margin: 0 !important;
+      max-width: none !important;
+      overflow: auto !important;
+    }
+
+    .fullscreen-mode>div:last-child {
+      height: calc(100vh - 100px) !important;
+      max-width: none !important;
+    }
+  </style>
 </head>
+
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -22,6 +70,16 @@
       <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i></button>
     </div>
     <nav class="sidebar-menu">
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)"><i class="fas fa-tachometer-alt"></i><span>Visão
+            Geral</span><i class="fas fa-chevron-right section-arrow"></i></div>
+        <ul>
+          <li class="menu-item"><a href="dashboard.html" class="menu-link"><i class="fas fa-home"></i><span>Dashboard
+                Executivo</span></a></li>
+          <li class="menu-item"><a href="resultado-orcamentario.html" class="menu-link"><i
+                class="fas fa-chart-pie"></i><span>Resultado Orçamentário</span></a></li>
+        </ul>
+      </div>
       <div class="menu-section expanded">
         <div class="menu-section-title" onclick="toggleSection(this)">
           <i class="fas fa-hand-holding-usd"></i>
@@ -29,12 +87,18 @@
           <i class="fas fa-chevron-right section-arrow"></i>
         </div>
         <ul>
-          <li class="menu-item"><a href="receitas-previsao.html" class="menu-link"><i class="fas fa-chart-line"></i><span>Previsão</span></a></li>
-          <li class="menu-item"><a href="receitas-arrecadacao.html" class="menu-link"><i class="fas fa-money-bill-wave"></i><span>Arrecadação</span></a></li>
-          <li class="menu-item"><a href="receitas-retencoes.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retenções</span></a></li>
-          <li class="menu-item"><a href="receitas-deducoes.html" class="menu-link"><i class="fas fa-minus-circle"></i><span>Deduções</span></a></li>
-          <li class="menu-item"><a href="receitas-gerencial.html" class="menu-link active"><i class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
-          <li class="menu-item"><a href="receitas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+          <li class="menu-item"><a href="receitas-previsao.html" class="menu-link"><i
+                class="fas fa-chart-line"></i><span>Previsão</span></a></li>
+          <li class="menu-item"><a href="receitas-arrecadacao.html" class="menu-link"><i
+                class="fas fa-money-bill-wave"></i><span>Arrecadação</span></a></li>
+          <li class="menu-item"><a href="receitas-retencoes.html" class="menu-link"><i
+                class="fas fa-hand-holding-usd"></i><span>Retenções</span></a></li>
+          <li class="menu-item"><a href="receitas-deducoes.html" class="menu-link"><i
+                class="fas fa-minus-circle"></i><span>Deduções</span></a></li>
+          <li class="menu-item"><a href="receitas-gerencial.html" class="menu-link active"><i
+                class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="receitas-comparativos.html" class="menu-link"><i
+                class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
         </ul>
       </div>
       <div class="menu-section">
@@ -44,13 +108,43 @@
           <i class="fas fa-chevron-right section-arrow"></i>
         </div>
         <ul>
-          <li class="menu-item"><a href="despesas-empenhados.html" class="menu-link"><i class="fas fa-file-invoice"></i><span>Empenhados</span></a></li>
-          <li class="menu-item"><a href="despesas-liquidados.html" class="menu-link"><i class="fas fa-check-circle"></i><span>Liquidados</span></a></li>
-          <li class="menu-item"><a href="despesas-retidos.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retidos</span></a></li>
-          <li class="menu-item"><a href="despesas-pagos.html" class="menu-link"><i class="fas fa-money-check-alt"></i><span>Pagos</span></a></li>
-          <li class="menu-item"><a href="despesas-a-pagar.html" class="menu-link"><i class="fas fa-clock"></i><span>A Pagar</span></a></li>
-          <li class="menu-item"><a href="despesas-gerencial.html" class="menu-link"><i class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
-          <li class="menu-item"><a href="despesas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+          <li class="menu-item"><a href="despesas-empenhados.html" class="menu-link"><i
+                class="fas fa-file-invoice"></i><span>Empenhados</span></a></li>
+          <li class="menu-item"><a href="despesas-liquidados.html" class="menu-link"><i
+                class="fas fa-check-circle"></i><span>Liquidados</span></a></li>
+          <li class="menu-item"><a href="despesas-retidos.html" class="menu-link"><i
+                class="fas fa-hand-holding-usd"></i><span>Retidos</span></a></li>
+          <li class="menu-item"><a href="despesas-pagos.html" class="menu-link"><i
+                class="fas fa-money-check-alt"></i><span>Pagos</span></a></li>
+          <li class="menu-item"><a href="despesas-a-pagar.html" class="menu-link"><i class="fas fa-clock"></i><span>A
+                Pagar</span></a></li>
+          <li class="menu-item"><a href="despesas-gerencial.html" class="menu-link"><i
+                class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="despesas-comparativos.html" class="menu-link"><i
+                class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)">
+          <i class="fas fa-search-dollar"></i>
+          <span>Análises</span>
+          <i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="despesas-analise.html" class="menu-link"><i
+                class="fas fa-chart-pie"></i><span>Análise Financeira</span></a></li>
+          <li class="menu-item"><a href="despesas-execucao.html" class="menu-link"><i
+                class="fas fa-chart-bar"></i><span>Execução Orçamentária</span></a></li>
+          <li class="menu-item"><a href="despesas-fontes.html" class="menu-link"><i
+                class="fas fa-layer-group"></i><span>Fontes de Recursos</span></a></li>
+          <li class="menu-item"><a href="despesas-credores.html" class="menu-link"><i
+                class="fas fa-users"></i><span>Credores</span></a></li>
+          <li class="menu-item"><a href="despesas-natureza.html" class="menu-link"><i
+                class="fas fa-sitemap"></i><span>Natureza da Despesa</span></a></li>
+          <li class="menu-item"><a href="limites-legais.html" class="menu-link"><i
+                class="fas fa-gavel"></i><span>Limites Legais</span></a></li>
+          <li class="menu-item"><a href="despesas-alertas.html" class="menu-link"><i
+                class="fas fa-exclamation-triangle"></i><span>Alertas</span></a></li>
         </ul>
       </div>
       <div class="menu-section">
@@ -60,8 +154,12 @@
           <i class="fas fa-chevron-right section-arrow"></i>
         </div>
         <ul>
-          <li class="menu-item"><a href="banco-importar-dados.html" class="menu-link"><i class="fas fa-file-import"></i><span>Importar Dados</span></a></li>
-          <li class="menu-item"><a href="banco-historico.html" class="menu-link"><i class="fas fa-history"></i><span>Histórico</span></a></li>
+          <li class="menu-item"><a href="banco-importar-dados.html" class="menu-link"><i
+                class="fas fa-file-import"></i><span>Importar Dados</span></a></li>
+          <li class="menu-item"><a href="banco-historico.html" class="menu-link"><i
+                class="fas fa-history"></i><span>Histórico</span></a></li>
+          <li class="menu-item"><a href="admin-usuarios.html" class="menu-link"><i
+                class="fas fa-user-shield"></i><span>Usuários</span></a></li>
         </ul>
       </div>
     </nav>
@@ -87,7 +185,8 @@
     <section class="page-header">
       <div class="page-header-content">
         <h1 class="page-title"><i class="fas fa-tachometer-alt"></i> Visão Gerencial de Receitas</h1>
-        <p class="page-subtitle">Análise gerencial consolidada das receitas do município de Caruaru - Quantidade de Registros</p>
+        <p class="page-subtitle">Análise gerencial consolidada das receitas do município de Caruaru - Quantidade de
+          Registros</p>
       </div>
     </section>
     <main class="content-area">
@@ -97,7 +196,8 @@
           <div class="stat-content">
             <div class="stat-label">Previsões</div>
             <div class="stat-value" id="kpiPrevisao">0</div>
-            <div class="stat-change positive" id="kpiPrevisaoVar"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>
+            <div class="stat-change positive" id="kpiPrevisaoVar"><i class="fas fa-spinner fa-spin"></i> Carregando...
+            </div>
           </div>
         </div>
         <div class="stat-card">
@@ -105,7 +205,8 @@
           <div class="stat-content">
             <div class="stat-label">Arrecadações</div>
             <div class="stat-value" id="kpiArrecadacao">0</div>
-            <div class="stat-change positive" id="kpiArrecadacaoVar"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>
+            <div class="stat-change positive" id="kpiArrecadacaoVar"><i class="fas fa-spinner fa-spin"></i>
+              Carregando...</div>
           </div>
         </div>
         <div class="stat-card">
@@ -113,7 +214,8 @@
           <div class="stat-content">
             <div class="stat-label">Retenções</div>
             <div class="stat-value" id="kpiRetencoes">0</div>
-            <div class="stat-change positive" id="kpiRetencoesVar"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>
+            <div class="stat-change positive" id="kpiRetencoesVar"><i class="fas fa-spinner fa-spin"></i> Carregando...
+            </div>
           </div>
         </div>
         <div class="stat-card">
@@ -121,7 +223,8 @@
           <div class="stat-content">
             <div class="stat-label">Deduções</div>
             <div class="stat-value" id="kpiDeducoes">0</div>
-            <div class="stat-change negative" id="kpiDeducoesVar"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>
+            <div class="stat-change negative" id="kpiDeducoesVar"><i class="fas fa-spinner fa-spin"></i> Carregando...
+            </div>
           </div>
         </div>
       </div>
@@ -140,7 +243,8 @@
       <div class="card">
         <div class="card-header">
           <h2 class="card-title"><i class="fas fa-chart-pie"></i> Análise Gerencial por Categoria</h2>
-          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i class="fas fa-sync-alt"></i> Carregando...</span></div>
+          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i
+                class="fas fa-sync-alt"></i> Carregando...</span></div>
         </div>
         <div class="card-body">
           <div class="tabs">
@@ -150,72 +254,89 @@
           </div>
           <div class="tab-content active" id="resumo">
             <!-- Filtro de Anos para Resumo -->
-            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; border: 1px solid #bae6fd;">
+            <div
+              style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; border: 1px solid #bae6fd;">
               <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <i class="fas fa-calendar-alt" style="color: #0284c7; font-size: 16px;"></i>
-                  <label style="font-weight: 600; color: #0369a1;">Comparar Anos:</label>
+
+              </div>
+              <div class="table-container">
+                <table class="data-table">
+                  <thead id="headerResumo">
+                    <tr>
+                      <th>Categoria</th>
+                      <th style="text-align: center;">2025</th>
+                      <th style="text-align: center;">2024</th>
+                      <th style="text-align: center;">Variação</th>
+                    </tr>
+                  </thead>
+                  <tbody id="corpoResumo">
+                    <tr>
+                      <td colspan="4" style="text-align:center; padding:40px; color:#64748b;"><i
+                          class="fas fa-spinner fa-spin"></i> Carregando dados...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="tab-content" id="detalhado">
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Categoria</th>
+                      <th>Data Mais Antiga</th>
+                      <th>Data Mais Recente</th>
+                      <th>Qtd. Registros</th>
+                      <th>Valor Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="corpoDetalhado">
+                    <tr>
+                      <td colspan="5" style="text-align:center; padding:40px; color:#64748b;"><i
+                          class="fas fa-spinner fa-spin"></i> Carregando dados...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="tab-content" id="grafico">
+              <div style="display: grid; gap: 30px;">
+                <div id="chartCategoriaContainer" style="background: #f8fafc; border-radius: 12px; padding: 24px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 style="font-size: 14px; color: #64748b; margin: 0;"><i class="fas fa-chart-pie"
+                        style="color: #3b82f6;"></i> Distribuição por Categoria (Quantidade de Registros)</h3>
+                    <button onclick="toggleFullscreen('chartCategoriaContainer')" class="btn-fullscreen"
+                      title="Tela cheia">
+                      <i class="fas fa-expand"></i>
+                    </button>
+                  </div>
+                  <div style="max-width: 500px; margin: 0 auto; height: 350px;">
+                    <canvas id="chartCategoria"></canvas>
+                  </div>
                 </div>
-                <div id="checkboxesAnos" style="display: flex; gap: 12px; flex-wrap: wrap;"></div>
-                <button class="btn btn-primary btn-sm" onclick="aplicarFiltroAnosResumo()" style="margin-left: auto;">
-                  <i class="fas fa-sync-alt"></i> Atualizar
-                </button>
-              </div>
-            </div>
-            <div class="table-container">
-              <table class="data-table">
-                <thead id="headerResumo">
-                  <tr>
-                    <th>Categoria</th>
-                    <th style="text-align: center;">2025</th>
-                    <th style="text-align: center;">2024</th>
-                    <th style="text-align: center;">Variação</th>
-                  </tr>
-                </thead>
-                <tbody id="corpoResumo">
-                  <tr><td colspan="4" style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Carregando dados...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class="tab-content" id="detalhado">
-            <div class="table-container">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Categoria</th>
-                    <th>Data Mais Antiga</th>
-                    <th>Data Mais Recente</th>
-                    <th>Qtd. Registros</th>
-                    <th>Valor Total</th>
-                  </tr>
-                </thead>
-                <tbody id="corpoDetalhado">
-                  <tr><td colspan="5" style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Carregando dados...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class="tab-content" id="grafico">
-            <div style="display: grid; gap: 30px;">
-              <div style="background: #f8fafc; border-radius: 12px; padding: 24px;">
-                <h3 style="font-size: 14px; color: #64748b; margin-bottom: 16px;"><i class="fas fa-chart-pie" style="color: #3b82f6;"></i> Distribuição por Categoria (Quantidade de Registros)</h3>
-                <div style="max-width: 500px; margin: 0 auto;">
-                  <canvas id="chartCategoria"></canvas>
+                <div id="chartBarrasContainer" style="background: #f8fafc; border-radius: 12px; padding: 24px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 style="font-size: 14px; color: #64748b; margin: 0;"><i class="fas fa-chart-bar"
+                        style="color: #3b82f6;"></i> Quantidade de Registros por Categoria</h3>
+                    <button onclick="toggleFullscreen('chartBarrasContainer')" class="btn-fullscreen"
+                      title="Tela cheia">
+                      <i class="fas fa-expand"></i>
+                    </button>
+                  </div>
+                  <div style="height: 300px;">
+                    <canvas id="chartBarras"></canvas>
+                  </div>
                 </div>
               </div>
-              <div style="background: #f8fafc; border-radius: 12px; padding: 24px;">
-                <h3 style="font-size: 14px; color: #64748b; margin-bottom: 16px;"><i class="fas fa-chart-bar" style="color: #3b82f6;"></i> Quantidade de Registros por Categoria</h3>
-                <canvas id="chartBarras" style="max-height: 300px;"></canvas>
-              </div>
             </div>
-          </div>
-          <div class="export-section">
-            <button class="btn btn-secondary btn-sm" onclick="exportarCSV()"><i class="fas fa-download"></i> CSV</button>
-            <button class="btn btn-secondary btn-sm" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
+            <div class="export-section">
+              <button class="btn btn-secondary btn-sm" onclick="exportarDadosPDF()"><i class="fas fa-file-pdf"></i>
+                PDF</button>
+              <button class="btn btn-secondary btn-sm" onclick="exportarDadosExcel()"><i class="fas fa-file-excel"></i>
+                Excel</button>
+            </div>
           </div>
         </div>
-      </div>
     </main>
     <footer class="main-footer">
       <div class="footer-content">
@@ -224,6 +345,10 @@
     </footer>
   </div>
   <script src="js/portal-transparencia.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="js/exportar-dados.js"></script>
   <script>
     const DB_NAME = 'PortalTransparenciaDB';
     const DB_VERSION = 2;
@@ -240,7 +365,7 @@
         request.onsuccess = () => { db = request.result; resolve(db); };
         request.onupgradeneeded = (event) => {
           const database = event.target.result;
-          ['despesas-empenhados','despesas-liquidados','despesas-pagos','despesas-retidos','despesas-a-pagar','receitas-previsao','receitas-arrecadacao','receitas-retencoes','receitas-deducoes'].forEach(s => {
+          ['despesas-empenhados', 'despesas-liquidados', 'despesas-pagos', 'despesas-retidos', 'despesas-a-pagar', 'receitas-previsao', 'receitas-arrecadacao', 'receitas-retencoes', 'receitas-deducoes'].forEach(s => {
             if (!database.objectStoreNames.contains(s)) database.createObjectStore(s, { keyPath: 'id', autoIncrement: true });
           });
         };
@@ -279,27 +404,27 @@
     function formatarMoeda(valor) { return (parseFloat(valor) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
     function formatarData(dataStr) {
       if (!dataStr || dataStr === '-') return '-';
-      if (dataStr instanceof Date) { const d = dataStr; return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
-      if (typeof dataStr === 'number' && dataStr > 40000 && dataStr < 60000) { const d = new Date((dataStr - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`; }
+      if (dataStr instanceof Date) { const d = dataStr; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; }
+      if (typeof dataStr === 'number' && dataStr > 40000 && dataStr < 60000) { const d = new Date((dataStr - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`; }
       const str = String(dataStr).trim();
       if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) return str;
       if (/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/\d{4}$/.test(str)) { const m = str.match(/^(\d{2})\s+\d{2}:\d{2}:\d{2}\/(\d{2})\/(\d{4})$/); if (m) return `${m[1]}/${m[2]}/${m[3]}`; }
-      const num = parseFloat(str); if (!isNaN(num) && num > 40000 && num < 60000) { const d = new Date((num - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`; }
+      const num = parseFloat(str); if (!isNaN(num) && num > 40000 && num < 60000) { const d = new Date((num - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`; }
       if (str.includes('-')) { const p = str.split('T')[0].split(' ')[0].split('-'); if (p.length === 3 && p[0].length === 4) return `${p[2]}/${p[1]}/${p[0]}`; }
-      try { const d = new Date(str); if (!isNaN(d.getTime()) && d.getFullYear() > 1990) return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; } catch(e) {}
+      try { const d = new Date(str); if (!isNaN(d.getTime()) && d.getFullYear() > 1990) return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; } catch (e) { }
       return str;
     }
 
     let anosDisponiveis = [];
-    
+
     async function carregarTodosDados() {
       dadosPorCategoria = {};
       const anos = new Set();
-      
+
       for (const store of STORES) {
         const dados = await carregarDados(store);
         dadosPorCategoria[store] = dados;
-        
+
         const cols = identificarColunas(dados);
         dados.forEach(d => {
           const data = String(d[cols.data] || '');
@@ -316,53 +441,27 @@
           if (ano && ano.match(/^\d{4}$/)) anos.add(ano);
         });
       }
-      
+
       // Popular filtro de anos
       anosDisponiveis = [...anos].sort().reverse();
       document.getElementById('filtroAno').innerHTML = '<option value="">Todos</option>' + anosDisponiveis.map(a => `<option value="${a}">${a}</option>`).join('');
-      
+
       // Popular checkboxes de anos para comparação
-      popularCheckboxesAnos();
+      // Inicializar anosSelecionados com os 2 mais recentes (padrão)
+      anosSelecionados = anosDisponiveis.slice(0, 2);
     }
-    
-    function popularCheckboxesAnos() {
-      const checkboxesContainer = document.getElementById('checkboxesAnos');
-      checkboxesContainer.innerHTML = '';
-      anosDisponiveis.forEach((ano, idx) => {
-        const checked = idx < 2; // Seleciona os 2 mais recentes por padrão
-        const bgColor = checked ? '#3b82f6' : '#f1f5f9';
-        const textColor = checked ? '#ffffff' : '#64748b';
-        checkboxesContainer.innerHTML += `
-          <label onclick="toggleAnoCheckbox(this, '${ano}')" 
-                 style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; cursor: pointer; 
-                        background: ${bgColor}; color: ${textColor}; font-weight: 500; font-size: 14px; transition: all 0.2s; user-select: none;"
-                 data-ano="${ano}" data-checked="${checked}">
-            <i class="fas ${checked ? 'fa-check-square' : 'fa-square'}" style="font-size: 14px;"></i>
-            ${ano}
-          </label>`;
-      });
-    }
-    
-    function toggleAnoCheckbox(label, ano) {
-      const isChecked = label.dataset.checked === 'true';
-      const newChecked = !isChecked;
-      label.dataset.checked = newChecked;
-      label.style.background = newChecked ? '#3b82f6' : '#f1f5f9';
-      label.style.color = newChecked ? '#ffffff' : '#64748b';
-      label.querySelector('i').className = newChecked ? 'fas fa-check-square' : 'fas fa-square';
-    }
-    
+
+    // Variável global
+    let anosSelecionados = [];
+
     function getAnosSelecionados() {
-      const labels = document.querySelectorAll('#checkboxesAnos label');
-      const anos = [];
-      labels.forEach(label => {
-        if (label.dataset.checked === 'true') {
-          anos.push(label.dataset.ano);
-        }
-      });
-      return anos.sort().reverse();
+      // Retorna os anos selecionados globalmente
+      if (!anosSelecionados || anosSelecionados.length === 0) {
+        return [];
+      }
+      return anosSelecionados;
     }
-    
+
     function aplicarFiltroAnosResumo() {
       const anos = getAnosSelecionados();
       if (anos.length < 2) {
@@ -371,9 +470,15 @@
       }
       renderizarResumoMultiAnos();
     }
-    
+
     function extrairAnoData(dataStr) {
       if (!dataStr) return null;
+      // Serial Excel (número entre 40000 e 60000)
+      const num = typeof dataStr === 'number' ? dataStr : parseFloat(String(dataStr).trim());
+      if (!isNaN(num) && num > 40000 && num < 60000) {
+        const d = new Date((num - 25569) * 86400 * 1000);
+        return String(d.getUTCFullYear());
+      }
       const str = String(dataStr).trim();
       // Formato especial: "02 00:00:00/01/2024"
       const matchEspecial = str.match(/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/(\d{4})$/);
@@ -381,16 +486,16 @@
       // Formato DD/MM/YYYY
       if (str.includes('/')) {
         const partes = str.split('/');
-        if (partes.length === 3) return partes[2].substring(0, 4);
+        if (partes.length === 3 && partes[2].length >= 4) return partes[2].substring(0, 4);
       }
       // Formato YYYY-MM-DD
       if (str.includes('-') && !str.includes('/')) {
-        return str.substring(0, 4);
+        const m = str.match(/^(\d{4})-/);
+        if (m) return m[1];
       }
-      const match = str.match(/\d{4}/);
-      return match ? match[0] : null;
+      return null;
     }
-    
+
     function calcVariacao(atual, anterior) {
       if (!anterior || anterior === 0) return atual > 0 ? 100 : 0;
       return ((atual - anterior) / anterior * 100);
@@ -400,57 +505,57 @@
       const anoSel = document.getElementById('filtroAno').value;
       let totalGeral = 0;
       const resumo = {};
-      
+
       // Calcular totais
       for (const [store, dados] of Object.entries(dadosPorCategoria)) {
         const cols = identificarColunas(dados);
         let dadosFiltrados = dados;
-        
+
         if (anoSel) {
           dadosFiltrados = dados.filter(d => {
             const ano = extrairAnoData(d[cols.data]);
             return ano === anoSel;
           });
         }
-        
+
         const qtd = dadosFiltrados.length;
         const valor = dadosFiltrados.reduce((acc, d) => acc + (parseFloat(d[cols.valor]) || 0), 0);
-        
+
         let dataMin = '-', dataMax = '-';
         if (dadosFiltrados.length > 0) {
           const datas = dadosFiltrados.map(d => d[cols.data]).filter(Boolean).sort();
           dataMin = datas[0];
           dataMax = datas[datas.length - 1];
         }
-        
+
         resumo[store] = { qtd, valor, dataMin, dataMax };
         totalGeral += qtd;
       }
-      
+
       // Atualizar KPIs com tooltip
       const kpiPrev = document.getElementById('kpiPrevisao');
       kpiPrev.textContent = (resumo['receitas-previsao']?.qtd || 0).toLocaleString();
       kpiPrev.title = (resumo['receitas-previsao']?.qtd || 0).toLocaleString() + ' registros';
       document.getElementById('kpiPrevisaoVar').innerHTML = '<i class="fas fa-file-alt"></i> registros';
-      
+
       const kpiArrec = document.getElementById('kpiArrecadacao');
       kpiArrec.textContent = (resumo['receitas-arrecadacao']?.qtd || 0).toLocaleString();
       kpiArrec.title = (resumo['receitas-arrecadacao']?.qtd || 0).toLocaleString() + ' registros';
       document.getElementById('kpiArrecadacaoVar').innerHTML = '<i class="fas fa-file-alt"></i> registros';
-      
+
       const kpiRet = document.getElementById('kpiRetencoes');
       kpiRet.textContent = (resumo['receitas-retencoes']?.qtd || 0).toLocaleString();
       kpiRet.title = (resumo['receitas-retencoes']?.qtd || 0).toLocaleString() + ' registros';
       document.getElementById('kpiRetencoesVar').innerHTML = '<i class="fas fa-file-alt"></i> registros';
-      
+
       const kpiDed = document.getElementById('kpiDeducoes');
       kpiDed.textContent = (resumo['receitas-deducoes']?.qtd || 0).toLocaleString();
       kpiDed.title = (resumo['receitas-deducoes']?.qtd || 0).toLocaleString() + ' registros';
       document.getElementById('kpiDeducoesVar').innerHTML = '<i class="fas fa-file-alt"></i> registros';
-      
+
       // Renderizar resumo com múltiplos anos
       renderizarResumoMultiAnos();
-      
+
       // Renderizar detalhado
       const corpoDetalhado = document.getElementById('corpoDetalhado');
       if (totalGeral === 0) {
@@ -470,11 +575,11 @@
           `;
         }).join('');
       }
-      
+
       // Atualizar gráficos com múltiplos anos
       atualizarGraficosMultiAnos();
     }
-    
+
     function renderizarResumoMultiAnos() {
       const anos = getAnosSelecionados();
       if (anos.length < 2) {
@@ -486,7 +591,7 @@
           return;
         }
       }
-      
+
       // Calcular quantidade por categoria por ano
       const dadosPorAno = {};
       anos.forEach(ano => {
@@ -497,7 +602,7 @@
           dadosPorAno[ano][store] = qtd;
         });
       });
-      
+
       // Atualizar cabeçalho da tabela
       const headerResumo = document.getElementById('headerResumo');
       let headerHtml = '<tr><th>Categoria</th>';
@@ -506,20 +611,20 @@
       });
       headerHtml += '<th style="text-align: center;">Variação</th></tr>';
       headerResumo.innerHTML = headerHtml;
-      
+
       // Renderizar corpo da tabela
       const corpo = document.getElementById('corpoResumo');
       let totalGeral = 0;
       STORES.forEach(store => {
         anos.forEach(ano => totalGeral += dadosPorAno[ano][store]);
       });
-      
+
       if (totalGeral === 0) {
         const colunas = anos.length + 2;
         corpo.innerHTML = `<tr><td colspan="${colunas}" style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-inbox"></i> Nenhum dado encontrado. <a href="banco-importar-dados.html">Importar dados</a></td></tr>`;
         return;
       }
-      
+
       let html = STORES.map(store => {
         const info = nomesCategoria[store];
         const primeiroAno = anos[0];
@@ -528,7 +633,7 @@
         const corFundo = variacao > 0 ? 'rgba(45, 152, 70, 0.1)' : variacao < 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)';
         const corTexto = variacao > 0 ? '#2D9846' : variacao < 0 ? '#ef4444' : '#3b82f6';
         const sinal = variacao >= 0 ? '+' : '';
-        
+
         let row = `<tr><td><i class="fas fa-${info.icone}" style="color:${info.cor};margin-right:8px;"></i><strong>${info.nome}</strong></td>`;
         anos.forEach((ano, idx) => {
           const badgeClass = idx === 0 ? 'badge-info' : 'badge-secondary';
@@ -537,7 +642,7 @@
         row += `<td style="text-align: center;"><span class="badge" style="background: ${corFundo}; color: ${corTexto};">${sinal}${variacao.toFixed(1)}%</span></td></tr>`;
         return row;
       }).join('');
-      
+
       // Linha de totais
       html += '<tr class="total-row"><td><strong>TOTAL</strong></td>';
       anos.forEach((ano, idx) => {
@@ -552,14 +657,14 @@
       const corTextoTotal = variacaoTotal > 0 ? '#2D9846' : variacaoTotal < 0 ? '#ef4444' : '#3b82f6';
       const sinalTotal = variacaoTotal >= 0 ? '+' : '';
       html += `<td style="text-align: center;"><strong><span class="badge" style="background: ${corFundoTotal}; color: ${corTextoTotal};">${sinalTotal}${variacaoTotal.toFixed(1)}%</span></strong></td></tr>`;
-      
+
       corpo.innerHTML = html;
     }
-    
+
     function atualizarGraficosMultiAnos() {
       if (chartCategoria) chartCategoria.destroy();
       if (chartBarras) chartBarras.destroy();
-      
+
       const anos = getAnosSelecionados();
       if (anos.length < 2) {
         if (anosDisponiveis.length >= 2) {
@@ -569,21 +674,21 @@
           return;
         }
       }
-      
+
       // Cores para os anos
       const coresAnos = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899'];
-      
+
       // Dados por categoria
       const labels = STORES.map(s => nomesCategoria[s].nome);
       const coresCategorias = STORES.map(s => nomesCategoria[s].cor);
-      
+
       // Gráfico de pizza - ano mais recente
       const anoRecente = anos[0];
       const dadosAnoRecente = STORES.map(store => {
         const cols = identificarColunas(dadosPorCategoria[store]);
         return dadosPorCategoria[store].filter(d => extrairAnoData(d[cols.data]) === anoRecente).length;
       });
-      
+
       const totalAnoRecente = dadosAnoRecente.reduce((a, b) => a + b, 0);
       if (totalAnoRecente > 0) {
         chartCategoria = new Chart(document.getElementById('chartCategoria'), {
@@ -592,17 +697,17 @@
             labels: labels,
             datasets: [{ data: dadosAnoRecente, backgroundColor: coresCategorias, borderWidth: 2, borderColor: '#fff' }]
           },
-          options: { 
-            responsive: true, 
-            plugins: { 
-              legend: { position: 'bottom' }, 
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' },
               title: { display: true, text: `Distribuição ${anoRecente}` },
-              tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.raw.toLocaleString()} registros` } } 
-            } 
+              tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.raw.toLocaleString()} registros` } }
+            }
           }
         });
       }
-      
+
       // Gráfico de barras agrupadas por ano
       const datasets = anos.map((ano, idx) => {
         const dados = STORES.map(store => {
@@ -616,27 +721,38 @@
           borderRadius: 6
         };
       });
-      
+
       chartBarras = new Chart(document.getElementById('chartBarras'), {
         type: 'bar',
         data: { labels: labels, datasets: datasets },
-        options: { 
-          responsive: true, 
-          plugins: { legend: { position: 'top' } }, 
-          scales: { y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString() } } } 
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'top' } },
+          scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { display: false }, ticks: { callback: v => v.toLocaleString() } } }
         }
       });
     }
 
-    function exportarCSV() {
-      let csv = 'Categoria;Quantidade;Valor\n';
+    function getDadosExportacaoGerencial() {
+      const linhas = [];
       for (const [store, dados] of Object.entries(dadosPorCategoria)) {
         const cols = identificarColunas(dados);
         const valor = dados.reduce((acc, d) => acc + (parseFloat(d[cols.valor]) || 0), 0);
-        csv += `${nomesCategoria[store].nome};${dados.length};${valor}\n`;
+        linhas.push({
+          'Categoria': nomesCategoria[store].nome,
+          'Quantidade': dados.length,
+          'Valor': valor
+        });
       }
-      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'receitas-gerencial.csv'; link.click();
+      return linhas;
+    }
+
+    function exportarDadosExcel() {
+      exportarExcel(getDadosExportacaoGerencial(), 'receitas-gerencial');
+    }
+
+    function exportarDadosPDF() {
+      exportarPDF(getDadosExportacaoGerencial(), 'receitas-gerencial', 'Receitas - Gerencial');
     }
 
     async function init() {
@@ -650,19 +766,19 @@
       }
     }
     document.addEventListener('DOMContentLoaded', init);
-    
+
     // Controlar visibilidade dos filtros por aba
     function atualizarVisibilidadeFiltros(tabId) {
       const filtrosSection = document.getElementById('filtrosSection');
       if (filtrosSection) {
-        filtrosSection.style.display = tabId === 'resumo' ? 'none' : 'block';
+        filtrosSection.style.display = 'block';
       }
     }
-    
+
     // Sobrescrever comportamento das tabs para controlar filtros
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
           const tabId = this.getAttribute('data-tab');
           document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
           document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -675,7 +791,50 @@
           }
         });
       });
+      atualizarVisibilidadeFiltros('resumo');
     });
+
+    // Função para alternar tela cheia
+    function toggleFullscreen(containerId) {
+      const container = document.getElementById(containerId);
+      const btn = container.querySelector('.btn-fullscreen i');
+
+      if (!container.classList.contains('fullscreen-mode')) {
+        container.classList.add('fullscreen-mode');
+        btn.classList.remove('fa-expand');
+        btn.classList.add('fa-compress');
+
+        // Redimensionar gráfico após entrar em tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      } else {
+        container.classList.remove('fullscreen-mode');
+        btn.classList.remove('fa-compress');
+        btn.classList.add('fa-expand');
+
+        // Redimensionar gráfico após sair de tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      }
+
+      // Fechar tela cheia com ESC
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && container.classList.contains('fullscreen-mode')) {
+          toggleFullscreen(containerId);
+        }
+      });
+    }
   </script>
 </body>
+
 </html>

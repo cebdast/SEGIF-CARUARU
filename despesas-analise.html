@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGEF | Análise de Despesas - Caruaru</title>
+  <link rel="icon" type="image/png" href="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/portal-transparencia.css">
+  <script src="js/auth-check.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .btn-fullscreen {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .btn-fullscreen:hover {
+      background: #f1f5f9;
+      color: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .btn-fullscreen i {
+      font-size: 14px;
+    }
+
+    /* Estilos para modo tela cheia */
+    .fullscreen-mode {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+      background: white !important;
+      padding: 20px !important;
+      margin: 0 !important;
+      max-width: none !important;
+      overflow: auto !important;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .fullscreen-mode>div:last-child {
+      flex: 1;
+      height: auto !important;
+      max-width: none !important;
+    }
+
+    #chartEvolucaoContainer {
+      position: relative;
+    }
+
+    #chartEvolucaoContainer .btn-fullscreen {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 10;
+    }
+  </style>
+  <style>
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      padding: 16px 20px;
+      border-radius: 12px;
+      border: 1px solid #bae6fd;
+      margin-bottom: 20px;
+    }
+
+    .filter-bar label {
+      font-weight: 600;
+      color: #0369a1;
+      white-space: nowrap;
+    }
+
+    .valor-destaque {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .percent-positive {
+      color: #2D9846;
+      font-weight: 600;
+    }
+
+    .percent-negative {
+      color: #ef4444;
+      font-weight: 600;
+    }
+
+    .percent-neutral {
+      color: #3b82f6;
+      font-weight: 600;
+    }
+
+    .variacao-baixa {
+      background-color: #fff;
+    }
+
+    .variacao-media {
+      background-color: #fef3c7 !important;
+    }
+
+    .variacao-alta {
+      background-color: #fecaca !important;
+    }
+
+    .grafico-container {
+      margin-bottom: 20px;
+      padding: 20px;
+      background: #f8fafc;
+      border-radius: 12px;
+    }
+
+    .grafico-titulo {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .legenda-cores {
+      display: flex;
+      gap: 20px;
+      margin-top: 20px;
+      padding: 12px;
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      font-size: 13px;
+      justify-content: center;
+    }
+
+    .legenda-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legenda-cor {
+      width: 24px;
+      height: 18px;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+    }
+  </style>
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><img src="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png"
+          alt="Brasão Caruaru"></div>
+      <h1 class="sidebar-title">Secretaria da Fazenda</h1>
+      <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    <nav class="sidebar-menu">
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)"><i class="fas fa-tachometer-alt"></i><span>Visão
+            Geral</span><i class="fas fa-chevron-right section-arrow"></i></div>
+        <ul>
+          <li class="menu-item"><a href="dashboard.html" class="menu-link"><i class="fas fa-home"></i><span>Dashboard
+                Executivo</span></a></li>
+          <li class="menu-item"><a href="resultado-orcamentario.html" class="menu-link"><i
+                class="fas fa-chart-pie"></i><span>Resultado Orçamentário</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)"><i
+            class="fas fa-hand-holding-usd"></i><span>Receitas</span><i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="receitas-previsao.html" class="menu-link"><i
+                class="fas fa-chart-line"></i><span>Previsão</span></a></li>
+          <li class="menu-item"><a href="receitas-arrecadacao.html" class="menu-link"><i
+                class="fas fa-money-bill-wave"></i><span>Arrecadação</span></a></li>
+          <li class="menu-item"><a href="receitas-retencoes.html" class="menu-link"><i
+                class="fas fa-hand-holding-usd"></i><span>Retenções</span></a></li>
+          <li class="menu-item"><a href="receitas-deducoes.html" class="menu-link"><i
+                class="fas fa-minus-circle"></i><span>Deduções</span></a></li>
+          <li class="menu-item"><a href="receitas-gerencial.html" class="menu-link"><i
+                class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="receitas-comparativos.html" class="menu-link"><i
+                class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section expanded">
+        <div class="menu-section-title" onclick="toggleSection(this)"><i
+            class="fas fa-file-invoice-dollar"></i><span>Despesas</span><i
+            class="fas fa-chevron-right section-arrow"></i></div>
+        <ul>
+          <li class="menu-item"><a href="despesas-empenhados.html" class="menu-link"><i
+                class="fas fa-file-invoice"></i><span>Empenhados</span></a></li>
+          <li class="menu-item"><a href="despesas-liquidados.html" class="menu-link"><i
+                class="fas fa-check-circle"></i><span>Liquidados</span></a></li>
+          <li class="menu-item"><a href="despesas-retidos.html" class="menu-link"><i
+                class="fas fa-hand-holding-usd"></i><span>Retidos</span></a></li>
+          <li class="menu-item"><a href="despesas-pagos.html" class="menu-link"><i
+                class="fas fa-money-check-alt"></i><span>Pagos</span></a></li>
+          <li class="menu-item"><a href="despesas-a-pagar.html" class="menu-link"><i class="fas fa-clock"></i><span>A
+                Pagar</span></a></li>
+          <li class="menu-item"><a href="despesas-gerencial.html" class="menu-link"><i
+                class="fas fa-chart-line"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="despesas-comparativos.html" class="menu-link"><i
+                class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)"><i
+            class="fas fa-search-dollar"></i><span>Análises</span><i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="despesas-analise.html" class="menu-link active"><i
+                class="fas fa-chart-pie"></i><span>Análise Financeira</span></a></li>
+          <li class="menu-item"><a href="despesas-execucao.html" class="menu-link"><i
+                class="fas fa-chart-bar"></i><span>Execução Orçamentária</span></a></li>
+          <li class="menu-item"><a href="despesas-fontes.html" class="menu-link"><i
+                class="fas fa-layer-group"></i><span>Fontes de Recursos</span></a></li>
+          <li class="menu-item"><a href="despesas-credores.html" class="menu-link"><i
+                class="fas fa-users"></i><span>Credores</span></a></li>
+          <li class="menu-item"><a href="despesas-natureza.html" class="menu-link"><i
+                class="fas fa-sitemap"></i><span>Natureza da Despesa</span></a></li>
+          <li class="menu-item"><a href="limites-legais.html" class="menu-link"><i
+                class="fas fa-gavel"></i><span>Limites Legais</span></a></li>
+          <li class="menu-item"><a href="despesas-alertas.html" class="menu-link"><i
+                class="fas fa-exclamation-triangle"></i><span>Alertas</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)"><i class="fas fa-database"></i><span>Banco de
+            Dados</span><i class="fas fa-chevron-right section-arrow"></i></div>
+        <ul>
+          <li class="menu-item"><a href="banco-importar-dados.html" class="menu-link"><i
+                class="fas fa-file-import"></i><span>Importar Dados</span></a></li>
+          <li class="menu-item"><a href="banco-historico.html" class="menu-link"><i
+                class="fas fa-history"></i><span>Histórico</span></a></li>
+          <li class="menu-item"><a href="admin-usuarios.html" class="menu-link"><i
+                class="fas fa-user-shield"></i><span>Usuários</span></a></li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <nav class="breadcrumb">
+          <span>Despesas</span>
+          <i class="fas fa-chevron-right"></i>
+          <span>Análise Financeira</span>
+        </nav>
+      </div>
+      <div class="header-actions">
+        <div class="user-menu">
+          <div class="user-avatar">AD</div>
+          <div class="user-info"><span class="user-name">Administrador</span><span class="user-role">SIGEF</span></div>
+        </div>
+      </div>
+    </header>
+    <section class="page-header">
+      <div class="page-header-content">
+        <h1 class="page-title"><i class="fas fa-chart-pie"></i> Análise Financeira de Despesas</h1>
+        <p class="page-subtitle">Análise vertical, horizontal e mensal das despesas municipais</p>
+      </div>
+    </section>
+    <main class="content-area">
+
+      <!-- Seletor de Tipo de Análise -->
+      <div class="filter-bar">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <label style="white-space: nowrap;"><i class="fas fa-filter"></i> Tipo de Análise:</label>
+          <select id="tipoAnalise" class="filter-select" style="min-width: 180px;" onchange="atualizarAnalise()">
+            <option value="vertical">Análise Vertical</option>
+            <option value="horizontal">Análise Horizontal</option>
+          </select>
+        </div>
+
+        <div id="filtroAnosHorizontal" style="display: none; align-items: center; gap: 12px;">
+          <label style="white-space: nowrap;"><i class="fas fa-calendar"></i> Anos para análise:</label>
+          <div id="checkboxesAnosAnalise" style="display: flex; gap: 12px; flex-wrap: wrap;"></div>
+        </div>
+
+        <div id="filtroAnoVertical" style="display: flex; align-items: center; gap: 12px;">
+          <label style="white-space: nowrap;"><i class="fas fa-calendar"></i> Exercício:</label>
+          <select id="anoVertical" class="filter-select" style="min-width: 100px;" onchange="atualizarAnalise()">
+          </select>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <label style="white-space: nowrap;"><i class="fas fa-layer-group"></i> Agrupar por:</label>
+          <select id="agrupamento" class="filter-select" style="min-width: 180px; max-width: 200px;"
+            onchange="atualizarAnalise()">
+            <option value="Elemento">Elemento</option>
+            <option value="Função">Função</option>
+            <option value="Unidade orçamentária">Unidade Orçamentária</option>
+            <option value="Programa">Programa</option>
+            <option value="Natureza da Despesa">Natureza da Despesa</option>
+          </select>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <label style="white-space: nowrap;"><i class="fas fa-chart-line"></i> Métrica:</label>
+          <select id="metricaAnalise" class="filter-select" style="min-width: 130px;"
+            onchange="atualizarAnalise()">
+            <option value="empenhado">Empenhado</option>
+            <option value="liquidado">Liquidado</option>
+            <option value="pago">Pago</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" onclick="atualizarAnalise()" style="margin-left: auto;">
+          <i class="fas fa-sync-alt"></i> Atualizar
+        </button>
+      </div>
+
+      <!-- Gráfico Pizza - Análise Vertical (Top 5 + Outros) -->
+      <div class="card grafico-container" id="graficoPizzaContainer" style="display: none;">
+        <div class="grafico-titulo" style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-chart-pie"></i>
+            <span id="tituloPizza">Composição da Despesa Empenhada</span>
+          </div>
+          <button onclick="toggleFullscreen('graficoPizzaContainer')" class="btn-fullscreen" title="Tela cheia">
+            <i class="fas fa-expand"></i>
+          </button>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 40px; flex-wrap: wrap;">
+          <div style="position: relative; width: 360px; height: 360px;">
+            <canvas id="chartPizza"></canvas>
+          </div>
+          <div id="legendaPizza" style="font-size: 14px; line-height: 2;"></div>
+        </div>
+      </div>
+
+      <!-- Gráfico de Evolução (em cima da tabela) -->
+      <div class="card grafico-container" id="graficoContainer" style="display: none;">
+        <div class="grafico-titulo" style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-chart-bar"></i>
+            <span id="tituloGraficoEvolucao">Despesa Liquidada no Exercício</span>
+          </div>
+          <button onclick="toggleFullscreen('graficoContainer')" class="btn-fullscreen" title="Tela cheia">
+            <i class="fas fa-expand"></i>
+          </button>
+        </div>
+        <div style="height: 400px;">
+          <canvas id="chartEvolucao"></canvas>
+        </div>
+      </div>
+
+      <!-- Card com a Tabela de Análise -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title" id="tituloAnalise"><i class="fas fa-table"></i> Análise Vertical</h2>
+          <div class="card-actions">
+            <span class="badge badge-success" id="dataAtualizacao"><i class="fas fa-sync-alt"></i> Carregando...</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-container">
+            <table class="data-table">
+              <thead id="theadAnalise">
+                <tr>
+                  <th>Elemento</th>
+                  <th style="text-align: right;">Empenhado</th>
+                  <th style="text-align: right;">Liquidado</th>
+                  <th style="text-align: right;">Pago</th>
+                  <th style="text-align: center;">%</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyAnalise">
+                <tr>
+                  <td colspan="5" style="text-align: center; padding: 40px;">Carregando dados...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Legenda de Cores -->
+          <div id="legendaContainer" style="display: none;">
+            <div class="legenda-cores">
+              <div class="legenda-item">
+                <div class="legenda-cor" style="background: #fff; border: 1px solid #cbd5e1;"></div>
+                <span>Variação &lt; ±30%</span>
+              </div>
+              <div class="legenda-item">
+                <div class="legenda-cor" style="background: #fef3c7;"></div>
+                <span>Amarelo: ± 30% ≤ variação &lt; ±50%</span>
+              </div>
+              <div class="legenda-item">
+                <div class="legenda-cor" style="background: #fecaca;"></div>
+                <span>Vermelho: variação ≥ ±50%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="export-section" style="margin-top: 20px;">
+            <button class="btn btn-secondary btn-sm" onclick="exportarPDF()"><i class="fas fa-file-pdf"></i> Exportar
+              PDF</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportarExcel()"><i class="fas fa-file-excel"></i>
+              Exportar Excel</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+    <footer class="main-footer">
+      <div class="footer-content">
+        <p class="footer-text">© 2026 Prefeitura Municipal de Caruaru - SIGEF. Todos os direitos reservados.</p>
+      </div>
+    </footer>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="js/portal-transparencia.js"></script>
+  <script src="js/indexeddb-utils.js"></script>
+  <script src="js/chart-variacao-plugin.js"></script>
+  <script src="js/exportar-dados.js"></script>
+  <script>
+    // Dados globais
+    let dadosEmpenhados = [];
+    let dadosLiquidados = [];
+    let dadosPagos = [];
+    let dadosAnalise = [];
+    let chartEvolucao = null;
+    let chartPizza = null;
+
+    // Funções auxiliares
+    function formatarMoeda(v) {
+      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+    }
+
+    function formatarNumero(v) {
+      return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function getValor(item, ...campos) {
+      // Primeiro: busca exata (mantém compatibilidade)
+      for (let c of campos) {
+        if (item[c] !== undefined && item[c] !== null && item[c] !== '') return item[c];
+      }
+
+      // Segundo: busca case-insensitive e normalizada (para resolver inconsistências de capitalização)
+      const normalizar = (str) => {
+        return str.toLowerCase()
+          .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove acentos
+          .replace(/\s+/g, ' ').trim();
+      };
+
+      for (let c of campos) {
+        const cNorm = normalizar(c);
+        for (let key in item) {
+          if (normalizar(key) === cNorm) {
+            const val = item[key];
+            if (val !== undefined && val !== null && val !== '') return val;
+          }
+        }
+      }
+
+      return null;
+    }
+
+    function extrairAno(dataStr) {
+      if (!dataStr) return null;
+      const str = String(dataStr).trim();
+      const matchEspecial = str.match(/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/(\d{4})$/);
+      if (matchEspecial) return matchEspecial[1];
+      if (str.includes('/')) {
+        const p = str.split('/');
+        if (p.length === 3) return p[2].substring(0, 4);
+      }
+      if (str.includes('-') && !str.includes('/')) return str.substring(0, 4);
+      return null;
+    }
+
+    function extrairMes(dataStr) {
+      if (!dataStr) return null;
+      const str = String(dataStr).trim();
+      const matchEspecial = str.match(/^\d{2}\s+\d{2}:\d{2}:\d{2}\/(\d{2})\/\d{4}$/);
+      if (matchEspecial) return matchEspecial[1];
+      if (str.includes('/')) {
+        const p = str.split('/');
+        if (p.length === 3) return p[1];
+      }
+      if (str.includes('-') && !str.includes('/')) return str.substring(5, 7);
+      return null;
+    }
+
+    // Normalizar chave de agrupamento para evitar duplicatas por truncamento
+    function normalizarChaveAgrupamento(valor, agrupamento) {
+      if (!valor || valor === 'Não informado') return valor;
+
+      const str = String(valor).trim();
+
+      // Para campos que têm código numérico no início (formato: "CODIGO - NOME")
+      // Extrair apenas o código para consolidação
+      const camposComCodigo = ['Unidade orçamentária', 'Programa', 'Função', 'Subfunção', 'Ação'];
+
+      if (camposComCodigo.includes(agrupamento)) {
+        // Extrair código antes do " - " ou " – " (traço diferente)
+        const match = str.match(/^(\d+)\s*[-–—]\s*/);
+        if (match) {
+          return match[1]; // Retorna apenas o código
+        }
+      }
+
+      // Para Natureza da Despesa e Elemento (formato: "3.X.XX.XX.XX" ou similar)
+      if (agrupamento === 'Natureza da Despesa' || agrupamento === 'Elemento' || agrupamento === 'Despesa') {
+        const match = str.match(/^[\d\.]+/);
+        if (match) {
+          return match[0]; // Retorna apenas a codificação numérica
+        }
+      }
+
+      return str; // Retorna o valor original para outros casos
+    }
+
+    // Obter nome completo a partir do valor original (preserva a descrição mais longa)
+    function obterNomeCompleto(valor, agrupamento) {
+      if (!valor || valor === 'Não informado') return valor;
+      return String(valor).trim();
+    }
+
+    // Carregar dados
+    async function carregarDados() {
+      try {
+        const [emp, liq, pag] = await Promise.all([
+          carregarDadosPortal('despesas-empenhados'),
+          carregarDadosPortal('despesas-liquidados'),
+          carregarDadosPortal('despesas-pagos')
+        ]);
+
+        dadosEmpenhados = emp || [];
+        dadosLiquidados = liq || [];
+        dadosPagos = pag || [];
+
+        popularFiltros();
+        atualizarAnalise();
+        atualizarDataUltimaImportacao();
+      } catch (e) {
+        console.error('Erro ao carregar dados:', e);
+        document.getElementById('tbodyAnalise').innerHTML =
+          '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #ef4444;">Erro ao carregar dados. Verifique se os dados foram importados.</td></tr>';
+      }
+    }
+
+    function popularFiltros() {
+      const anosSet = new Set();
+
+      dadosEmpenhados.forEach(d => {
+        const ano = extrairAno(getValor(d, 'Data'));
+        if (ano) anosSet.add(ano);
+      });
+      dadosLiquidados.forEach(d => {
+        const ano = extrairAno(getValor(d, 'Data'));
+        if (ano) anosSet.add(ano);
+      });
+      dadosPagos.forEach(d => {
+        const ano = extrairAno(getValor(d, 'Data'));
+        if (ano) anosSet.add(ano);
+      });
+
+      const anos = [...anosSet].sort().reverse();
+
+      // Popular dropdown de ano para análise vertical
+      const selectAnoVertical = document.getElementById('anoVertical');
+      selectAnoVertical.innerHTML = '';
+      anos.forEach(ano => {
+        const option = document.createElement('option');
+        option.value = ano;
+        option.textContent = ano;
+        selectAnoVertical.appendChild(option);
+      });
+
+      // Popular checkboxes de anos para análise horizontal
+      const checkboxesContainer = document.getElementById('checkboxesAnosAnalise');
+      checkboxesContainer.innerHTML = '';
+      anos.forEach((ano, idx) => {
+        const checked = idx < 3; // Seleciona os 3 mais recentes por padrão
+        const bgColor = checked ? '#3b82f6' : '#f1f5f9';
+        const textColor = checked ? '#ffffff' : '#64748b';
+        checkboxesContainer.innerHTML += `
+          <label onclick="toggleAnoCheckboxAnalise(this, '${ano}')"
+                 style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; cursor: pointer;
+                        background: ${bgColor}; color: ${textColor}; font-weight: 500; font-size: 14px; transition: all 0.2s; user-select: none;"
+                 data-ano="${ano}" data-checked="${checked}">
+            <i class="fas ${checked ? 'fa-check-square' : 'fa-square'}" style="font-size: 14px;"></i>
+            ${ano}
+          </label>`;
+      });
+    }
+
+    function toggleAnoCheckboxAnalise(label, ano) {
+      const isChecked = label.dataset.checked === 'true';
+      const newChecked = !isChecked;
+      label.dataset.checked = newChecked;
+      label.style.background = newChecked ? '#3b82f6' : '#f1f5f9';
+      label.style.color = newChecked ? '#ffffff' : '#64748b';
+      label.querySelector('i').className = newChecked ? 'fas fa-check-square' : 'fas fa-square';
+    }
+
+    function getAnosSelecionados() {
+      const labels = document.querySelectorAll('#checkboxesAnosAnalise label');
+      const anos = [];
+      labels.forEach(label => {
+        if (label.dataset.checked === 'true') {
+          anos.push(label.dataset.ano);
+        }
+      });
+      return anos.sort().reverse();
+    }
+
+    function filtrarPorAno(dados, ano) {
+      return dados.filter(d => extrairAno(getValor(d, 'Data')) === ano);
+    }
+
+    function atualizarAnalise() {
+      const tipo = document.getElementById('tipoAnalise').value;
+      const agrupamento = document.getElementById('agrupamento').value;
+
+      // Mostrar/ocultar filtros conforme tipo
+      document.getElementById('filtroAnosHorizontal').style.display = tipo === 'horizontal' ? 'flex' : 'none';
+      document.getElementById('filtroAnoVertical').style.display = tipo === 'vertical' ? 'flex' : 'none';
+
+      // Mostrar/ocultar gráficos
+      document.getElementById('graficoContainer').style.display = tipo === 'horizontal' ? 'block' : 'none';
+      document.getElementById('graficoPizzaContainer').style.display = tipo === 'vertical' ? 'block' : 'none';
+
+      // Atualizar título
+      const titulos = {
+        'vertical': 'Análise Vertical',
+        'horizontal': 'Análise Horizontal'
+      };
+      document.getElementById('tituloAnalise').innerHTML = `<i class="fas fa-table"></i> ${titulos[tipo]}`;
+
+      // Mostrar/ocultar legenda (apenas para horizontal)
+      document.getElementById('legendaContainer').style.display = tipo === 'horizontal' ? 'block' : 'none';
+
+      if (tipo === 'vertical') {
+        const anoSelecionado = document.getElementById('anoVertical').value;
+        if (!anoSelecionado) return;
+        const empAno = filtrarPorAno(dadosEmpenhados, anoSelecionado);
+        const liqAno = filtrarPorAno(dadosLiquidados, anoSelecionado);
+        const pagAno = filtrarPorAno(dadosPagos, anoSelecionado);
+        renderizarAnaliseVertical(empAno, liqAno, pagAno, agrupamento, anoSelecionado);
+      } else if (tipo === 'horizontal') {
+        const anos = getAnosSelecionados();
+        if (anos.length < 2) {
+          alert('Selecione pelo menos 2 anos para análise horizontal.');
+          return;
+        }
+        renderizarAnaliseHorizontal(anos, agrupamento);
+      }
+    }
+
+    function renderizarAnaliseVertical(empenhados, liquidados, pagos, agrupamento, ano) {
+      // Obter métrica selecionada
+      const metrica = document.getElementById('metricaAnalise').value;
+
+      // Agrupar dados com normalização de chave e preservação do nome mais completo
+      const grupos = {};
+      const nomesCompletos = {}; // Mapeia chave normalizada -> nome completo mais longo
+
+      empenhados.forEach(d => {
+        const valorOriginal = getValor(d, agrupamento) || 'Não informado';
+        const chave = normalizarChaveAgrupamento(valorOriginal, agrupamento);
+
+        // Preservar o nome mais completo encontrado
+        if (!nomesCompletos[chave] || valorOriginal.length > nomesCompletos[chave].length) {
+          nomesCompletos[chave] = valorOriginal;
+        }
+
+        if (!grupos[chave]) {
+          grupos[chave] = { empenhado: 0, liquidado: 0, pago: 0 };
+        }
+        grupos[chave].empenhado += parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0;
+      });
+
+      liquidados.forEach(d => {
+        const valorOriginal = getValor(d, agrupamento) || 'Não informado';
+        const chave = normalizarChaveAgrupamento(valorOriginal, agrupamento);
+
+        // Preservar o nome mais completo encontrado
+        if (!nomesCompletos[chave] || valorOriginal.length > nomesCompletos[chave].length) {
+          nomesCompletos[chave] = valorOriginal;
+        }
+
+        if (!grupos[chave]) {
+          grupos[chave] = { empenhado: 0, liquidado: 0, pago: 0 };
+        }
+        grupos[chave].liquidado += parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0;
+      });
+
+      pagos.forEach(d => {
+        const valorOriginal = getValor(d, agrupamento) || 'Não informado';
+        const chave = normalizarChaveAgrupamento(valorOriginal, agrupamento);
+
+        // Preservar o nome mais completo encontrado
+        if (!nomesCompletos[chave] || valorOriginal.length > nomesCompletos[chave].length) {
+          nomesCompletos[chave] = valorOriginal;
+        }
+
+        if (!grupos[chave]) {
+          grupos[chave] = { empenhado: 0, liquidado: 0, pago: 0 };
+        }
+        grupos[chave].pago += parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0;
+      });
+
+      // Calcular totais
+      let totalEmp = 0, totalLiq = 0, totalPag = 0;
+      Object.values(grupos).forEach(g => {
+        totalEmp += g.empenhado;
+        totalLiq += g.liquidado;
+        totalPag += g.pago;
+      });
+
+      // Definir total da métrica selecionada
+      const totalMetrica = metrica === 'empenhado' ? totalEmp : metrica === 'liquidado' ? totalLiq : totalPag;
+
+      // Preparar dados para tabela (usando nome completo preservado e métrica selecionada para ordenação e percentual)
+      dadosAnalise = Object.entries(grupos).map(([chave, valores]) => ({
+        nome: nomesCompletos[chave] || chave, // Usa o nome completo preservado
+        empenhado: valores.empenhado,
+        liquidado: valores.liquidado,
+        pago: valores.pago,
+        percentual: totalMetrica > 0 ? (valores[metrica] / totalMetrica * 100) : 0
+      })).sort((a, b) => b[metrica] - a[metrica]);
+
+      // Atualizar cabeçalho (sem legenda aqui)
+      document.getElementById('theadAnalise').innerHTML = `
+        <tr>
+          <th>${agrupamento}</th>
+          <th style="text-align: right;">Empenhado (${ano})</th>
+          <th style="text-align: right;">Liquidado (${ano})</th>
+          <th style="text-align: right;">Pago (${ano})</th>
+          <th style="text-align: center;">% Vertical</th>
+        </tr>
+      `;
+
+      // Renderizar linhas
+      const tbody = document.getElementById('tbodyAnalise');
+      tbody.innerHTML = dadosAnalise.map(item => `
+        <tr>
+          <td>${item.nome.length > 50 ? item.nome.substring(0, 50) + '...' : item.nome}</td>
+          <td style="text-align: right;" class="valor-destaque">${formatarMoeda(item.empenhado)}</td>
+          <td style="text-align: right;">${formatarMoeda(item.liquidado)}</td>
+          <td style="text-align: right;">${formatarMoeda(item.pago)}</td>
+          <td style="text-align: center;"><span class="percent-neutral">${formatarNumero(item.percentual)}%</span></td>
+        </tr>
+      `).join('');
+
+      // Adicionar linha de total
+      tbody.innerHTML += `
+        <tr style="background: #f8fafc; font-weight: bold; border-top: 2px solid #cbd5e1;">
+          <td>TOTAL</td>
+          <td style="text-align: right;" class="valor-destaque">${formatarMoeda(totalEmp)}</td>
+          <td style="text-align: right;">${formatarMoeda(totalLiq)}</td>
+          <td style="text-align: right;">${formatarMoeda(totalPag)}</td>
+          <td style="text-align: center;"><span class="percent-neutral">100,00%</span></td>
+        </tr>
+      `;
+
+      // Renderizar gráfico pizza top 5 + outros
+      renderizarGraficoPizza(dadosAnalise, agrupamento, ano, metrica);
+    }
+
+    function renderizarGraficoPizza(dados, agrupamento, ano, metrica) {
+      if (chartPizza) chartPizza.destroy();
+
+      const metricaNome = metrica === 'empenhado' ? 'Empenhada' : metrica === 'liquidado' ? 'Liquidada' : 'Paga';
+      document.getElementById('tituloPizza').textContent = `Composição da Despesa ${metricaNome} - ${ano} (por ${agrupamento})`;
+
+      const cores = ['#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#ef4444', '#94a3b8'];
+      const top5 = dados.slice(0, 5);
+      const outrosValor = dados.slice(5).reduce((sum, d) => sum + d[metrica], 0);
+      const outrosQtd = dados.length - 5;
+
+      const labels = top5.map(d => d.nome.length > 35 ? d.nome.substring(0, 35) + '...' : d.nome);
+      const values = top5.map(d => d[metrica]);
+      const bgColors = cores.slice(0, 5);
+
+      if (outrosValor > 0) {
+        labels.push(`Outros (${outrosQtd})`);
+        values.push(outrosValor);
+        bgColors.push(cores[5]);
+      }
+
+      const totalGeral = values.reduce((s, v) => s + v, 0);
+
+      // Legenda personalizada
+      const legendaHtml = labels.map((label, i) => {
+        const perc = totalGeral > 0 ? (values[i] / totalGeral * 100).toFixed(1) : 0;
+        return `<div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:14px;height:14px;border-radius:3px;background:${bgColors[i]};flex-shrink:0;"></div>
+          <span style="color:#334155;"><strong>${perc}%</strong> ${label}</span>
+        </div>`;
+      }).join('');
+      document.getElementById('legendaPizza').innerHTML = legendaHtml;
+
+      const ctx = document.getElementById('chartPizza').getContext('2d');
+      chartPizza = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: values,
+            backgroundColor: bgColors,
+            borderWidth: 3,
+            borderColor: '#fff',
+            hoverOffset: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '55%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function (ctx) {
+                  const perc = totalGeral > 0 ? (ctx.raw / totalGeral * 100).toFixed(1) : 0;
+                  return `${ctx.label}: ${formatarMoeda(ctx.raw)} (${perc}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderizarAnaliseHorizontal(anos, agrupamento) {
+      // Obter métrica selecionada
+      const metrica = document.getElementById('metricaAnalise').value;
+
+      // Agrupar dados por ano e elemento com normalização de chave
+      const dadosPorAno = {};
+      const nomesCompletos = {}; // Mapeia chave normalizada -> nome completo mais longo
+
+      anos.forEach(ano => {
+        dadosPorAno[ano] = {};
+
+        const empAno = filtrarPorAno(dadosEmpenhados, ano);
+        const liqAno = filtrarPorAno(dadosLiquidados, ano);
+        const pagAno = filtrarPorAno(dadosPagos, ano);
+
+        empAno.forEach(d => {
+          const valorOriginal = getValor(d, agrupamento) || 'Não informado';
+          const chave = normalizarChaveAgrupamento(valorOriginal, agrupamento);
+
+          // Preservar o nome mais completo encontrado
+          if (!nomesCompletos[chave] || valorOriginal.length > nomesCompletos[chave].length) {
+            nomesCompletos[chave] = valorOriginal;
+          }
+
+          if (!dadosPorAno[ano][chave]) {
+            dadosPorAno[ano][chave] = { empenhado: 0, liquidado: 0, pago: 0 };
+          }
+          dadosPorAno[ano][chave].empenhado += parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0;
+        });
+
+        liqAno.forEach(d => {
+          const valorOriginal = getValor(d, agrupamento) || 'Não informado';
+          const chave = normalizarChaveAgrupamento(valorOriginal, agrupamento);
+
+          // Preservar o nome mais completo encontrado
+          if (!nomesCompletos[chave] || valorOriginal.length > nomesCompletos[chave].length) {
+            nomesCompletos[chave] = valorOriginal;
+          }
+
+          if (!dadosPorAno[ano][chave]) {
+            dadosPorAno[ano][chave] = { empenhado: 0, liquidado: 0, pago: 0 };
+          }
+          dadosPorAno[ano][chave].liquidado += parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0;
+        });
+
+        pagAno.forEach(d => {
+          const valorOriginal = getValor(d, agrupamento) || 'Não informado';
+          const chave = normalizarChaveAgrupamento(valorOriginal, agrupamento);
+
+          // Preservar o nome mais completo encontrado
+          if (!nomesCompletos[chave] || valorOriginal.length > nomesCompletos[chave].length) {
+            nomesCompletos[chave] = valorOriginal;
+          }
+
+          if (!dadosPorAno[ano][chave]) {
+            dadosPorAno[ano][chave] = { empenhado: 0, liquidado: 0, pago: 0 };
+          }
+          dadosPorAno[ano][chave].pago += parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0;
+        });
+      });
+
+      // Combinar todas as chaves (elementos)
+      const todasChaves = new Set();
+      anos.forEach(ano => {
+        Object.keys(dadosPorAno[ano]).forEach(chave => todasChaves.add(chave));
+      });
+
+      // Preparar dados para tabela (usando nome completo preservado e métrica selecionada)
+      dadosAnalise = [...todasChaves].map(chave => {
+        const item = { nome: nomesCompletos[chave] || chave }; // Usa o nome completo preservado
+
+        anos.forEach((ano, idx) => {
+          const dados = dadosPorAno[ano][chave] || { empenhado: 0, liquidado: 0, pago: 0 };
+          item[`${metrica}_${ano}`] = dados[metrica];
+
+          // Calcular variação em relação ao ano anterior
+          if (idx < anos.length - 1) {
+            const anoAnterior = anos[idx + 1];
+            const dadosAnterior = dadosPorAno[anoAnterior][chave] || { empenhado: 0, liquidado: 0, pago: 0 };
+            const variacao = dadosAnterior[metrica] > 0
+              ? ((dados[metrica] - dadosAnterior[metrica]) / dadosAnterior[metrica] * 100)
+              : (dados[metrica] > 0 ? 100 : 0);
+            item[`var_${ano}_${anoAnterior}`] = variacao;
+          }
+        });
+
+        return item;
+      }).sort((a, b) => (b[`${metrica}_${anos[0]}`] || 0) - (a[`${metrica}_${anos[0]}`] || 0));
+
+      // Construir cabeçalho dinâmico: todos os anos primeiro, depois variações
+      const metricaNome = metrica === 'empenhado' ? 'Empenhado' : metrica === 'liquidado' ? 'Liquidado' : 'Pago';
+      let headerHtml = `<tr><th>Elemento de Despesa</th>`;
+      anos.forEach(ano => {
+        headerHtml += `<th style="text-align: right;">${metricaNome} (${ano})</th>`;
+      });
+      for (let idx = 0; idx < anos.length - 1; idx++) {
+        const anoAtual = anos[idx];
+        const anoAnterior = anos[idx + 1];
+        headerHtml += `<th style="text-align: center;">Variação ${anoAtual}|${anoAnterior}</th>`;
+      }
+      headerHtml += `</tr>`;
+
+      document.getElementById('theadAnalise').innerHTML = headerHtml;
+
+      // Função para determinar classe de fundo baseado na variação
+      function getClasseVariacao(variacao) {
+        const abs = Math.abs(variacao);
+        if (abs >= 50) return 'variacao-alta';
+        if (abs >= 30) return 'variacao-media';
+        return 'variacao-baixa';
+      }
+
+      // Renderizar linhas: anos primeiro, depois variações
+      const tbody = document.getElementById('tbodyAnalise');
+      tbody.innerHTML = dadosAnalise.map(item => {
+        let html = `<tr><td>${item.nome.length > 50 ? item.nome.substring(0, 50) + '...' : item.nome}</td>`;
+
+        // Colunas de valores por ano
+        anos.forEach(ano => {
+          const valor = item[`${metrica}_${ano}`] || 0;
+          html += `<td style="text-align: right;">${formatarMoeda(valor)}</td>`;
+        });
+
+        // Colunas de variação
+        for (let idx = 0; idx < anos.length - 1; idx++) {
+          const anoAtual = anos[idx];
+          const anoAnterior = anos[idx + 1];
+          const variacao = item[`var_${anoAtual}_${anoAnterior}`] || 0;
+          const classe = getClasseVariacao(variacao);
+          const classPercent = variacao > 0 ? 'percent-positive' : variacao < 0 ? 'percent-negative' : 'percent-neutral';
+          const sinal = variacao > 0 ? '+' : '';
+
+          html += `<td style="text-align: center;" class="${classe}">
+            <span class="${classPercent}">${sinal}${variacao.toFixed(2)}%</span>
+          </td>`;
+        }
+
+        html += `</tr>`;
+        return html;
+      }).join('');
+
+      // Calcular totais: anos primeiro, depois variações
+      let totalHtml = `<tr style="background: #f8fafc; font-weight: bold; border-top: 2px solid #cbd5e1;"><td>TOTAL</td>`;
+
+      // Totais por ano
+      const totaisPorAno = {};
+      anos.forEach(ano => {
+        const total = dadosAnalise.reduce((sum, item) => sum + (item[`${metrica}_${ano}`] || 0), 0);
+        totaisPorAno[ano] = total;
+        totalHtml += `<td style="text-align: right;">${formatarMoeda(total)}</td>`;
+      });
+
+      // Variações dos totais
+      for (let idx = 0; idx < anos.length - 1; idx++) {
+        const anoAtual = anos[idx];
+        const anoAnterior = anos[idx + 1];
+        const varTotal = totaisPorAno[anoAnterior] > 0 ? ((totaisPorAno[anoAtual] - totaisPorAno[anoAnterior]) / totaisPorAno[anoAnterior] * 100) : (totaisPorAno[anoAtual] > 0 ? 100 : 0);
+        const classe = getClasseVariacao(varTotal);
+        const classPercent = varTotal > 0 ? 'percent-positive' : varTotal < 0 ? 'percent-negative' : 'percent-neutral';
+        const sinal = varTotal > 0 ? '+' : '';
+
+        totalHtml += `<td style="text-align: center;" class="${classe}">
+          <span class="${classPercent}">${sinal}${varTotal.toFixed(2)}%</span>
+        </td>`;
+      }
+
+      totalHtml += `</tr>`;
+      tbody.innerHTML += totalHtml;
+
+      // Renderizar gráfico de evolução
+      renderizarGraficoEvolucao(anos, dadosPorAno, metrica);
+    }
+
+    function renderizarGraficoEvolucao(anos, dadosPorAno, metrica) {
+      // Calcular total da métrica selecionada por ano
+      const totaisMetrica = anos.map(ano => {
+        return Object.values(dadosPorAno[ano]).reduce((sum, item) => sum + item[metrica], 0);
+      });
+
+      if (chartEvolucao) {
+        chartEvolucao.destroy();
+      }
+
+      const metricaNome = metrica === 'empenhado' ? 'Empenhada' : metrica === 'liquidado' ? 'Liquidada' : 'Paga';
+      document.getElementById('tituloGraficoEvolucao').textContent = `Despesa ${metricaNome} no Exercício`;
+      const ctx = document.getElementById('chartEvolucao').getContext('2d');
+      chartEvolucao = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: anos.reverse(),
+          datasets: [{
+            label: `Despesa ${metricaNome}`,
+            data: totaisMetrica.reverse(),
+            backgroundColor: '#5b7fc7',
+            borderRadius: 6,
+            barThickness: 80
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  return formatarMoeda(context.raw);
+                }
+              }
+            }
+          },
+          scales: {
+            x: { grid: { display: false } },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function (value) {
+                  if (value >= 1e9) return 'R$ ' + (value / 1e9).toFixed(1) + 'B';
+                  if (value >= 1e6) return 'R$ ' + (value / 1e6).toFixed(1) + 'M';
+                  if (value >= 1e3) return 'R$ ' + (value / 1e3).toFixed(0) + 'K';
+                  return formatarMoeda(value);
+                }
+              },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+
+      // Reverter de volta para manter consistência
+      anos.reverse();
+      totaisMetrica.reverse();
+    }
+
+
+    function getAnoExportacao() {
+      const tipo = document.getElementById('tipoAnalise').value;
+      if (tipo === 'vertical') return document.getElementById('anoVertical').value || '';
+      return getAnosSelecionados().join('-') || '';
+    }
+
+    function exportarExcel() {
+      const tipo = document.getElementById('tipoAnalise').value;
+      const ano = getAnoExportacao();
+      const titulos = {
+        'vertical': 'Analise_Vertical',
+        'horizontal': 'Analise_Horizontal'
+      };
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(dadosAnalise);
+      XLSX.utils.book_append_sheet(wb, ws, 'Análise');
+      XLSX.writeFile(wb, `${titulos[tipo]}_${ano}.xlsx`);
+    }
+
+    function exportarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const tipo = document.getElementById('tipoAnalise').value;
+      const ano = getAnoExportacao();
+      const titulos = {
+        'vertical': 'Análise Vertical',
+        'horizontal': 'Análise Horizontal'
+      };
+
+      doc.setFontSize(16);
+      doc.text(titulos[tipo] + ' - ' + ano, 14, 15);
+
+      doc.autoTable({
+        html: '.data-table',
+        startY: 25,
+        theme: 'grid',
+        styles: { fontSize: 8 }
+      });
+
+      doc.save(`${titulos[tipo]}_${ano}.pdf`);
+    }
+
+    document.addEventListener('DOMContentLoaded', carregarDados);
+
+    // Função para alternar tela cheia
+    function toggleFullscreen(containerId) {
+      const container = document.getElementById(containerId);
+      // Ajuste para pegar o botão dentro ou fora
+      const btn = container.querySelector('.btn-fullscreen i') || container.parentElement.querySelector('.btn-fullscreen i') || document.querySelector(`button[onclick="toggleFullscreen('${containerId}')"] i`);
+
+      if (!container.classList.contains('fullscreen-mode')) {
+        container.classList.add('fullscreen-mode');
+        // Ajustar padding no modo tela cheia
+        container.style.paddingTop = '60px';
+        if (btn) {
+          btn.classList.remove('fa-expand');
+          btn.classList.add('fa-compress');
+          // Se o botão não estiver dentro do container (caso do style absolute top -30), precisamos trazê-lo para dentro ou fixá-lo
+          // Neste caso especifico do despesas-analise, o botão está dentro do container mas com style top -30.
+          // Ao entrar em fullscreen, vamos resetar o style top
+          if (btn.parentElement.style.top === '-30px') {
+            btn.parentElement.dataset.orgTop = '-30px';
+            btn.parentElement.style.top = '10px';
+            btn.parentElement.style.right = '10px';
+            btn.parentElement.style.position = 'fixed'; // Para garantir que fique visível
+            btn.parentElement.style.zIndex = '10001';
+          }
+        }
+
+        // Redimensionar gráfico após entrar em tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      } else {
+        container.classList.remove('fullscreen-mode');
+        container.style.paddingTop = '';
+        if (btn) {
+          btn.classList.remove('fa-compress');
+          btn.classList.add('fa-expand');
+          if (btn.parentElement.dataset.orgTop) {
+            btn.parentElement.style.top = btn.parentElement.dataset.orgTop;
+            btn.parentElement.style.right = '0';
+            btn.parentElement.style.position = 'absolute';
+            btn.parentElement.style.zIndex = '10';
+          }
+        }
+
+        // Redimensionar gráfico após sair de tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      }
+
+      // Fechar tela cheia com ESC
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && container.classList.contains('fullscreen-mode')) {
+          toggleFullscreen(containerId);
+        }
+      });
+    }
+  </script>
+
+</body>
+
+</html>

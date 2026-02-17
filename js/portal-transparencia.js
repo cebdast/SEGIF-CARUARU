@@ -1,6 +1,41 @@
-// ============================================
+﻿// ============================================
 // PORTAL TRANSPARÊNCIA - JAVASCRIPT
 // ============================================
+
+// ============================================
+// AUTENTICAÇÃO (FRONTEND)
+// ============================================
+(function enforceAuthGuard() {
+  try {
+    var page = (window.location.pathname.split('/').pop() || '').toLowerCase();
+    if (!page || page === 'index.html') return;
+
+    var token = localStorage.getItem('auth_token');
+    var authTime = Number(localStorage.getItem('auth_time') || '0');
+
+    if (!token || !authTime) {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    var hours = (Date.now() - authTime) / (1000 * 60 * 60);
+    if (hours >= 24) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_time');
+      localStorage.removeItem('user_data');
+      window.location.href = 'index.html';
+    }
+  } catch (e) {
+    window.location.href = 'index.html';
+  }
+})();
+
+function logoutSistema() {
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('auth_time');
+  localStorage.removeItem('user_data');
+  window.location.href = 'index.html';
+}
 
 // ============================================
 // FORMATAÇÃO DE VALORES COM TOOLTIP
@@ -104,16 +139,20 @@ function closeSidebar() {
 
 // Toggle Section (Accordion)
 function toggleSection(element) {
-  const section = element.parentElement;
-  const allSections = document.querySelectorAll('.menu-section');
-  
-  // Se a seção clicada já está expandida, apenas fecha ela
-  if (section.classList.contains('expanded')) {
-    section.classList.remove('expanded');
-  } else {
-    // Fecha todas as outras seções
-    allSections.forEach(s => s.classList.remove('expanded'));
-    // Abre a seção clicada
+  const section = element.closest('.menu-section');
+  if (!section) return;
+
+  const menu = section.parentElement;
+  if (!menu) return;
+
+  const allSections = menu.querySelectorAll(':scope > .menu-section');
+  const isExpanded = section.classList.contains('expanded');
+
+  // Mantém somente uma seção aberta por vez na sidebar
+  allSections.forEach(s => s.classList.remove('expanded'));
+
+  // Se a clicada estava fechada, abre; se estava aberta, fecha (fica tudo recolhido)
+  if (!isExpanded) {
     section.classList.add('expanded');
   }
 }
@@ -127,6 +166,71 @@ function toggleSubmenu(event, element) {
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', function() {
+  // Normalizar estado inicial do menu (evita múltiplas seções destacadas)
+  document.querySelectorAll('.sidebar-menu').forEach(menu => {
+    const sections = Array.from(menu.querySelectorAll(':scope > .menu-section'));
+    if (!sections.length) return;
+
+    let alvo = sections.find(s => s.querySelector('.menu-link.active')) || null;
+    if (!alvo) alvo = sections.find(s => s.classList.contains('expanded')) || null;
+
+    sections.forEach(s => s.classList.remove('expanded'));
+    if (alvo) alvo.classList.add('expanded');
+  });
+
+  // Preencher dados do usuário logado no header e habilitar menu "Deslogar"
+  const userMenu = document.querySelector('.user-menu');
+  if (userMenu) {
+    try {
+      const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+      const nome = (userData.nome || userData.username || '').trim();
+      const role = (userData.role || 'sigef').toString();
+
+      const nomeEl = userMenu.querySelector('.user-name');
+      const roleEl = userMenu.querySelector('.user-role');
+      const avatarEl = userMenu.querySelector('.user-avatar');
+
+      if (nomeEl && nome) nomeEl.textContent = nome;
+      if (roleEl) roleEl.textContent = role.toUpperCase();
+      if (avatarEl && nome) {
+        const iniciais = nome
+          .split(' ')
+          .filter(Boolean)
+          .slice(0, 2)
+          .map(p => p[0].toUpperCase())
+          .join('');
+        if (iniciais) avatarEl.textContent = iniciais;
+      }
+    } catch (e) {}
+
+    if (!userMenu.querySelector('.user-menu-dropdown')) {
+      const dropdown = document.createElement('div');
+      dropdown.className = 'user-menu-dropdown';
+      dropdown.innerHTML = '<button type=\"button\" id=\"btnLogoutMenu\"><i class=\"fas fa-sign-out-alt\"></i> Deslogar</button>';
+      userMenu.appendChild(dropdown);
+
+      const btnLogout = dropdown.querySelector('#btnLogoutMenu');
+      if (btnLogout) {
+        btnLogout.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          logoutSistema();
+        });
+      }
+
+      userMenu.addEventListener('click', function(e) {
+        if (e.target.closest('#btnLogoutMenu')) return;
+        userMenu.classList.toggle('open');
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!userMenu.contains(e.target)) {
+          userMenu.classList.remove('open');
+        }
+      });
+    }
+  }
+
   // Menu link click - não remove mais o active pois cada página controla isso
   // Apenas adiciona hover effects
 
@@ -158,4 +262,25 @@ document.addEventListener('DOMContentLoaded', function() {
   if (overlay) {
     overlay.addEventListener('click', closeSidebar);
   }
+
+  // Reorganizar filtros: Unidade Gestora ao lado de Exercício
+  try {
+    const selectExercicio = document.getElementById('filtroExercicio') || document.getElementById('filtroAno');
+    const selectUnidadeGestora = document.getElementById('filtroUnidadeGestora');
+
+    if (selectExercicio && selectUnidadeGestora) {
+      const grupoExercicio = selectExercicio.closest('.filter-group');
+      const grupoUnidadeGestora = selectUnidadeGestora.closest('.filter-group');
+      const grid = grupoExercicio ? grupoExercicio.parentElement : null;
+
+      if (grid && grupoExercicio && grupoUnidadeGestora && grupoExercicio !== grupoUnidadeGestora) {
+        const next = grupoExercicio.nextElementSibling;
+        if (next !== grupoUnidadeGestora) {
+          grid.insertBefore(grupoUnidadeGestora, grupoExercicio.nextElementSibling);
+        }
+      }
+    }
+  } catch (e) {}
 });
+
+

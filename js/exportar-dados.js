@@ -1,4 +1,4 @@
-// =====================================================
+﻿// =====================================================
 // Funções de Exportação - SEFAZ Caruaru
 // =====================================================
 
@@ -252,3 +252,4 @@ function exportarPDF(dados, nomeArquivo, titulo, colunas) {
 // Exportar funções globalmente
 window.exportarExcel = exportarExcel;
 window.exportarPDF = exportarPDF;
+

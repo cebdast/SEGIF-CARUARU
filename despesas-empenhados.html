@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +9,58 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="css/portal-transparencia.css">
+  <script src="js/auth-check.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="js/chart-variacao-plugin.js"></script>
+  <style>
+    .btn-fullscreen {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-fullscreen:hover {
+      background: #f1f5f9;
+      color: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .btn-fullscreen i {
+      font-size: 14px;
+    }
+
+    /* Estilos para modo tela cheia */
+    .fullscreen-mode {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+      background: white !important;
+      padding: 20px !important;
+      margin: 0 !important;
+      max-width: none !important;
+      overflow: auto !important;
+    }
+
+    .fullscreen-mode>div:last-child {
+      height: calc(100vh - 100px) !important;
+      max-width: none !important;
+    }
+  </style>
 </head>
+
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -23,18 +72,34 @@
     </div>
     <nav class="sidebar-menu">
       <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)"><i class="fas fa-tachometer-alt"></i><span>Visão
+            Geral</span><i class="fas fa-chevron-right section-arrow"></i></div>
+        <ul>
+          <li class="menu-item"><a href="dashboard.html" class="menu-link"><i class="fas fa-home"></i><span>Dashboard
+                Executivo</span></a></li>
+          <li class="menu-item"><a href="resultado-orcamentario.html" class="menu-link"><i
+                class="fas fa-chart-pie"></i><span>Resultado Orçamentário</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
         <div class="menu-section-title" onclick="toggleSection(this)">
           <i class="fas fa-hand-holding-usd"></i>
           <span>Receitas</span>
           <i class="fas fa-chevron-right section-arrow"></i>
         </div>
         <ul>
-          <li class="menu-item"><a href="receitas-previsao.html" class="menu-link"><i class="fas fa-chart-line"></i><span>Previsão</span></a></li>
-          <li class="menu-item"><a href="receitas-arrecadacao.html" class="menu-link"><i class="fas fa-money-bill-wave"></i><span>Arrecadação</span></a></li>
-          <li class="menu-item"><a href="receitas-retencoes.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retenções</span></a></li>
-          <li class="menu-item"><a href="receitas-deducoes.html" class="menu-link"><i class="fas fa-minus-circle"></i><span>Deduções</span></a></li>
-          <li class="menu-item"><a href="receitas-gerencial.html" class="menu-link"><i class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
-          <li class="menu-item"><a href="receitas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+          <li class="menu-item"><a href="receitas-previsao.html" class="menu-link"><i
+                class="fas fa-chart-line"></i><span>Previsão</span></a></li>
+          <li class="menu-item"><a href="receitas-arrecadacao.html" class="menu-link"><i
+                class="fas fa-money-bill-wave"></i><span>Arrecadação</span></a></li>
+          <li class="menu-item"><a href="receitas-retencoes.html" class="menu-link"><i
+                class="fas fa-hand-holding-usd"></i><span>Retenções</span></a></li>
+          <li class="menu-item"><a href="receitas-deducoes.html" class="menu-link"><i
+                class="fas fa-minus-circle"></i><span>Deduções</span></a></li>
+          <li class="menu-item"><a href="receitas-gerencial.html" class="menu-link"><i
+                class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="receitas-comparativos.html" class="menu-link"><i
+                class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
         </ul>
       </div>
       <div class="menu-section expanded">
@@ -44,13 +109,43 @@
           <i class="fas fa-chevron-right section-arrow"></i>
         </div>
         <ul>
-          <li class="menu-item"><a href="despesas-empenhados.html" class="menu-link active"><i class="fas fa-file-invoice"></i><span>Empenhados</span></a></li>
-          <li class="menu-item"><a href="despesas-liquidados.html" class="menu-link"><i class="fas fa-check-circle"></i><span>Liquidados</span></a></li>
-          <li class="menu-item"><a href="despesas-retidos.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retidos</span></a></li>
-          <li class="menu-item"><a href="despesas-pagos.html" class="menu-link"><i class="fas fa-money-check-alt"></i><span>Pagos</span></a></li>
-          <li class="menu-item"><a href="despesas-a-pagar.html" class="menu-link"><i class="fas fa-clock"></i><span>A Pagar</span></a></li>
-          <li class="menu-item"><a href="despesas-gerencial.html" class="menu-link"><i class="fas fa-chart-line"></i><span>Gerencial</span></a></li>
-          <li class="menu-item"><a href="despesas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+          <li class="menu-item"><a href="despesas-empenhados.html" class="menu-link active"><i
+                class="fas fa-file-invoice"></i><span>Empenhados</span></a></li>
+          <li class="menu-item"><a href="despesas-liquidados.html" class="menu-link"><i
+                class="fas fa-check-circle"></i><span>Liquidados</span></a></li>
+          <li class="menu-item"><a href="despesas-retidos.html" class="menu-link"><i
+                class="fas fa-hand-holding-usd"></i><span>Retidos</span></a></li>
+          <li class="menu-item"><a href="despesas-pagos.html" class="menu-link"><i
+                class="fas fa-money-check-alt"></i><span>Pagos</span></a></li>
+          <li class="menu-item"><a href="despesas-a-pagar.html" class="menu-link"><i class="fas fa-clock"></i><span>A
+                Pagar</span></a></li>
+          <li class="menu-item"><a href="despesas-gerencial.html" class="menu-link"><i
+                class="fas fa-chart-line"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="despesas-comparativos.html" class="menu-link"><i
+                class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)">
+          <i class="fas fa-search-dollar"></i>
+          <span>Análises</span>
+          <i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="despesas-analise.html" class="menu-link"><i
+                class="fas fa-chart-pie"></i><span>Análise Financeira</span></a></li>
+          <li class="menu-item"><a href="despesas-execucao.html" class="menu-link"><i
+                class="fas fa-chart-bar"></i><span>Execução Orçamentária</span></a></li>
+          <li class="menu-item"><a href="despesas-fontes.html" class="menu-link"><i
+                class="fas fa-layer-group"></i><span>Fontes de Recursos</span></a></li>
+          <li class="menu-item"><a href="despesas-credores.html" class="menu-link"><i
+                class="fas fa-users"></i><span>Credores</span></a></li>
+          <li class="menu-item"><a href="despesas-natureza.html" class="menu-link"><i
+                class="fas fa-sitemap"></i><span>Natureza da Despesa</span></a></li>
+          <li class="menu-item"><a href="limites-legais.html" class="menu-link"><i
+                class="fas fa-gavel"></i><span>Limites Legais</span></a></li>
+          <li class="menu-item"><a href="despesas-alertas.html" class="menu-link"><i
+                class="fas fa-exclamation-triangle"></i><span>Alertas</span></a></li>
         </ul>
       </div>
       <div class="menu-section">
@@ -60,8 +155,12 @@
           <i class="fas fa-chevron-right section-arrow"></i>
         </div>
         <ul>
-          <li class="menu-item"><a href="banco-importar-dados.html" class="menu-link"><i class="fas fa-file-import"></i><span>Importar Dados</span></a></li>
-          <li class="menu-item"><a href="banco-historico.html" class="menu-link"><i class="fas fa-history"></i><span>Histórico</span></a></li>
+          <li class="menu-item"><a href="banco-importar-dados.html" class="menu-link"><i
+                class="fas fa-file-import"></i><span>Importar Dados</span></a></li>
+          <li class="menu-item"><a href="banco-historico.html" class="menu-link"><i
+                class="fas fa-history"></i><span>Histórico</span></a></li>
+          <li class="menu-item"><a href="admin-usuarios.html" class="menu-link"><i
+                class="fas fa-user-shield"></i><span>Usuários</span></a></li>
         </ul>
       </div>
     </nav>
@@ -132,16 +231,21 @@
           </div>
           <div class="filter-group">
             <label class="filter-label">Nº Empenho</label>
-            <input type="text" class="filter-input" id="filtroNumero" placeholder="Ex: 12345">
+            <input type="text" class="filter-input" id="filtroNumero" placeholder="Ex: 12345" autocomplete="off"
+              oninput="filtrarEmpenhos(this.value)">
+            <datalist id="listaNumEmpenhos"></datalist>
           </div>
           <div class="filter-group">
             <label class="filter-label">Credor/Fornecedor</label>
-            <input type="text" class="filter-input" id="filtroCredor" placeholder="Digite 2+ letras..." autocomplete="off" oninput="filtrarCredores(this.value)">
+            <input type="text" class="filter-input" id="filtroCredor" placeholder="Digite 2+ letras..."
+              autocomplete="off" oninput="filtrarCredores(this.value)">
             <datalist id="listaCredores"></datalist>
           </div>
           <div class="filter-group">
             <label class="filter-label">CNPJ/CPF</label>
-            <input type="text" class="filter-input" id="filtroCnpjCpf" placeholder="Ex: 12.345.678/0001-00">
+            <input type="text" class="filter-input" id="filtroCnpjCpf" placeholder="Ex: 12.345.678/0001-00"
+              autocomplete="off" oninput="filtrarCnpjCpf(this.value)">
+            <datalist id="listaCnpjsCpfs"></datalist>
           </div>
           <div class="filter-group">
             <label class="filter-label">Município</label>
@@ -211,11 +315,14 @@
           </div>
           <div class="filter-group">
             <label class="filter-label">Detalhamento Despesa</label>
-            <input type="text" class="filter-input" id="filtroDetalhamento" placeholder="Digite para filtrar...">
+            <input type="text" class="filter-input" id="filtroDetalhamento" placeholder="Digite para filtrar..."
+              autocomplete="off" oninput="filtrarDetalhamentos(this.value)">
+            <datalist id="listaDetalhamentos"></datalist>
           </div>
           <div class="filter-group">
             <label class="filter-label">Despesa</label>
-            <input type="text" class="filter-input" id="filtroDespesa" placeholder="Ex: 449..." autocomplete="off" oninput="filtrarDespesas(this.value)">
+            <input type="text" class="filter-input" id="filtroDespesa" placeholder="Ex: 449..." autocomplete="off"
+              oninput="filtrarDespesas(this.value)">
             <datalist id="listaDespesas"></datalist>
           </div>
           <div class="filter-group">
@@ -233,17 +340,20 @@
         </div>
       </div>
       <!-- Mensagem quando não há dados -->
-      <div id="semDadosMsg" style="display: none; text-align: center; padding: 60px 20px; background: #f8fafc; border-radius: 12px; margin-bottom: 24px;">
+      <div id="semDadosMsg"
+        style="display: none; text-align: center; padding: 60px 20px; background: #f8fafc; border-radius: 12px; margin-bottom: 24px;">
         <i class="fas fa-database" style="font-size: 48px; color: #cbd5e1; margin-bottom: 16px;"></i>
         <h3 style="color: #64748b; margin-bottom: 8px;">Nenhum dado encontrado</h3>
         <p style="color: #94a3b8; margin-bottom: 16px;">Não há dados de empenhos importados no sistema.</p>
-        <a href="banco-importar-dados.html" class="btn btn-primary"><i class="fas fa-file-import"></i> Importar Dados</a>
+        <a href="banco-importar-dados.html" class="btn btn-primary"><i class="fas fa-file-import"></i> Importar
+          Dados</a>
       </div>
-      
+
       <div class="card" id="cardDemonstrativo">
         <div class="card-header">
           <h2 class="card-title"><i class="fas fa-table"></i> Demonstrativo de Empenhos de Despesas</h2>
-          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i class="fas fa-sync-alt"></i> Carregando...</span></div>
+          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i
+                class="fas fa-sync-alt"></i> Carregando...</span></div>
         </div>
         <div class="card-body">
           <div class="tabs">
@@ -254,7 +364,8 @@
           <div class="tab-content active" id="resumo">
             <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
               <label style="font-weight: 600; color: var(--text-secondary);">Agrupar por:</label>
-              <select id="colunaAgrupamento" class="filter-select" style="min-width: 200px;" onchange="renderizarResumo()">
+              <select id="colunaAgrupamento" class="filter-select" style="min-width: 200px;"
+                onchange="renderizarResumo()">
                 <option value="Unidade gestora">Unidade Gestora</option>
                 <option value="Unidade orçamentária">Unidade Orçamentária</option>
                 <option value="Fonte de recursos">Fonte de Recursos</option>
@@ -316,14 +427,16 @@
                 <tbody id="tabelaDetalhado"></tbody>
               </table>
             </div>
-            <div id="paginacaoControles" style="margin-top: 16px; display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <div id="paginacaoControles"
+              style="margin-top: 16px; display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;">
               <!-- Controles de paginação serão inseridos via JavaScript -->
             </div>
           </div>
           <div class="tab-content" id="grafico">
             <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
               <label style="font-weight: 600; color: var(--text-secondary);">Agrupar por:</label>
-              <select id="agrupamentoGrafico" class="filter-select" style="min-width: 200px;" onchange="renderizarGraficos()">
+              <select id="agrupamentoGrafico" class="filter-select" style="min-width: 200px;"
+                onchange="renderizarGraficos()">
                 <option value="Unidade gestora">Unidade Gestora</option>
                 <option value="Unidade orçamentária">Unidade Orçamentária</option>
                 <option value="Fonte de recursos">Fonte de Recursos</option>
@@ -338,18 +451,32 @@
                 <option value="Programa">Programa</option>
               </select>
             </div>
-            <div>
-              <h4 style="margin-bottom: 16px; color: var(--text-secondary);"><i class="fas fa-chart-bar"></i> Top 30 por Agrupamento</h4>
+            <div id="chartUnidadesContainer">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h4 style="margin: 0; color: var(--text-secondary);"><i class="fas fa-chart-bar"></i> Top 30 por
+                  Agrupamento</h4>
+                <button onclick="toggleFullscreen('chartUnidadesContainer')" class="btn-fullscreen" title="Tela cheia">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
               <div style="height: 500px;"><canvas id="chartUnidades"></canvas></div>
             </div>
-            <div style="margin-top: 24px;">
-              <h4 style="margin-bottom: 16px; color: var(--text-secondary);"><i class="fas fa-chart-line"></i> Evolução Mensal</h4>
-              <div style="height: 280px;"><canvas id="chartMensal"></canvas></div>
+            <div style="margin-top: 24px;" id="chartMensalContainer">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h4 style="margin: 0; color: var(--text-secondary);"><i class="fas fa-chart-line"></i> Evolução Mensal
+                  (com acumulado e comparação)</h4>
+                <button onclick="toggleFullscreen('chartMensalContainer')" class="btn-fullscreen" title="Tela cheia">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
+              <div style="height: 380px;"><canvas id="chartMensal"></canvas></div>
             </div>
           </div>
           <div class="export-section">
-            <button class="btn btn-secondary btn-sm" onclick="exportarDadosPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
-            <button class="btn btn-secondary btn-sm" onclick="exportarDadosExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosPDF()"><i class="fas fa-file-pdf"></i>
+              PDF</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosExcel()"><i class="fas fa-file-excel"></i>
+              Excel</button>
           </div>
         </div>
       </div>
@@ -365,13 +492,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <script src="js/portal-transparencia.js"></script>
   <script src="js/indexeddb-utils.js"></script>
+  <script src="js/renderizacao-otimizada.js"></script>
   <script src="js/exportar-dados.js"></script>
   <script>
     // Variáveis globais
     let todosOsDados = [];
     const STORE_NAME = 'despesas-empenhados';
     let charts = {};
-    
+
     // Função para formatar valor em Real
     function formatarMoeda(valor) {
       return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
@@ -382,25 +510,25 @@
       if (v >= 1e3) return 'R$ ' + (v / 1e3).toFixed(1).replace('.', ',') + ' mil';
       return formatarMoeda(v);
     }
-    
+
     // Formatar data para DD/MM/AAAA
     function formatarData(dataStr) {
       if (!dataStr || dataStr === '-') return '-';
-      if (dataStr instanceof Date) { const d = dataStr; return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
-      if (typeof dataStr === 'number' && dataStr > 40000 && dataStr < 60000) { const d = new Date((dataStr - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`; }
+      if (dataStr instanceof Date) { const d = dataStr; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; }
+      if (typeof dataStr === 'number' && dataStr > 40000 && dataStr < 60000) { const d = new Date((dataStr - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`; }
       const str = String(dataStr).trim();
       if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) return str;
       if (/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/\d{4}$/.test(str)) { const m = str.match(/^(\d{2})\s+\d{2}:\d{2}:\d{2}\/(\d{2})\/(\d{4})$/); if (m) return `${m[1]}/${m[2]}/${m[3]}`; }
-      const num = parseFloat(str); if (!isNaN(num) && num > 40000 && num < 60000) { const d = new Date((num - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`; }
+      const num = parseFloat(str); if (!isNaN(num) && num > 40000 && num < 60000) { const d = new Date((num - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`; }
       if (str.includes('-')) { const p = str.split('T')[0].split(' ')[0].split('-'); if (p.length === 3 && p[0].length === 4) return `${p[2]}/${p[1]}/${p[0]}`; }
-      try { const d = new Date(str); if (!isNaN(d.getTime()) && d.getFullYear() > 1990) return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; } catch(e) {}
+      try { const d = new Date(str); if (!isNaN(d.getTime()) && d.getFullYear() > 1990) return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; } catch (e) { }
       return str;
     }
-    
+
     // Variáveis de ordenação
     let colunaOrdenacao = '';
     let direcaoOrdenacao = 'asc';
-    
+
     // Função de ordenação
     function ordenarPor(coluna) {
       if (colunaOrdenacao === coluna) {
@@ -409,7 +537,7 @@
         colunaOrdenacao = coluna;
         direcaoOrdenacao = 'asc';
       }
-      
+
       // Atualizar ícones de ordenação
       document.querySelectorAll('th i[id^="sort-"]').forEach(icon => {
         icon.className = 'fas fa-sort';
@@ -418,12 +546,12 @@
       if (iconAtual) {
         iconAtual.className = direcaoOrdenacao === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
       }
-      
+
       // Ordenar dados
       dadosFiltradosGlobal.sort((a, b) => {
         let valA = getValor(a, coluna);
         let valB = getValor(b, coluna);
-        
+
         // Tratamento especial para valores numéricos
         if (coluna.toLowerCase().includes('valor') || coluna.includes('R$')) {
           valA = parseFloat(valA) || 0;
@@ -436,16 +564,16 @@
           valA = String(valA || '').toLowerCase();
           valB = String(valB || '').toLowerCase();
         }
-        
+
         if (valA < valB) return direcaoOrdenacao === 'asc' ? -1 : 1;
         if (valA > valB) return direcaoOrdenacao === 'asc' ? 1 : -1;
         return 0;
       });
-      
+
       paginaAtual = 1;
       renderizarDetalhado();
     }
-    
+
     // Função para determinar classe do badge baseado na espécie
     function getBadgeClass(especie) {
       if (!especie) return 'badge-info';
@@ -455,7 +583,7 @@
       if (especieLower.includes('estimativa')) return 'badge-info';
       return 'badge-info';
     }
-    
+
     // Função para obter valor do campo (suporta múltiplos nomes)
     function getValor(item, ...campos) {
       for (let campo of campos) {
@@ -465,7 +593,7 @@
       }
       return '-';
     }
-    
+
     // Função para converter data DD/MM/YYYY para objeto Date
     function parseData(dataStr) {
       if (!dataStr || dataStr === '-') return null;
@@ -486,7 +614,7 @@
       }
       return null;
     }
-    
+
     // Função para extrair ano de uma data (DD/MM/YYYY ou YYYY-MM-DD)
     function extrairAno(dataStr) {
       if (!dataStr || dataStr === '-') return null;
@@ -505,7 +633,7 @@
       }
       return null;
     }
-    
+
     // Função para popular selects com valores únicos
     function popularFiltros() {
       // Popular filtro de Exercício (anos)
@@ -517,17 +645,17 @@
         opt.textContent = ano;
         selectExercicio.appendChild(opt);
       });
-      
+
       // Popular filtro de Unidade Gestora
       const unidadesGestoras = [...new Set(todosOsDados.map(d => getValor(d, 'Unidade gestora', 'Unidade Gestora')).filter(v => v && v !== '-'))].sort();
       popularSelect('filtroUnidadeGestora', unidadesGestoras);
-      
+
       // Popular filtros existentes
       const unidades = [...new Set(todosOsDados.map(d => getValor(d, 'Unidade orçamentária', 'Unidade Orçamentária')).filter(v => v && v !== '-'))].sort();
       const fontes = [...new Set(todosOsDados.map(d => getValor(d, 'Fonte de recursos', 'Fonte de Recursos')).filter(v => v && v !== '-'))].sort();
       const especies = [...new Set(todosOsDados.map(d => getValor(d, 'Espécie')).filter(v => v && v !== '-'))].sort();
       const tipos = [...new Set(todosOsDados.map(d => getValor(d, 'Tipo')).filter(v => v && v !== '-'))].sort();
-      
+
       // Novos filtros
       const municipios = [...new Set(todosOsDados.map(d => getValor(d, 'Município')).filter(v => v && v !== '-'))].sort();
       const acoes = [...new Set(todosOsDados.map(d => getValor(d, 'Ação')).filter(v => v && v !== '-'))].sort();
@@ -535,7 +663,7 @@
       const funcoes = [...new Set(todosOsDados.map(d => getValor(d, 'Função')).filter(v => v && v !== '-'))].sort();
       const subfuncoes = [...new Set(todosOsDados.map(d => getValor(d, 'SubFunção', 'Subfunção')).filter(v => v && v !== '-'))].sort();
       const programas = [...new Set(todosOsDados.map(d => getValor(d, 'Programa')).filter(v => v && v !== '-'))].sort();
-      
+
       // Popular selects
       popularSelect('filtroUnidade', unidades);
       popularSelect('filtroFonte', fontes);
@@ -548,7 +676,7 @@
       popularSelect('filtroSubFuncao', subfuncoes);
       popularSelect('filtroPrograma', programas);
     }
-    
+
     // Função auxiliar para popular selects
     function popularSelect(id, valores) {
       const select = document.getElementById(id);
@@ -560,57 +688,83 @@
         select.appendChild(opt);
       });
     }
-    
+
     // Lista de credores e despesas únicos (será populada ao carregar dados)
     let listaCredoresUnicos = [];
     let listaDespesasUnicas = [];
-    
+    let listaCnpjsCpfsUnicos = [];
+    let listaNumEmpenhosUnicos = [];
+    let listaDetalhamentosUnicos = [];
+
     // Função para filtrar credores conforme digitação
     function filtrarCredores(termo) {
       const datalist = document.getElementById('listaCredores');
       const input = document.getElementById('filtroCredor');
       datalist.innerHTML = '';
-      
+
       // Só mostra sugestões com 2+ caracteres
       if (termo.length < 2) {
         input.removeAttribute('list');
         return;
       }
-      
+
       input.setAttribute('list', 'listaCredores');
       const termoLower = termo.toLowerCase();
       const matches = listaCredoresUnicos.filter(c => c.toLowerCase().includes(termoLower)).slice(0, 15);
-      
+
       matches.forEach(c => {
         const opt = document.createElement('option');
         opt.value = c;
         datalist.appendChild(opt);
       });
     }
-    
+
     // Função para filtrar despesas conforme digitação
+
+    function filtrarCnpjCpf(termo) {
+      const datalist = document.getElementById('listaCnpjsCpfs');
+      const input = document.getElementById('filtroCnpjCpf');
+      datalist.innerHTML = '';
+      if (termo.length < 2) { input.removeAttribute('list'); return; }
+      input.setAttribute('list', 'listaCnpjsCpfs');
+      const termoDigits = termo.replace(/\D/g, '');
+      const matches = listaCnpjsCpfsUnicos.filter(c => c.toLowerCase().includes(termo.toLowerCase()) || c.replace(/\D/g, '').includes(termoDigits)).slice(0, 15);
+      matches.forEach(c => { const opt = document.createElement('option'); opt.value = c; datalist.appendChild(opt); });
+    }
+
+    function filtrarEmpenhos(termo) {
+      const datalist = document.getElementById('listaNumEmpenhos');
+      const input = document.getElementById('filtroNumero');
+      datalist.innerHTML = '';
+      if (termo.length < 2) { input.removeAttribute('list'); return; }
+      input.setAttribute('list', 'listaNumEmpenhos');
+      const termoLower = termo.toLowerCase();
+      const matches = listaNumEmpenhosUnicos.filter(n => n.toLowerCase().includes(termoLower)).slice(0, 15);
+      matches.forEach(n => { const opt = document.createElement('option'); opt.value = n; datalist.appendChild(opt); });
+    }
+
     function filtrarDespesas(termo) {
       const datalist = document.getElementById('listaDespesas');
       const input = document.getElementById('filtroDespesa');
       datalist.innerHTML = '';
-      
-      // Só mostra sugestões com 2+ caracteres
-      if (termo.length < 2) {
-        input.removeAttribute('list');
-        return;
-      }
-      
+      if (termo.length < 2) { input.removeAttribute('list'); return; }
       input.setAttribute('list', 'listaDespesas');
       const termoLower = termo.toLowerCase();
       const matches = listaDespesasUnicas.filter(d => d.toLowerCase().includes(termoLower)).slice(0, 15);
-      
-      matches.forEach(d => {
-        const opt = document.createElement('option');
-        opt.value = d;
-        datalist.appendChild(opt);
-      });
+      matches.forEach(d => { const opt = document.createElement('option'); opt.value = d; datalist.appendChild(opt); });
     }
-    
+
+    function filtrarDetalhamentos(termo) {
+      const datalist = document.getElementById('listaDetalhamentos');
+      const input = document.getElementById('filtroDetalhamento');
+      datalist.innerHTML = '';
+      if (termo.length < 2) { input.removeAttribute('list'); return; }
+      input.setAttribute('list', 'listaDetalhamentos');
+      const termoLower = termo.toLowerCase();
+      const matches = listaDetalhamentosUnicos.filter(v => v.toLowerCase().includes(termoLower)).slice(0, 15);
+      matches.forEach(v => { const opt = document.createElement('option'); opt.value = v; datalist.appendChild(opt); });
+    }
+
     // Variáveis de paginação
     let paginaAtual = 1;
     let dadosFiltradosGlobal = [];
@@ -642,18 +796,18 @@
       }
       const mediaValor = dados.length > 0 ? totalValor / dados.length : 0;
       atualizarEstatisticas(totalValor, dados.length, mediaValor, maiorValor);
-      
+
       // Renderizar resumo agrupado
       renderizarResumo();
-      
+
       // Renderizar detalhado paginado
       paginaAtual = 1;
       renderizarDetalhado();
-      
+
       // Renderizar gráficos
       renderizarGraficos();
     }
-    
+
     // Função para extrair mês de uma data
     function extrairMes(dataStr) {
       if (!dataStr || dataStr === '-') return null;
@@ -667,15 +821,15 @@
       if (str.includes('-') && !str.includes('/')) return str.substring(5, 7);
       return null;
     }
-    
+
     // Função para renderizar gráficos
     function renderizarGraficos() {
       const dados = dadosFiltradosGlobal;
       if (dados.length === 0) return;
-      
+
       // Pegar agrupamento selecionado
       const agrupamento = document.getElementById('agrupamentoGrafico')?.value || 'Unidade orçamentária';
-      
+
       // Gráfico: Top 30 por Agrupamento
       const porAgrupamento = {};
       dados.forEach(d => {
@@ -683,11 +837,11 @@
         const valor = parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0;
         porAgrupamento[chave] = (porAgrupamento[chave] || 0) + valor;
       });
-      
+
       const top30 = Object.entries(porAgrupamento)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 30);
-      
+
       if (charts.unidades) charts.unidades.destroy();
       charts.unidades = new Chart(document.getElementById('chartUnidades'), {
         type: 'bar',
@@ -705,85 +859,95 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
-          scales: { x: { ticks: { callback: v => formatarMoedaCompacta(v) } } }
+          scales: { x: { ticks: { callback: v => formatarMoedaCompacta(v) }, grid: { display: false } }, y: { grid: { display: false } } }
         }
       });
-      
-      // Gráfico: Evolução Mensal (com suporte a múltiplos anos)
+
+      // Gráfico: Evolução Mensal aprimorada (3.2)
       const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-      
-      // Extrair mês/ano de cada registro e agrupar
+
+      // Agrupar por mês/ano
       const porMesAno = {};
       dados.forEach(d => {
         const mes = extrairMes(getValor(d, 'Data'));
         const ano = extrairAno(getValor(d, 'Data'));
         if (mes && ano) {
-          const chave = `${ano}-${mes}`; // formato para ordenação
+          const chave = `${ano}-${mes}`;
           const valor = parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0;
           porMesAno[chave] = (porMesAno[chave] || 0) + valor;
         }
       });
-      
-      // Ordenar cronologicamente
-      const chavesOrdenadas = Object.keys(porMesAno).sort();
-      
-      // Criar labels com mês/ano (ex: "Jan/24")
-      const labelsMensais = chavesOrdenadas.map(chave => {
-        const [ano, mes] = chave.split('-');
-        const nomeMes = nomesMeses[parseInt(mes) - 1];
-        return `${nomeMes}/${ano.substring(2)}`;
-      });
-      
-      const valoresMensais = chavesOrdenadas.map(chave => porMesAno[chave]);
-      
+
+      // Detectar ano selecionado no filtro ou o mais recente
+      const filtroAno = document.getElementById('filtroExercicio').value;
+      const anosPresentes = [...new Set(Object.keys(porMesAno).map(k => k.split('-')[0]))].sort().reverse();
+      const anoAtual = filtroAno || anosPresentes[0] || new Date().getFullYear().toString();
+      const anoAnterior = String(parseInt(anoAtual) - 1);
+
+      // Dados mensais por ano
+      const valoresAnoAtual = nomesMeses.map((_, i) => porMesAno[`${anoAtual}-${(i + 1).toString().padStart(2, '0')}`] || 0);
+      const valoresAnoAnterior = nomesMeses.map((_, i) => porMesAno[`${anoAnterior}-${(i + 1).toString().padStart(2, '0')}`] || 0);
+
+      // Acumulado no ano
+      let acum = 0;
+      const acumulado = valoresAnoAtual.map(v => { acum += v; return acum; });
+
+      // Média mensal
+      const mesesComValor = valoresAnoAtual.filter(v => v > 0);
+      const media = mesesComValor.length > 0 ? mesesComValor.reduce((a, b) => a + b, 0) / mesesComValor.length : 0;
+
       if (charts.mensal) charts.mensal.destroy();
       charts.mensal = new Chart(document.getElementById('chartMensal'), {
-        type: 'line',
+        type: 'bar',
         data: {
-          labels: labelsMensais,
-          datasets: [{
-            label: 'Valor Empenhado',
-            data: valoresMensais,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59,130,246,0.1)',
-            fill: true,
-            tension: 0.3
-          }]
+          labels: nomesMeses,
+          datasets: [
+            { type: 'bar', label: `${anoAtual}`, data: valoresAnoAtual, backgroundColor: '#3b82f680', borderColor: '#3b82f6', borderWidth: 1, borderRadius: 4, yAxisID: 'y' },
+            { type: 'bar', label: `${anoAnterior}`, data: valoresAnoAnterior, backgroundColor: '#94a3b840', borderColor: '#94a3b8', borderWidth: 1, borderRadius: 4, yAxisID: 'y' },
+            { type: 'line', label: 'Acumulado ' + anoAtual, data: acumulado, borderColor: '#8b5cf6', borderWidth: 2, tension: 0.3, pointRadius: 3, fill: false, yAxisID: 'y1' },
+            { type: 'line', label: 'Média Mensal', data: Array(12).fill(media), borderColor: '#f59e0b', borderDash: [5, 5], borderWidth: 1.5, pointRadius: 0, fill: false, yAxisID: 'y' }
+          ]
         },
         options: {
+          layout: { padding: { bottom: 32 } },
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { ticks: { callback: v => formatarMoedaCompacta(v) } } }
-        }
+          plugins: { legend: { position: 'top', labels: { font: { size: 11 } } } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { ticks: { callback: v => formatarMoedaCompacta(v) }, grid: { display: false } },
+            y1: { position: 'right', display: false, grid: { drawOnChartArea: false } }
+          }
+        },
+        plugins: [pluginVariacaoPercentual]
       });
     }
-    
+
     // Função para renderizar RESUMO com agrupamento
     function renderizarResumo() {
       const dados = dadosFiltradosGlobal;
       const tbody = document.getElementById('tabelaDados');
       const colunaAgrupamento = document.getElementById('colunaAgrupamento').value;
-      
+
       // Atualizar cabeçalho da tabela
       document.getElementById('thAgrupamento').textContent = colunaAgrupamento;
-      
+
       tbody.innerHTML = '';
-      
+
       if (dados.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #64748b;"><i class="fas fa-search" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>Nenhum registro encontrado.</td></tr>';
         document.getElementById('totalAgrupamentos').textContent = '';
         return;
       }
-      
+
       // Agrupar dados pela coluna selecionada
       const agrupado = {};
       let totalGeral = 0;
-      
+
       dados.forEach(item => {
         const chave = getValor(item, colunaAgrupamento) || 'Não informado';
         const valor = parseFloat(getValor(item, 'Valor (R$)', 'Valor')) || 0;
-        
+
         if (!agrupado[chave]) {
           agrupado[chave] = { quantidade: 0, valor: 0 };
         }
@@ -791,12 +955,12 @@
         agrupado[chave].valor += valor;
         totalGeral += valor;
       });
-      
+
       // Converter para array e ordenar por valor (maior primeiro)
       const gruposOrdenados = Object.entries(agrupado)
         .map(([nome, dados]) => ({ nome, ...dados }))
         .sort((a, b) => b.valor - a.valor);
-      
+
       // Atualizar dados do resumo para exportação
       dadosResumoGlobal = gruposOrdenados.map(grupo => ({
         'Agrupamento': grupo.nome,
@@ -804,11 +968,31 @@
         'Valor Total': grupo.valor,
         '% do Total': totalGeral > 0 ? ((grupo.valor / totalGeral * 100).toFixed(2) + '%') : '0%'
       }));
-      
-      // Renderizar linhas
+
+      // Calcular valores do ano anterior para comparação (3.3)
+      const anoSelecionado = document.getElementById('filtroExercicio').value;
+      const anoAnteriorRes = anoSelecionado ? String(parseInt(anoSelecionado) - 1) : '';
+      const dadosAnoAnterior = {};
+      if (anoAnteriorRes) {
+        todosOsDados.filter(d => extrairAno(getValor(d, 'Data')) === anoAnteriorRes).forEach(item => {
+          const chave = getValor(item, colunaAgrupamento) || 'Não informado';
+          const valor = parseFloat(getValor(item, 'Valor (R$)', 'Valor')) || 0;
+          if (!dadosAnoAnterior[chave]) dadosAnoAnterior[chave] = 0;
+          dadosAnoAnterior[chave] += valor;
+        });
+      }
+
+      // Renderizar linhas com variação e drill-down (3.3)
       gruposOrdenados.forEach(grupo => {
         const percentual = totalGeral > 0 ? (grupo.valor / totalGeral * 100) : 0;
+        const valorAnterior = dadosAnoAnterior[grupo.nome] || 0;
+        const temComparacao = valorAnterior > 0;
+        const variacao = temComparacao ? ((grupo.valor - valorAnterior) / valorAnterior * 100) : 0;
+        const varIcon = variacao > 0 ? 'fa-arrow-up' : variacao < 0 ? 'fa-arrow-down' : 'fa-minus';
+        const varColor = variacao > 0 ? '#ef4444' : variacao < 0 ? '#2D9846' : '#64748b';
         const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.onclick = function () { drillDownResumo(colunaAgrupamento, grupo.nome); };
         tr.innerHTML = `
           <td title="${grupo.nome}" style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${grupo.nome}</td>
           <td style="text-align: center;"><span class="badge badge-info">${grupo.quantidade.toLocaleString()}</span></td>
@@ -819,12 +1003,13 @@
                 <div style="width: ${Math.min(percentual, 100)}%; height: 100%; background: #3b82f6;"></div>
               </div>
               <span>${percentual.toFixed(1)}%</span>
+              ${temComparacao ? `<span style="display: inline-flex; align-items: center; gap: 2px; font-size: 11px; color: ${varColor};" title="Variação vs ${anoAnteriorRes}"><i class="fas ${varIcon}" style="font-size: 9px;"></i>${Math.abs(variacao).toFixed(0)}%</span>` : ''}
             </div>
           </td>
         `;
         tbody.appendChild(tr);
       });
-      
+
       // Linha de total
       const trTotal = document.createElement('tr');
       trTotal.className = 'total-row';
@@ -835,10 +1020,10 @@
         <td style="text-align: right;"><strong>100%</strong></td>
       `;
       tbody.appendChild(trTotal);
-      
+
       document.getElementById('totalAgrupamentos').textContent = `${gruposOrdenados.length} grupo(s) encontrado(s)`;
     }
-    
+
     // Função para renderizar DETALHADO com paginação
     function renderizarDetalhado() {
       const dados = dadosFiltradosGlobal;
@@ -893,14 +1078,14 @@
       document.getElementById('paginacaoInfo').textContent = `Exibindo ${inicio + 1}-${fim} de ${dados.length.toLocaleString()} | Total página: ${formatarMoeda(totalPag)}`;
       renderizarControlesPaginacao(totalPaginas);
     }
-    
+
     // Função para renderizar controles de paginação
     function renderizarControlesPaginacao(totalPaginas) {
       const container = document.getElementById('paginacaoControles');
       container.innerHTML = '';
-      
+
       if (totalPaginas <= 1) return;
-      
+
       // Botão Primeira
       const btnPrimeira = document.createElement('button');
       btnPrimeira.className = 'btn btn-secondary btn-sm';
@@ -908,7 +1093,7 @@
       btnPrimeira.disabled = paginaAtual === 1;
       btnPrimeira.onclick = () => mudarPagina(1);
       container.appendChild(btnPrimeira);
-      
+
       // Botão Anterior
       const btnAnterior = document.createElement('button');
       btnAnterior.className = 'btn btn-secondary btn-sm';
@@ -916,14 +1101,14 @@
       btnAnterior.disabled = paginaAtual === 1;
       btnAnterior.onclick = () => mudarPagina(paginaAtual - 1);
       container.appendChild(btnAnterior);
-      
+
       // Páginas
       const paginasVisiveis = [];
       const maxPaginas = 5;
       let inicioP = Math.max(1, paginaAtual - Math.floor(maxPaginas / 2));
       let fimP = Math.min(totalPaginas, inicioP + maxPaginas - 1);
       if (fimP - inicioP < maxPaginas - 1) inicioP = Math.max(1, fimP - maxPaginas + 1);
-      
+
       for (let i = inicioP; i <= fimP; i++) {
         const btn = document.createElement('button');
         btn.className = `btn btn-sm ${i === paginaAtual ? 'btn-primary' : 'btn-secondary'}`;
@@ -931,7 +1116,7 @@
         btn.onclick = () => mudarPagina(i);
         container.appendChild(btn);
       }
-      
+
       // Botão Próximo
       const btnProximo = document.createElement('button');
       btnProximo.className = 'btn btn-secondary btn-sm';
@@ -939,7 +1124,7 @@
       btnProximo.disabled = paginaAtual === totalPaginas;
       btnProximo.onclick = () => mudarPagina(paginaAtual + 1);
       container.appendChild(btnProximo);
-      
+
       // Botão Última
       const btnUltima = document.createElement('button');
       btnUltima.className = 'btn btn-secondary btn-sm';
@@ -947,7 +1132,7 @@
       btnUltima.disabled = paginaAtual === totalPaginas;
       btnUltima.onclick = () => mudarPagina(totalPaginas);
       container.appendChild(btnUltima);
-      
+
       // Ir para página
       const spanIr = document.createElement('span');
       spanIr.style.marginLeft = '16px';
@@ -956,13 +1141,13 @@
         onchange="mudarPagina(Math.min(Math.max(1, this.value), ${totalPaginas}))"> de ${totalPaginas}`;
       container.appendChild(spanIr);
     }
-    
+
     // Função para mudar página
     function mudarPagina(novaPagina) {
       paginaAtual = novaPagina;
       renderizarDetalhado();
     }
-    
+
     function atualizarEstatisticas(total, qtd, media, maior) {
       const kpiTotal = document.getElementById('kpiTotal');
       if (kpiTotal) { kpiTotal.textContent = formatarMoedaCompacta(total); kpiTotal.title = formatarMoeda(total); }
@@ -974,7 +1159,7 @@
       if (kpiMaior) { kpiMaior.textContent = formatarMoedaCompacta(maior); kpiMaior.title = formatarMoeda(maior); }
       atualizarDataUltimaImportacao();
     }
-    
+
     // Função de busca/filtro
     function buscarDados() {
       const filtroExercicio = document.getElementById('filtroExercicio').value;
@@ -997,111 +1182,111 @@
       const filtroPrograma = document.getElementById('filtroPrograma').value;
       const filtroDetalhamento = document.getElementById('filtroDetalhamento').value.toLowerCase().trim();
       const filtroUnidadeGestora = document.getElementById('filtroUnidadeGestora').value;
-      
+
       let dadosFiltrados = todosOsDados.filter(item => {
         // Filtro por exercício (ano)
         if (filtroExercicio) {
           const ano = extrairAno(getValor(item, 'Data'));
           if (ano !== filtroExercicio) return false;
         }
-        
+
         // Filtro por número do empenho
         if (filtroNumero) {
           const numero = String(getValor(item, 'Nr emp.', 'Nr Emp.'));
           if (!numero.includes(filtroNumero)) return false;
         }
-        
+
         // Filtro por credor
         if (filtroCredor) {
           const credor = String(getValor(item, 'Credor/Fornecedor')).toLowerCase();
           if (!credor.includes(filtroCredor)) return false;
         }
-        
+
         // Filtro por CNPJ/CPF
         if (filtroCnpjCpf) {
           const cnpjcpf = String(getValor(item, 'CNPJ/CPF', 'CNPJ', 'CPF', 'CNPJ&CPF')).replace(/\D/g, '');
           const filtroLimpo = filtroCnpjCpf.replace(/\D/g, '');
           if (!cnpjcpf.includes(filtroLimpo)) return false;
         }
-        
+
         // Filtro por município
         if (filtroMunicipio) {
           const municipio = getValor(item, 'Município');
           if (municipio !== filtroMunicipio) return false;
         }
-        
+
         // Filtro por espécie
         if (filtroEspecie) {
           const especie = getValor(item, 'Espécie');
           if (especie !== filtroEspecie) return false;
         }
-        
+
         // Filtro por tipo
         if (filtroTipo) {
           const tipo = getValor(item, 'Tipo');
           if (tipo !== filtroTipo) return false;
         }
-        
+
         // Filtro por unidade gestora
         if (filtroUnidadeGestora) {
           const unidadeGestora = getValor(item, 'Unidade gestora', 'Unidade Gestora');
           if (unidadeGestora !== filtroUnidadeGestora) return false;
         }
-        
+
         // Filtro por unidade orçamentária
         if (filtroUnidade) {
           const unidade = getValor(item, 'Unidade orçamentária', 'Unidade Orçamentária');
           if (unidade !== filtroUnidade) return false;
         }
-        
+
         // Filtro por fonte de recursos
         if (filtroFonte) {
           const fonte = getValor(item, 'Fonte de recursos', 'Fonte de Recursos');
           if (fonte !== filtroFonte) return false;
         }
-        
+
         // Filtro por ação
         if (filtroAcao) {
           const acao = getValor(item, 'Ação');
           if (acao !== filtroAcao) return false;
         }
-        
+
         // Filtro por natureza da despesa
         if (filtroNatureza) {
           const natureza = getValor(item, 'Natureza da Despesa', 'Natureza Despesa');
           if (natureza !== filtroNatureza) return false;
         }
-        
+
         // Filtro por função
         if (filtroFuncao) {
           const funcao = getValor(item, 'Função');
           if (funcao !== filtroFuncao) return false;
         }
-        
+
         // Filtro por subfunção
         if (filtroSubFuncao) {
           const subfuncao = getValor(item, 'SubFunção', 'Subfunção');
           if (subfuncao !== filtroSubFuncao) return false;
         }
-        
+
         // Filtro por programa
         if (filtroPrograma) {
           const programa = getValor(item, 'Programa');
           if (programa !== filtroPrograma) return false;
         }
-        
+
         // Filtro por detalhamento
         if (filtroDetalhamento) {
           const detalhamento = String(getValor(item, 'Detalhamento despesa', 'Detalhamento')).toLowerCase();
           if (!detalhamento.includes(filtroDetalhamento)) return false;
         }
-        
+
         // Filtro por despesa
         if (filtroDespesa) {
           const despesa = String(getValor(item, 'Despesa')).toLowerCase();
           if (!despesa.includes(filtroDespesa)) return false;
         }
-        
+
         // Filtro por data
         if (filtroDataInicio || filtroDataFim) {
           const dataItem = parseData(getValor(item, 'Data'));
@@ -1110,13 +1295,13 @@
             if (filtroDataFim && dataItem > new Date(filtroDataFim)) return false;
           }
         }
-        
+
         return true;
       });
-      
+
       renderizarDados(dadosFiltrados);
     }
-    
+
     // Função para limpar filtros
     function limparFiltros() {
       document.getElementById('filtroExercicio').value = '';
@@ -1141,18 +1326,18 @@
       document.getElementById('filtroDetalhamento').value = '';
       renderizarDados(todosOsDados);
     }
-    
+
     // Carregar dados ao iniciar
-    document.addEventListener('DOMContentLoaded', async function() {
+    document.addEventListener('DOMContentLoaded', async function () {
       try {
         // Carregar dados do IndexedDB
-        todosOsDados = await carregarDadosPortal(STORE_NAME);
+        todosOsDados = await carregarDadosComCache(STORE_NAME);
         console.log(`Carregados ${todosOsDados.length} registros de ${STORE_NAME}`);
       } catch (e) {
         console.error('Erro ao carregar dados:', e);
         todosOsDados = [];
       }
-      
+
       // Verificar se há dados
       if (todosOsDados.length === 0) {
         // Ocultar demonstrativo e mostrar mensagem
@@ -1163,7 +1348,7 @@
         atualizarDataUltimaImportacao();
         return;
       }
-      
+
       // Mostrar demonstrativo
       document.getElementById('cardDemonstrativo').style.display = 'block';
       document.getElementById('semDadosMsg').style.display = 'none';
@@ -1171,9 +1356,12 @@
       popularFiltros();
       listaCredoresUnicos = [...new Set(todosOsDados.map(d => getValor(d, 'Credor/Fornecedor')).filter(v => v !== '-'))].sort();
       listaDespesasUnicas = [...new Set(todosOsDados.map(d => getValor(d, 'Despesa')).filter(v => v !== '-' && v !== ''))].sort();
+      listaCnpjsCpfsUnicos = [...new Set(todosOsDados.map(d => getValor(d, 'CNPJ/CPF', 'CNPJ', 'CPF', 'CNPJ&CPF', 'CNPJ/CPF do Credor')).filter(v => v && v !== '-'))].sort();
+      listaNumEmpenhosUnicos = [...new Set(todosOsDados.map(d => String(getValor(d, 'Nr emp.', 'Nr Emp.'))).filter(v => v && v !== '-' && v !== 'null' && v !== 'undefined'))].sort();
+      listaDetalhamentosUnicos = [...new Set(todosOsDados.map(d => String(getValor(d, 'Detalhamento despesa', 'Detalhamento', 'Detalhamento Despesa'))).filter(v => v && v !== '-' && v !== 'null' && v !== 'undefined'))].sort();
       renderizarDados(todosOsDados);
     });
-    
+
     // Dados do resumo para exportação
     let dadosResumoGlobal = [];
 
@@ -1204,7 +1392,7 @@
             colunasSelecionadas = new Set(arr.filter(c => colunasDisponiveis.includes(c)));
           }
         }
-      } catch(e) {}
+      } catch (e) { }
 
       if (colunasSelecionadas.size === 0) {
         colunasSelecionadas = new Set(COLUNAS_PADRAO.filter(c => colunasDisponiveis.includes(c)));
@@ -1230,7 +1418,7 @@
       dd.classList.toggle('show');
     }
 
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       const dd = document.getElementById('colSelectorDropdown');
       if (dd && !e.target.closest('.col-selector-wrap')) dd.classList.remove('show');
     });
@@ -1308,20 +1496,38 @@
         exportarPDF(dadosFiltradosGlobal, 'despesas-empenhados-detalhado', 'Despesas Empenhadas - Detalhado', getColunasAtivas());
       }
     }
-    
+
+    // Drill-down do Resumo: clicar no grupo filtra o detalhado (3.3)
+    function drillDownResumo(campo, valor) {
+      // Mudar para aba detalhado com filtro aplicado
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelector('.tab-btn[data-tab="detalhado"]').classList.add('active');
+      document.getElementById('detalhado').classList.add('active');
+      atualizarVisibilidadeFiltros('detalhado');
+
+      // Aplicar filtro específico
+      const selects = { 'Unidade gestora': 'filtroUnidadeGestora', 'Unidade orçamentária': 'filtroUnidade', 'Fonte de recursos': 'filtroFonte', 'Função': 'filtroFuncao', 'Espécie': 'filtroEspecie', 'Tipo': 'filtroTipo', 'Município': 'filtroMunicipio', 'Ação': 'filtroAcao', 'Natureza da Despesa': 'filtroNatureza', 'SubFunção': 'filtroSubFuncao', 'Programa': 'filtroPrograma' };
+      const selectId = selects[campo];
+      if (selectId) { const el = document.getElementById(selectId); if (el) el.value = valor; }
+      else if (campo === 'Credor/Fornecedor') { document.getElementById('filtroCredor').value = valor; }
+      buscarDados();
+    }
+
+    // Controlar visibilidade dos filtros e KPIs por aba
     // Controlar visibilidade dos filtros e KPIs por aba
     function atualizarVisibilidadeFiltros(tabId) {
       const filtrosSection = document.getElementById('filtrosSection');
       const kpisSection = document.getElementById('kpisSection');
       const mostrar = tabId !== 'resumo';
-      if (filtrosSection) filtrosSection.style.display = mostrar ? 'block' : 'none';
+      if (filtrosSection) filtrosSection.style.display = 'block';
       if (kpisSection) kpisSection.style.display = mostrar ? 'grid' : 'none';
     }
-    
+
     // Sobrescrever comportamento das tabs para controlar filtros
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
           const tabId = this.getAttribute('data-tab');
           document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
           document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -1334,7 +1540,51 @@
           }
         });
       });
+      atualizarVisibilidadeFiltros('resumo');
     });
+
+
+    // Função para alternar tela cheia
+    function toggleFullscreen(containerId) {
+      const container = document.getElementById(containerId);
+      const btn = container.querySelector('.btn-fullscreen i');
+
+      if (!container.classList.contains('fullscreen-mode')) {
+        container.classList.add('fullscreen-mode');
+        btn.classList.remove('fa-expand');
+        btn.classList.add('fa-compress');
+
+        // Redimensionar gráfico após entrar em tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      } else {
+        container.classList.remove('fullscreen-mode');
+        btn.classList.remove('fa-compress');
+        btn.classList.add('fa-expand');
+
+        // Redimensionar gráfico após sair de tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      }
+
+      // Fechar tela cheia com ESC
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && container.classList.contains('fullscreen-mode')) {
+          toggleFullscreen(containerId);
+        }
+      });
+    }
   </script>
 </body>
+
 </html>

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Teste automatizado das transformações JS vs Python
  * Roda no Node.js, compara célula a célula com os resultados Python
  *
@@ -290,3 +290,4 @@ for (const [ch, ok] of Object.entries(resultados)) {
 }
 console.log(`${'='.repeat(60)}`);
 process.exit(allOk ? 0 : 1);
+

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Transformação: Empenhos a Pagar
  * Port de "Empenhos a pagar.py"
  *
@@ -20,7 +20,7 @@ function transformarAPagar(workbook) {
   const header = matrix[0];
 
   // Pre-Step: Detectar Unidade gestora e anotar em cada linha ANTES de qualquer filtro
-  // Busca "Unidade gestora:" em QUALQUER coluna da linha → nome da unidade em outra célula da mesma linha
+  // Busca "Unidade gestora:" em QUALQUER coluna da linha â†’ nome da unidade em outra célula da mesma linha
   {
     let unidadeAtual = null;
     for (let r = 1; r < matrix.length; r++) {
@@ -111,7 +111,7 @@ function transformarAPagar(workbook) {
     }
   }
 
-  // 7) Nr emp. → adicionar /ANO extraído da coluna Data (ex: 235 → 235/2025)
+  // 7) Nr emp. â†’ adicionar /ANO extraído da coluna Data (ex: 235 â†’ 235/2025)
   {
     const colNrEmp = findColumn(newHeader, 'nr emp');
     console.log('[A Pagar] Nr emp. col=' + colNrEmp + ', Data col=' + colDataFmt +
@@ -120,7 +120,7 @@ function transformarAPagar(workbook) {
     console.log('[A Pagar] Após formatNrEmpComAno: Nr emp.=[' + safeGet(filtered, 1, colNrEmp) + ']');
   }
 
-  // 8) Renomear "Av. liquid." → "Seq. Liq." para padronização
+  // 8) Renomear "Av. liquid." â†’ "Seq. Liq." para padronização
   {
     const colAvLiq = findColumn(filtered[0], 'Av. liquid');
     if (colAvLiq >= 0) filtered[0][colAvLiq] = 'Seq. Liq.';
@@ -152,3 +152,4 @@ function transformarAPagar(workbook) {
     }
   };
 }
+

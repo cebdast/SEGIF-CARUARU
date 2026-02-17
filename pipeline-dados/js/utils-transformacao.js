@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Utilitários compartilhados para transformação de dados SIGEF
  * Dependência: SheetJS (XLSX) deve estar carregado globalmente
  */
@@ -215,6 +215,70 @@ function findColumnExact(header, name) {
 }
 
 // =========================================================
+// Detectar linha de cabeçalho
+// =========================================================
+
+/**
+ * Procura a linha que contém os nomes das colunas reais,
+ * pulando linhas de título/cabeçalho extras.
+ *
+ * @param {Array[]} matrix - Matriz de dados
+ * @param {string[]} expectedColumns - Colunas esperadas (opcional)
+ * @returns {number} Índice da linha de cabeçalho (0-based)
+ */
+function detectHeaderRow(matrix, expectedColumns = null) {
+  if (!matrix || matrix.length === 0) return 0;
+
+  // Colunas comuns em planilhas SIGEF
+  const commonColumns = expectedColumns || [
+    'Data', 'Valor', 'Empenho', 'Credor', 'CPF/CNPJ', 'CNPJ/CPF',
+    'Unidade Gestora', 'Unidade Orçamentária', 'Detalhamento',
+    'Valor (R$)', 'Valor(R$)', 'Nr Empenho', 'Nº Empenho',
+    'Data de Emissão', 'Data Emissão', 'Data do Empenho'
+  ];
+
+  // Procura nas primeiras 10 linhas
+  const maxLinesToCheck = Math.min(10, matrix.length);
+
+  for (let rowIdx = 0; rowIdx < maxLinesToCheck; rowIdx++) {
+    const row = matrix[rowIdx] || [];
+
+    // Conta quantas colunas conhecidas existem nesta linha
+    let matchCount = 0;
+    let totalNonEmpty = 0;
+
+    for (let colIdx = 0; colIdx < row.length; colIdx++) {
+      const cell = row[colIdx];
+
+      if (cell !== null && cell !== undefined && String(cell).trim() !== '') {
+        totalNonEmpty++;
+
+        const cellStr = String(cell).trim();
+
+        // Verifica se é uma coluna conhecida (case-insensitive)
+        for (const expectedCol of commonColumns) {
+          if (cellStr.toLowerCase().includes(expectedCol.toLowerCase()) ||
+              expectedCol.toLowerCase().includes(cellStr.toLowerCase())) {
+            matchCount++;
+            break;
+          }
+        }
+      }
+    }
+
+    // Se encontrou pelo menos 3 colunas conhecidas, ou
+    // se tem pelo menos 5 células não-vazias (provável header)
+    if (matchCount >= 3 || (totalNonEmpty >= 5 && rowIdx > 0)) {
+      console.log(`[DetectHeader] Cabeçalho detectado na linha ${rowIdx} (${matchCount} colunas conhecidas, ${totalNonEmpty} não-vazias)`);
+      return rowIdx;
+    }
+  }
+
+  // Se não encontrou, assume que é a primeira linha
+  console.warn('[DetectHeader] Cabeçalho não detectado, usando linha 0');
+  return 0;
+}
+
 // ColTracker — rastreador de colunas por nome
 // =========================================================
 
@@ -223,7 +287,8 @@ function findColumnExact(header, name) {
  * Atualiza-se automaticamente em inserções/deleções.
  *
  * Uso:
- *   const ct = createColTracker(matrix[0]);
+ *   const headerRowIdx = detectHeaderRow(matrix);
+ *   const ct = createColTracker(matrix[headerRowIdx]);
  *   ct.idx('Data')            // retorna índice atual
  *   ct.insert(3, 'NewCol')    // insere e atualiza mapping
  *   ct.remove('Espécie')      // remove por nome
@@ -369,12 +434,12 @@ function keepColumns(matrix, headerRow, keepNames) {
 }
 
 // =========================================================
-// Nr emp. + Ano: formata "235" → "235/2025" usando a coluna Data
+// Nr emp. + Ano: formata "235" â†’ "235/2025" usando a coluna Data
 // =========================================================
 
 /**
  * Formata "Nr emp." adicionando o ano extraído da coluna "Data".
- * Ex: "235" com Data "15/01/2025" → "235/2025"
+ * Ex: "235" com Data "15/01/2025" â†’ "235/2025"
  * Não altera valores que já contenham "/YYYY".
  *
  * @param {Array[]} matrix
@@ -423,3 +488,4 @@ if (typeof window !== 'undefined') {
     trackedInsertCol, keepColumns, formatNrEmpComAno
   };
 }
+

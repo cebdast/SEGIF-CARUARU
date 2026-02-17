@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +9,106 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="css/portal-transparencia.css">
+  <script src="js/auth-check.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .btn-fullscreen {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .btn-fullscreen:hover {
+      background: #f1f5f9;
+      color: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .btn-fullscreen i {
+      font-size: 14px;
+    }
+
+    /* Estilos para modo tela cheia */
+    .fullscreen-mode {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+      background: white !important;
+      padding: 20px !important;
+      margin: 0 !important;
+      max-width: none !important;
+      overflow: auto !important;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .fullscreen-mode>div:last-child {
+      flex: 1;
+      height: auto !important;
+      max-width: none !important;
+    }
+  </style>
+  <script src="js/chart-variacao-plugin.js"></script>
+  <style>
+    .btn-fullscreen {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-fullscreen:hover {
+      background: #f1f5f9;
+      color: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .btn-fullscreen i {
+      font-size: 14px;
+    }
+
+    /* Estilos para modo tela cheia */
+    .fullscreen-mode {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+      background: white !important;
+      padding: 20px !important;
+      margin: 0 !important;
+      max-width: none !important;
+      overflow: auto !important;
+    }
+
+    .fullscreen-mode>div:last-child {
+      height: calc(100vh - 100px) !important;
+      max-width: none !important;
+    }
+  </style>
 </head>
+
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -23,18 +120,34 @@
     </div>
     <nav class="sidebar-menu">
       <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)"><i class="fas fa-tachometer-alt"></i><span>Visão
+            Geral</span><i class="fas fa-chevron-right section-arrow"></i></div>
+        <ul>
+          <li class="menu-item"><a href="dashboard.html" class="menu-link"><i class="fas fa-home"></i><span>Dashboard
+                Executivo</span></a></li>
+          <li class="menu-item"><a href="resultado-orcamentario.html" class="menu-link"><i
+                class="fas fa-chart-pie"></i><span>Resultado Orçamentário</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
         <div class="menu-section-title" onclick="toggleSection(this)">
           <i class="fas fa-hand-holding-usd"></i>
           <span>Receitas</span>
           <i class="fas fa-chevron-right section-arrow"></i>
         </div>
         <ul>
-          <li class="menu-item"><a href="receitas-previsao.html" class="menu-link"><i class="fas fa-chart-line"></i><span>Previsão</span></a></li>
-          <li class="menu-item"><a href="receitas-arrecadacao.html" class="menu-link"><i class="fas fa-money-bill-wave"></i><span>Arrecadação</span></a></li>
-          <li class="menu-item"><a href="receitas-retencoes.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retenções</span></a></li>
-          <li class="menu-item"><a href="receitas-deducoes.html" class="menu-link"><i class="fas fa-minus-circle"></i><span>Deduções</span></a></li>
-          <li class="menu-item"><a href="receitas-gerencial.html" class="menu-link"><i class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
-          <li class="menu-item"><a href="receitas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+          <li class="menu-item"><a href="receitas-previsao.html" class="menu-link"><i
+                class="fas fa-chart-line"></i><span>Previsão</span></a></li>
+          <li class="menu-item"><a href="receitas-arrecadacao.html" class="menu-link"><i
+                class="fas fa-money-bill-wave"></i><span>Arrecadação</span></a></li>
+          <li class="menu-item"><a href="receitas-retencoes.html" class="menu-link"><i
+                class="fas fa-hand-holding-usd"></i><span>Retenções</span></a></li>
+          <li class="menu-item"><a href="receitas-deducoes.html" class="menu-link"><i
+                class="fas fa-minus-circle"></i><span>Deduções</span></a></li>
+          <li class="menu-item"><a href="receitas-gerencial.html" class="menu-link"><i
+                class="fas fa-tachometer-alt"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="receitas-comparativos.html" class="menu-link"><i
+                class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
         </ul>
       </div>
       <div class="menu-section expanded">
@@ -44,13 +157,43 @@
           <i class="fas fa-chevron-right section-arrow"></i>
         </div>
         <ul>
-          <li class="menu-item"><a href="despesas-empenhados.html" class="menu-link"><i class="fas fa-file-invoice"></i><span>Empenhados</span></a></li>
-          <li class="menu-item"><a href="despesas-liquidados.html" class="menu-link active"><i class="fas fa-check-circle"></i><span>Liquidados</span></a></li>
-          <li class="menu-item"><a href="despesas-retidos.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Retidos</span></a></li>
-          <li class="menu-item"><a href="despesas-pagos.html" class="menu-link"><i class="fas fa-money-check-alt"></i><span>Pagos</span></a></li>
-          <li class="menu-item"><a href="despesas-a-pagar.html" class="menu-link"><i class="fas fa-clock"></i><span>A Pagar</span></a></li>
-          <li class="menu-item"><a href="despesas-gerencial.html" class="menu-link"><i class="fas fa-chart-line"></i><span>Gerencial</span></a></li>
-          <li class="menu-item"><a href="despesas-comparativos.html" class="menu-link"><i class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+          <li class="menu-item"><a href="despesas-empenhados.html" class="menu-link"><i
+                class="fas fa-file-invoice"></i><span>Empenhados</span></a></li>
+          <li class="menu-item"><a href="despesas-liquidados.html" class="menu-link active"><i
+                class="fas fa-check-circle"></i><span>Liquidados</span></a></li>
+          <li class="menu-item"><a href="despesas-retidos.html" class="menu-link"><i
+                class="fas fa-hand-holding-usd"></i><span>Retidos</span></a></li>
+          <li class="menu-item"><a href="despesas-pagos.html" class="menu-link"><i
+                class="fas fa-money-check-alt"></i><span>Pagos</span></a></li>
+          <li class="menu-item"><a href="despesas-a-pagar.html" class="menu-link"><i class="fas fa-clock"></i><span>A
+                Pagar</span></a></li>
+          <li class="menu-item"><a href="despesas-gerencial.html" class="menu-link"><i
+                class="fas fa-chart-line"></i><span>Gerencial</span></a></li>
+          <li class="menu-item"><a href="despesas-comparativos.html" class="menu-link"><i
+                class="fas fa-balance-scale"></i><span>Comparativos</span></a></li>
+        </ul>
+      </div>
+      <div class="menu-section">
+        <div class="menu-section-title" onclick="toggleSection(this)">
+          <i class="fas fa-search-dollar"></i>
+          <span>Análises</span>
+          <i class="fas fa-chevron-right section-arrow"></i>
+        </div>
+        <ul>
+          <li class="menu-item"><a href="despesas-analise.html" class="menu-link"><i
+                class="fas fa-chart-pie"></i><span>Análise Financeira</span></a></li>
+          <li class="menu-item"><a href="despesas-execucao.html" class="menu-link"><i
+                class="fas fa-chart-bar"></i><span>Execução Orçamentária</span></a></li>
+          <li class="menu-item"><a href="despesas-fontes.html" class="menu-link"><i
+                class="fas fa-layer-group"></i><span>Fontes de Recursos</span></a></li>
+          <li class="menu-item"><a href="despesas-credores.html" class="menu-link"><i
+                class="fas fa-users"></i><span>Credores</span></a></li>
+          <li class="menu-item"><a href="despesas-natureza.html" class="menu-link"><i
+                class="fas fa-sitemap"></i><span>Natureza da Despesa</span></a></li>
+          <li class="menu-item"><a href="limites-legais.html" class="menu-link"><i
+                class="fas fa-gavel"></i><span>Limites Legais</span></a></li>
+          <li class="menu-item"><a href="despesas-alertas.html" class="menu-link"><i
+                class="fas fa-exclamation-triangle"></i><span>Alertas</span></a></li>
         </ul>
       </div>
       <div class="menu-section">
@@ -60,8 +203,12 @@
           <i class="fas fa-chevron-right section-arrow"></i>
         </div>
         <ul>
-          <li class="menu-item"><a href="banco-importar-dados.html" class="menu-link"><i class="fas fa-file-import"></i><span>Importar Dados</span></a></li>
-          <li class="menu-item"><a href="banco-historico.html" class="menu-link"><i class="fas fa-history"></i><span>Histórico</span></a></li>
+          <li class="menu-item"><a href="banco-importar-dados.html" class="menu-link"><i
+                class="fas fa-file-import"></i><span>Importar Dados</span></a></li>
+          <li class="menu-item"><a href="banco-historico.html" class="menu-link"><i
+                class="fas fa-history"></i><span>Histórico</span></a></li>
+          <li class="menu-item"><a href="admin-usuarios.html" class="menu-link"><i
+                class="fas fa-user-shield"></i><span>Usuários</span></a></li>
         </ul>
       </div>
     </nav>
@@ -93,7 +240,7 @@
     <main class="content-area">
       <div class="stats-grid" id="kpisSection" style="display: none;">
         <div class="stat-card">
-          <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-icon orange"><i class="fas fa-check-circle"></i></div>
           <div class="stat-content">
             <div class="stat-label">Total Liquidado</div>
             <div class="stat-value" id="kpiTotal" title="Carregando...">R$ 0,00</div>
@@ -132,46 +279,51 @@
           </div>
           <div class="filter-group">
             <label class="filter-label">Seq. Liquidação</label>
-            <input type="text" class="filter-input" id="filtroSeqLiq" placeholder="Nº sequência...">
+            <input type="text" class="filter-input" id="filtroSeqLiq" placeholder="Nº sequência..." autocomplete="off"
+              oninput="filtrarSeqLiq(this.value)">
+            <datalist id="listaSeqLiq"></datalist>
           </div>
           <div class="filter-group">
             <label class="filter-label">Nr Empenho</label>
-            <input type="text" class="filter-input" id="filtroNumEmp" placeholder="Ex: 12345">
+            <input type="text" class="filter-input" id="filtroNumEmp" placeholder="Ex: 12345" autocomplete="off"
+              oninput="filtrarEmpenhos(this.value)">
+            <datalist id="listaNumEmpenhos"></datalist>
           </div>
           <div class="filter-group">
             <label class="filter-label">Credor/Fornecedor</label>
-            <input type="text" class="filter-input" id="filtroCredor" placeholder="Digite 2+ letras..." autocomplete="off" oninput="filtrarCredores(this.value)">
+            <input type="text" class="filter-input" id="filtroCredor" placeholder="Digite 2+ letras..."
+              autocomplete="off" oninput="filtrarCredores(this.value)">
             <datalist id="listaCredores"></datalist>
-          </div>
-          <div class="filter-group">
-            <label class="filter-label">CNPJ/CPF</label>
-            <input type="text" class="filter-input" id="filtroCnpjCpf" placeholder="Ex: 12.345.678/0001-00">
-          </div>
-          <div class="filter-group">
-            <label class="filter-label">Município</label>
-            <select class="filter-select" id="filtroMunicipio">
-              <option value="">Todos</option>
-            </select>
           </div>
           <div class="filter-group">
             <label class="filter-label">Espécie</label>
             <select class="filter-select" id="filtroEspecie">
               <option value="">Todas</option>
+              <option value="Ordinário">Ordinário</option>
+              <option value="Global">Global</option>
+              <option value="Estimativa">Estimativa</option>
             </select>
           </div>
           <div class="filter-group">
             <label class="filter-label">Tipo</label>
             <select class="filter-select" id="filtroTipo">
               <option value="">Todos</option>
+              <option value="memo">Memo</option>
+              <option value="prestador">Prestador</option>
+              <option value="pad">PAD</option>
             </select>
           </div>
           <div class="filter-group">
-            <label class="filter-label">Unidade Gestora</label>
-            <select class="filter-select" id="filtroUnidadeGestora"><option value="">Todas</option></select>
+            <label class="filter-label">CNPJ/CPF</label>
+            <input type="text" class="filter-input" id="filtroCnpjCpf" placeholder="Digite CNPJ/CPF..."
+              autocomplete="off" oninput="filtrarCnpjCpf(this.value)">
+            <datalist id="listaCnpjsCpfs"></datalist>
           </div>
           <div class="filter-group">
-            <label class="filter-label">Unidade Orçamentária</label>
-            <select class="filter-select" id="filtroUnidade"><option value="">Todas</option></select>
+            <label class="filter-label">Município</label>
+            <select class="filter-select" id="filtroMunicipio">
+              <option value="">Todos</option>
+            </select>
           </div>
           <div class="filter-group">
             <label class="filter-label">Ação</label>
@@ -181,13 +333,15 @@
           </div>
           <div class="filter-group">
             <label class="filter-label">Natureza da Despesa</label>
-            <select class="filter-select" id="filtroNatureza">
+            <select class="filter-select" id="filtroNaturezaDespesa">
               <option value="">Todas</option>
             </select>
           </div>
           <div class="filter-group">
             <label class="filter-label">Função</label>
-            <select class="filter-select" id="filtroFuncao"><option value="">Todas</option></select>
+            <select class="filter-select" id="filtroFuncao">
+              <option value="">Todas</option>
+            </select>
           </div>
           <div class="filter-group">
             <label class="filter-label">SubFunção</label>
@@ -203,12 +357,27 @@
           </div>
           <div class="filter-group">
             <label class="filter-label">Detalhamento Despesa</label>
-            <input type="text" class="filter-input" id="filtroDetalhamento" placeholder="Digite para filtrar...">
+            <input type="text" class="filter-input" id="filtroDetalhamentoDespesa" placeholder="Digite detalhamento..."
+              autocomplete="off" oninput="filtrarDetalhamentos(this.value)">
+            <datalist id="listaDetalhamentos"></datalist>
           </div>
           <div class="filter-group">
             <label class="filter-label">Despesa</label>
-            <input type="text" class="filter-input" id="filtroDespesa" placeholder="Ex: 449..." autocomplete="off" oninput="filtrarDespesas(this.value)">
+            <input type="text" class="filter-input" id="filtroDespesa" placeholder="Ex: 449..." autocomplete="off"
+              oninput="filtrarDespesas(this.value)">
             <datalist id="listaDespesas"></datalist>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Unidade Gestora</label>
+            <select class="filter-select" id="filtroUnidadeGestora">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Unidade Orçamentária</label>
+            <select class="filter-select" id="filtroUnidade">
+              <option value="">Todas</option>
+            </select>
           </div>
           <div class="filter-group">
             <label class="filter-label">Data Início</label>
@@ -225,17 +394,20 @@
         </div>
       </div>
       <!-- Mensagem quando não há dados -->
-      <div id="semDadosMsg" style="display: none; text-align: center; padding: 60px 20px; background: #f8fafc; border-radius: 12px; margin-bottom: 24px;">
+      <div id="semDadosMsg"
+        style="display: none; text-align: center; padding: 60px 20px; background: #f8fafc; border-radius: 12px; margin-bottom: 24px;">
         <i class="fas fa-database" style="font-size: 48px; color: #cbd5e1; margin-bottom: 16px;"></i>
         <h3 style="color: #64748b; margin-bottom: 8px;">Nenhum dado encontrado</h3>
         <p style="color: #94a3b8; margin-bottom: 16px;">Não há dados de liquidações importados no sistema.</p>
-        <a href="banco-importar-dados.html" class="btn btn-primary"><i class="fas fa-file-import"></i> Importar Dados</a>
+        <a href="banco-importar-dados.html" class="btn btn-primary"><i class="fas fa-file-import"></i> Importar
+          Dados</a>
       </div>
-      
+
       <div class="card" id="cardDemonstrativo">
         <div class="card-header">
-          <h2 class="card-title"><i class="fas fa-table"></i> Demonstrativo de Liquidações de Despesas</h2>
-          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i class="fas fa-sync-alt"></i> Carregando...</span></div>
+          <h2 class="card-title"><i class="fas fa-table"></i> Demonstrativo de Liquidaçãos de Despesas</h2>
+          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i
+                class="fas fa-sync-alt"></i> Carregando...</span></div>
         </div>
         <div class="card-body">
           <div class="tabs">
@@ -246,9 +418,9 @@
           <div class="tab-content active" id="resumo">
             <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
               <label style="font-weight: 600; color: var(--text-secondary);">Agrupar por:</label>
-              <select id="colunaAgrupamento" class="filter-select" style="min-width: 200px;" onchange="renderizarResumo()">
+              <select id="colunaAgrupamento" class="filter-select" style="min-width: 200px;"
+                onchange="renderizarResumo()">
                 <option value="Unidade gestora">Unidade Gestora</option>
-                <option value="Unidade orçamentária">Unidade Orçamentária</option>
                 <option value="Função">Função</option>
                 <option value="Credor/Fornecedor">Credor/Fornecedor</option>
                 <option value="Espécie">Espécie</option>
@@ -265,7 +437,7 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th id="thAgrupamento">Unidade Orçamentária</th>
+                    <th id="thAgrupamento">Função</th>
                     <th style="text-align: center;">Qtd. Registros</th>
                     <th style="text-align: right;">Valor Total (R$)</th>
                     <th style="text-align: right;">% do Total</th>
@@ -305,14 +477,17 @@
                 <tbody id="tabelaDetalhado"></tbody>
               </table>
             </div>
-            <div id="paginacaoControles" style="margin-top: 16px; display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;"></div>
+            <div id="paginacaoControles"
+              style="margin-top: 16px; display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;">
+            </div>
           </div>
           <div class="tab-content" id="grafico">
             <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
               <label style="font-weight: 600; color: var(--text-secondary);">Agrupar por:</label>
-              <select id="agrupamentoGrafico" class="filter-select" style="min-width: 200px;" onchange="renderizarGraficos()">
+              <select id="agrupamentoGrafico" class="filter-select" style="min-width: 200px;"
+                onchange="renderizarGraficos()">
                 <option value="Unidade gestora">Unidade Gestora</option>
-                <option value="Unidade orçamentária">Unidade Orçamentária</option>
+                <option value="Unidade Orçamentária">Unidade Orçamentária</option>
                 <option value="Fonte de recursos">Fonte de Recursos</option>
                 <option value="Credor/Fornecedor">Credor/Fornecedor</option>
                 <option value="Espécie">Espécie</option>
@@ -325,18 +500,32 @@
                 <option value="Programa">Programa</option>
               </select>
             </div>
-            <div>
-              <h4 style="margin-bottom: 16px; color: var(--text-secondary);"><i class="fas fa-chart-bar"></i> Top 30 por Agrupamento</h4>
+            <div id="chartUnidadesContainer">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h4 style="margin: 0; color: var(--text-secondary);"><i class="fas fa-chart-bar"></i> Top 30 por
+                  Agrupamento</h4>
+                <button onclick="toggleFullscreen('chartUnidadesContainer')" class="btn-fullscreen" title="Tela cheia">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
               <div style="height: 500px;"><canvas id="chartUnidades"></canvas></div>
             </div>
-            <div style="margin-top: 24px;">
-              <h4 style="margin-bottom: 16px; color: var(--text-secondary);"><i class="fas fa-chart-line"></i> Evolução Mensal</h4>
-              <div style="height: 280px;"><canvas id="chartMensal"></canvas></div>
+            <div style="margin-top: 24px;" id="chartMensalContainer">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h4 style="margin: 0; color: var(--text-secondary);"><i class="fas fa-chart-line"></i> Evolução Mensal
+                  (com acumulado e comparação)</h4>
+                <button onclick="toggleFullscreen('chartMensalContainer')" class="btn-fullscreen" title="Tela cheia">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
+              <div style="height: 380px;"><canvas id="chartMensal"></canvas></div>
             </div>
           </div>
           <div class="export-section">
-            <button class="btn btn-secondary btn-sm" onclick="exportarDadosPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
-            <button class="btn btn-secondary btn-sm" onclick="exportarDadosExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosPDF()"><i class="fas fa-file-pdf"></i>
+              PDF</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosExcel()"><i class="fas fa-file-excel"></i>
+              Excel</button>
           </div>
         </div>
       </div>
@@ -352,93 +541,22 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <script src="js/portal-transparencia.js"></script>
   <script src="js/indexeddb-utils.js"></script>
+  <script src="js/renderizacao-otimizada.js"></script>
   <script src="js/exportar-dados.js"></script>
   <script>
     let todosOsDados = [];
     const STORE_NAME = 'despesas-liquidados';
     let charts = {};
-    
-    function formatarMoeda(valor) {
-      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
-    }
-    function formatarMoedaCompacta(v) {
-      if (v >= 1e9) return 'R$ ' + (v / 1e9).toFixed(1).replace('.', ',') + ' bi';
-      if (v >= 1e6) return 'R$ ' + (v / 1e6).toFixed(1).replace('.', ',') + ' mi';
-      if (v >= 1e3) return 'R$ ' + (v / 1e3).toFixed(1).replace('.', ',') + ' mil';
-      return formatarMoeda(v);
-    }
-    
-    function formatarData(dataStr) {
-      if (!dataStr || dataStr === '-') return '-';
-      if (dataStr instanceof Date) { const d = dataStr; return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
-      if (typeof dataStr === 'number' && dataStr > 40000 && dataStr < 60000) { const d = new Date((dataStr - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`; }
-      const str = String(dataStr).trim();
-      if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) return str;
-      if (/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/\d{4}$/.test(str)) { const m = str.match(/^(\d{2})\s+\d{2}:\d{2}:\d{2}\/(\d{2})\/(\d{4})$/); if (m) return `${m[1]}/${m[2]}/${m[3]}`; }
-      const num = parseFloat(str); if (!isNaN(num) && num > 40000 && num < 60000) { const d = new Date((num - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`; }
-      if (str.includes('-')) { const p = str.split('T')[0].split(' ')[0].split('-'); if (p.length === 3 && p[0].length === 4) return `${p[2]}/${p[1]}/${p[0]}`; }
-      try { const d = new Date(str); if (!isNaN(d.getTime()) && d.getFullYear() > 1990) return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; } catch(e) {}
-      return str;
-    }
-    
+
+    function formatarMoeda(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
+    function formatarMoedaCompacta(v) { if (v >= 1e9) return 'R$ ' + (v / 1e9).toFixed(1).replace('.', ',') + ' bi'; if (v >= 1e6) return 'R$ ' + (v / 1e6).toFixed(1).replace('.', ',') + ' mi'; if (v >= 1e3) return 'R$ ' + (v / 1e3).toFixed(1).replace('.', ',') + ' mil'; return formatarMoeda(v); }
+    function formatarData(dataStr) { if (!dataStr || dataStr === '-') return '-'; if (dataStr instanceof Date) { const d = dataStr; return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; } if (typeof dataStr === 'number' && dataStr > 40000 && dataStr < 60000) { const d = new Date((dataStr - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`; } const str = String(dataStr).trim(); if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) return str; if (/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/\d{4}$/.test(str)) { const m = str.match(/^(\d{2})\s+\d{2}:\d{2}:\d{2}\/(\d{2})\/(\d{4})$/); if (m) return `${m[1]}/${m[2]}/${m[3]}`; } const num = parseFloat(str); if (!isNaN(num) && num > 40000 && num < 60000) { const d = new Date((num - 25569) * 86400 * 1000); return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`; } if (str.includes('-')) { const p = str.split('T')[0].split(' ')[0].split('-'); if (p.length === 3 && p[0].length === 4) return `${p[2]}/${p[1]}/${p[0]}`; } try { const d = new Date(str); if (!isNaN(d.getTime()) && d.getFullYear() > 1990) return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; } catch (e) { } return str; }
     let colunaOrdenacao = '', direcaoOrdenacao = 'asc';
-    
-    function ordenarPor(coluna) {
-      if (colunaOrdenacao === coluna) {
-        direcaoOrdenacao = direcaoOrdenacao === 'asc' ? 'desc' : 'asc';
-      } else {
-        colunaOrdenacao = coluna;
-        direcaoOrdenacao = 'asc';
-      }
-      document.querySelectorAll('th i[id^="sort-"]').forEach(i => i.className = 'fas fa-sort');
-      const icon = document.getElementById('sort-' + coluna);
-      if (icon) icon.className = direcaoOrdenacao === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
-      
-      dadosFiltradosGlobal.sort((a, b) => {
-        let vA = getValor(a, coluna), vB = getValor(b, coluna);
-        if (coluna.toLowerCase().includes('valor') || coluna.includes('R$')) { vA = parseFloat(vA) || 0; vB = parseFloat(vB) || 0; }
-        else if (coluna === 'Data') { vA = vA ? new Date(vA.split('/').reverse().join('-') || vA) : new Date(0); vB = vB ? new Date(vB.split('/').reverse().join('-') || vB) : new Date(0); }
-        else { vA = String(vA || '').toLowerCase(); vB = String(vB || '').toLowerCase(); }
-        if (vA < vB) return direcaoOrdenacao === 'asc' ? -1 : 1;
-        if (vA > vB) return direcaoOrdenacao === 'asc' ? 1 : -1;
-        return 0;
-      });
-      paginaAtual = 1;
-      renderizarDetalhado();
-    }
-    
-    function getBadgeClass(especie) {
-      if (!especie) return 'badge-info';
-      const lower = especie.toLowerCase();
-      if (lower.includes('ordinário') || lower.includes('ordinario')) return 'badge-success';
-      if (lower.includes('global')) return 'badge-warning';
-      if (lower.includes('estimativa')) return 'badge-info';
-      return 'badge-info';
-    }
-    
-    function getValor(item, ...campos) {
-      for (let campo of campos) {
-        if (item[campo] !== undefined && item[campo] !== null && item[campo] !== '') return item[campo];
-      }
-      return '-';
-    }
-    
-    function parseData(dataStr) {
-      if (!dataStr || dataStr === '-') return null;
-      const str = String(dataStr).trim();
-      // Formato especial: "02 00:00:00/01/2024"
-      const matchEspecial = str.match(/^(\d{2})\s+\d{2}:\d{2}:\d{2}\/(\d{2})\/(\d{4})$/);
-      if (matchEspecial) {
-        return new Date(matchEspecial[3], matchEspecial[2] - 1, matchEspecial[1]);
-      }
-      // Formato DD/MM/YYYY
-      const partes = str.split('/');
-      if (partes.length === 3) return new Date(partes[2], partes[1] - 1, partes[0]);
-      // Formato YYYY-MM-DD
-      if (str.includes('-') && !str.includes('/')) return new Date(str);
-      return null;
-    }
-    
+    function ordenarPor(coluna) { if (colunaOrdenacao === coluna) { direcaoOrdenacao = direcaoOrdenacao === 'asc' ? 'desc' : 'asc'; } else { colunaOrdenacao = coluna; direcaoOrdenacao = 'asc'; } document.querySelectorAll('th i[id^="sort-"]').forEach(i => i.className = 'fas fa-sort'); const icon = document.getElementById('sort-' + coluna); if (icon) icon.className = direcaoOrdenacao === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'; dadosFiltradosGlobal.sort((a, b) => { let vA = getValor(a, coluna), vB = getValor(b, coluna); if (coluna.toLowerCase().includes('valor') || coluna.includes('R$')) { vA = parseFloat(vA) || 0; vB = parseFloat(vB) || 0; } else if (coluna === 'Data') { vA = vA ? new Date(vA.split('/').reverse().join('-') || vA) : new Date(0); vB = vB ? new Date(vB.split('/').reverse().join('-') || vB) : new Date(0); } else { vA = String(vA || '').toLowerCase(); vB = String(vB || '').toLowerCase(); } if (vA < vB) return direcaoOrdenacao === 'asc' ? -1 : 1; if (vA > vB) return direcaoOrdenacao === 'asc' ? 1 : -1; return 0; }); paginaAtual = 1; renderizarDetalhado(); }
+    function getBadgeClass(e) { if (!e) return 'badge-info'; const l = e.toLowerCase(); if (l.includes('ordinário') || l.includes('ordinario')) return 'badge-success'; if (l.includes('global')) return 'badge-warning'; return 'badge-info'; }
+    function getValor(item, ...campos) { for (let c of campos) { if (item[c] !== undefined && item[c] !== null && item[c] !== '') return item[c]; } return '-'; }
+    function parseData(d) { if (!d || d === '-') return null; const s = String(d).trim(); const m = s.match(/^(\d{2})\s+\d{2}:\d{2}:\d{2}\/(\d{2})\/(\d{4})$/); if (m) return new Date(m[3], m[2] - 1, m[1]); const p = s.split('/'); if (p.length === 3) return new Date(p[2], p[1] - 1, p[0]); if (s.includes('-') && !s.includes('/')) return new Date(s); return null; }
+
     // Função para extrair ano de uma data (DD/MM/YYYY ou YYYY-MM-DD)
     function extrairAno(dataStr) {
       if (!dataStr || dataStr === '-') return null;
@@ -452,53 +570,60 @@
       if (str.includes('-') && !str.includes('/')) return str.substring(0, 4);
       return null;
     }
-    
+
     function popularFiltros() {
       // Popular filtro de Exercício (anos)
       const anos = [...new Set(todosOsDados.map(d => extrairAno(getValor(d, 'Data'))).filter(a => a && a.length === 4))].sort().reverse();
       const selectExercicio = document.getElementById('filtroExercicio');
       anos.forEach(ano => { const opt = document.createElement('option'); opt.value = ano; opt.textContent = ano; selectExercicio.appendChild(opt); });
-      
+
+      const funcoes = [...new Set(todosOsDados.map(d => getValor(d, 'Função')).filter(v => v !== '-'))].sort();
+      const sel = document.getElementById('filtroFuncao');
+      funcoes.forEach(f => { const o = document.createElement('option'); o.value = f; o.textContent = f; sel.appendChild(o); });
+
       // Popular filtro de Unidade Gestora
       const unidadesGestoras = [...new Set(todosOsDados.map(d => getValor(d, 'Unidade gestora', 'Unidade Gestora')).filter(v => v && v !== '-'))].sort();
-      popularSelect('filtroUnidadeGestora', unidadesGestoras);
-      
-      // Popular filtros existentes e novos
-      const unidades = [...new Set(todosOsDados.map(d => getValor(d, 'Unidade orçamentária')).filter(v => v && v !== '-'))].sort();
-      const funcoes = [...new Set(todosOsDados.map(d => getValor(d, 'Função')).filter(v => v && v !== '-'))].sort();
-      const especies = [...new Set(todosOsDados.map(d => getValor(d, 'Espécie')).filter(v => v && v !== '-'))].sort();
-      const tipos = [...new Set(todosOsDados.map(d => getValor(d, 'Tipo')).filter(v => v && v !== '-'))].sort();
+      const selUG = document.getElementById('filtroUnidadeGestora');
+      unidadesGestoras.forEach(u => { const o = document.createElement('option'); o.value = u; o.textContent = u.length > 40 ? u.substring(0, 40) + '...' : u; o.title = u; selUG.appendChild(o); });
+
+      // Popular filtro de Unidade Orçamentária
+      const unidades = [...new Set(todosOsDados.map(d => getValor(d, 'Unidade orçamentária', 'Unidade Orçamentária')).filter(v => v && v !== '-'))].sort();
+      const selUnidade = document.getElementById('filtroUnidade');
+      unidades.forEach(u => { const o = document.createElement('option'); o.value = u; o.textContent = u.length > 40 ? u.substring(0, 40) + '...' : u; o.title = u; selUnidade.appendChild(o); });
+
+      // Popular filtro de Município
       const municipios = [...new Set(todosOsDados.map(d => getValor(d, 'Município')).filter(v => v && v !== '-'))].sort();
+      const selMunicipio = document.getElementById('filtroMunicipio');
+      municipios.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; selMunicipio.appendChild(o); });
+
+      // Popular filtro de Ação
       const acoes = [...new Set(todosOsDados.map(d => getValor(d, 'Ação')).filter(v => v && v !== '-'))].sort();
-      const naturezas = [...new Set(todosOsDados.map(d => getValor(d, 'Natureza da Despesa', 'Natureza Despesa')).filter(v => v && v !== '-'))].sort();
-      const subfuncoes = [...new Set(todosOsDados.map(d => getValor(d, 'SubFunção', 'Subfunção')).filter(v => v && v !== '-'))].sort();
+      const selAcao = document.getElementById('filtroAcao');
+      acoes.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a.length > 40 ? a.substring(0, 40) + '...' : a; o.title = a; selAcao.appendChild(o); });
+
+      // Popular filtro de Natureza da Despesa
+      const naturezas = [...new Set(todosOsDados.map(d => getValor(d, 'Natureza da Despesa')).filter(v => v && v !== '-'))].sort();
+      const selNatureza = document.getElementById('filtroNaturezaDespesa');
+      naturezas.forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n.length > 40 ? n.substring(0, 40) + '...' : n; o.title = n; selNatureza.appendChild(o); });
+
+      // Popular filtro de SubFunção
+      const subFuncoes = [...new Set(todosOsDados.map(d => getValor(d, 'SubFunção')).filter(v => v && v !== '-'))].sort();
+      const selSubFuncao = document.getElementById('filtroSubFuncao');
+      subFuncoes.forEach(sf => { const o = document.createElement('option'); o.value = sf; o.textContent = sf.length > 40 ? sf.substring(0, 40) + '...' : sf; o.title = sf; selSubFuncao.appendChild(o); });
+
+      // Popular filtro de Programa
       const programas = [...new Set(todosOsDados.map(d => getValor(d, 'Programa')).filter(v => v && v !== '-'))].sort();
-      
-      popularSelect('filtroUnidade', unidades);
-      popularSelect('filtroFuncao', funcoes);
-      popularSelect('filtroEspecie', especies);
-      popularSelect('filtroTipo', tipos);
-      popularSelect('filtroMunicipio', municipios);
-      popularSelect('filtroAcao', acoes);
-      popularSelect('filtroNatureza', naturezas);
-      popularSelect('filtroSubFuncao', subfuncoes);
-      popularSelect('filtroPrograma', programas);
+      const selPrograma = document.getElementById('filtroPrograma');
+      programas.forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = p.length > 40 ? p.substring(0, 40) + '...' : p; o.title = p; selPrograma.appendChild(o); });
     }
-    
-    function popularSelect(id, valores) {
-      const select = document.getElementById(id);
-      if (!select) return;
-      valores.forEach(v => {
-        const opt = document.createElement('option');
-        opt.value = v;
-        opt.textContent = v.length > 40 ? v.substring(0, 40) + '...' : v;
-        select.appendChild(opt);
-      });
-    }
-    
+
     let listaCredoresUnicos = [];
     let listaDespesasUnicas = [];
-    
+    let listaCnpjsCpfsUnicos = [];
+    let listaNumEmpenhosUnicos = [];
+    let listaSeqLiqUnicos = [];
+    let listaDetalhamentosUnicos = [];
+
     function filtrarCredores(termo) {
       const datalist = document.getElementById('listaCredores');
       const input = document.getElementById('filtroCredor');
@@ -506,19 +631,65 @@
       if (termo.length < 2) { input.removeAttribute('list'); return; }
       input.setAttribute('list', 'listaCredores');
       const matches = listaCredoresUnicos.filter(c => c.toLowerCase().includes(termo.toLowerCase())).slice(0, 15);
+      matches.forEach(c => { const o = document.createElement('option'); o.value = c; datalist.appendChild(o); });
+    }
+
+
+    function filtrarCnpjCpf(termo) {
+      const datalist = document.getElementById('listaCnpjsCpfs');
+      const input = document.getElementById('filtroCnpjCpf');
+      datalist.innerHTML = '';
+      if (termo.length < 2) { input.removeAttribute('list'); return; }
+      input.setAttribute('list', 'listaCnpjsCpfs');
+      const termoDigits = termo.replace(/\D/g, '');
+      const matches = listaCnpjsCpfsUnicos.filter(c => c.toLowerCase().includes(termo.toLowerCase()) || c.replace(/\D/g, '').includes(termoDigits)).slice(0, 15);
       matches.forEach(c => { const opt = document.createElement('option'); opt.value = c; datalist.appendChild(opt); });
     }
-    
+
+    function filtrarEmpenhos(termo) {
+      const datalist = document.getElementById('listaNumEmpenhos');
+      const input = document.getElementById('filtroNumEmp');
+      datalist.innerHTML = '';
+      if (termo.length < 2) { input.removeAttribute('list'); return; }
+      input.setAttribute('list', 'listaNumEmpenhos');
+      const termoLower = termo.toLowerCase();
+      const matches = listaNumEmpenhosUnicos.filter(n => n.toLowerCase().includes(termoLower)).slice(0, 15);
+      matches.forEach(n => { const opt = document.createElement('option'); opt.value = n; datalist.appendChild(opt); });
+    }
+
     function filtrarDespesas(termo) {
       const datalist = document.getElementById('listaDespesas');
       const input = document.getElementById('filtroDespesa');
       datalist.innerHTML = '';
       if (termo.length < 2) { input.removeAttribute('list'); return; }
       input.setAttribute('list', 'listaDespesas');
-      const matches = listaDespesasUnicas.filter(d => d.toLowerCase().includes(termo.toLowerCase())).slice(0, 15);
+      const termoLower = termo.toLowerCase();
+      const matches = listaDespesasUnicas.filter(d => d.toLowerCase().includes(termoLower)).slice(0, 15);
       matches.forEach(d => { const opt = document.createElement('option'); opt.value = d; datalist.appendChild(opt); });
     }
-    
+
+    function filtrarSeqLiq(termo) {
+      const datalist = document.getElementById('listaSeqLiq');
+      const input = document.getElementById('filtroSeqLiq');
+      datalist.innerHTML = '';
+      if (termo.length < 2) { input.removeAttribute('list'); return; }
+      input.setAttribute('list', 'listaSeqLiq');
+      const termoLower = termo.toLowerCase();
+      const matches = listaSeqLiqUnicos.filter(v => v.toLowerCase().includes(termoLower)).slice(0, 15);
+      matches.forEach(v => { const opt = document.createElement('option'); opt.value = v; datalist.appendChild(opt); });
+    }
+
+    function filtrarDetalhamentos(termo) {
+      const datalist = document.getElementById('listaDetalhamentos');
+      const input = document.getElementById('filtroDetalhamentoDespesa');
+      datalist.innerHTML = '';
+      if (termo.length < 2) { input.removeAttribute('list'); return; }
+      input.setAttribute('list', 'listaDetalhamentos');
+      const termoLower = termo.toLowerCase();
+      const matches = listaDetalhamentosUnicos.filter(v => v.toLowerCase().includes(termoLower)).slice(0, 15);
+      matches.forEach(v => { const opt = document.createElement('option'); opt.value = v; datalist.appendChild(opt); });
+    }
+
     let paginaAtual = 1;
     let dadosFiltradosGlobal = [];
     let campoValorDetectado = 'Valor (R$)';
@@ -538,20 +709,20 @@
     function renderizarDados(dados) {
       dadosFiltradosGlobal = dados;
       detectarCampoValor(dados);
-      let totalValor = 0, maiorValor = 0;
+      let total = 0, maiorValor = 0;
       for (let i = 0; i < dados.length; i++) {
         const v = parseFloat(dados[i][campoValorDetectado]) || 0;
-        totalValor += v;
+        total += v;
         if (v > maiorValor) maiorValor = v;
       }
-      const mediaValor = dados.length > 0 ? totalValor / dados.length : 0;
-      atualizarEstatisticas(totalValor, dados.length, mediaValor, maiorValor);
+      const media = dados.length > 0 ? total / dados.length : 0;
+      atualizarEst(total, dados.length, media, maiorValor);
       renderizarResumo();
       paginaAtual = 1;
       renderizarDetalhado();
       renderizarGraficos();
     }
-    
+
     function extrairMes(dataStr) {
       if (!dataStr || dataStr === '-') return null;
       const str = String(dataStr).trim();
@@ -564,33 +735,35 @@
       if (str.includes('-') && !str.includes('/')) return str.substring(5, 7);
       return null;
     }
-    
+
     function renderizarGraficos() {
       const dados = dadosFiltradosGlobal;
       if (dados.length === 0) return;
-      
-      const agrupamento = document.getElementById('agrupamentoGrafico')?.value || 'Unidade orçamentária';
+
+      const agrupamento = document.getElementById('agrupamentoGrafico')?.value || 'Unidade Orçamentária';
       const porAgrupamento = {};
       dados.forEach(d => {
-        const chave = getValor(d, agrupamento) || 'Não informado';
+        const chave = getValor(d, agrupamento, agrupamento.toLowerCase().replace(' ', ' ')) || 'Não informado';
         const valor = parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0;
         porAgrupamento[chave] = (porAgrupamento[chave] || 0) + valor;
       });
-      
+
       const top30 = Object.entries(porAgrupamento).sort((a, b) => b[1] - a[1]).slice(0, 30);
-      
+
       if (charts.unidades) charts.unidades.destroy();
       charts.unidades = new Chart(document.getElementById('chartUnidades'), {
         type: 'bar',
         data: {
           labels: top30.map(u => u[0].length > 30 ? u[0].substring(0, 30) + '...' : u[0]),
-          datasets: [{ label: 'Valor (R$)', data: top30.map(u => u[1]), backgroundColor: '#22c55e', borderRadius: 4 }]
+          datasets: [{ label: 'Valor (R$)', data: top30.map(u => u[1]), backgroundColor: '#f59e0b', borderRadius: 4 }]
         },
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { callback: v => formatarMoedaCompacta(v) } } } }
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { callback: v => formatarMoedaCompacta(v) }, grid: { display: false } }, y: { grid: { display: false } } } }
       });
-      
-      // Evolução Mensal (com suporte a múltiplos anos)
+
+      // Gráfico: Evolução Mensal aprimorada (com acumulado e comparação)
       const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+      // Agrupar por mês/ano
       const porMesAno = {};
       dados.forEach(d => {
         const mes = extrairMes(getValor(d, 'Data'));
@@ -601,71 +774,77 @@
           porMesAno[chave] = (porMesAno[chave] || 0) + valor;
         }
       });
-      const chavesOrdenadas = Object.keys(porMesAno).sort();
-      const labelsMensais = chavesOrdenadas.map(chave => { const [ano, mes] = chave.split('-'); return `${nomesMeses[parseInt(mes) - 1]}/${ano.substring(2)}`; });
-      const valoresMensais = chavesOrdenadas.map(chave => porMesAno[chave]);
-      
+
+      // Detectar ano selecionado no filtro ou o mais recente
+      const filtroAno = document.getElementById('filtroExercicio').value;
+      const anosPresentes = [...new Set(Object.keys(porMesAno).map(k => k.split('-')[0]))].sort().reverse();
+      const anoAtual = filtroAno || anosPresentes[0] || new Date().getFullYear().toString();
+      const anoAnterior = String(parseInt(anoAtual) - 1);
+
+      // Dados mensais por ano
+      const valoresAnoAtual = nomesMeses.map((_, i) => porMesAno[`${anoAtual}-${(i + 1).toString().padStart(2, '0')}`] || 0);
+      const valoresAnoAnterior = nomesMeses.map((_, i) => porMesAno[`${anoAnterior}-${(i + 1).toString().padStart(2, '0')}`] || 0);
+
+      // Acumulado no ano
+      let acum = 0;
+      const acumulado = valoresAnoAtual.map(v => { acum += v; return acum; });
+
+      // Média mensal
+      const mesesComValor = valoresAnoAtual.filter(v => v > 0);
+      const media = mesesComValor.length > 0 ? mesesComValor.reduce((a, b) => a + b, 0) / mesesComValor.length : 0;
+
       if (charts.mensal) charts.mensal.destroy();
       charts.mensal = new Chart(document.getElementById('chartMensal'), {
-        type: 'line',
-        data: { labels: labelsMensais, datasets: [{ label: 'Valor Liquidado', data: valoresMensais, borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.1)', fill: true, tension: 0.3 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => formatarMoedaCompacta(v) } } } }
+        type: 'bar',
+        data: {
+          labels: nomesMeses,
+          datasets: [
+            { type: 'bar', label: `${anoAtual}`, data: valoresAnoAtual, backgroundColor: '#f59e0b80', borderColor: '#f59e0b', borderWidth: 1, borderRadius: 4, yAxisID: 'y' },
+            { type: 'bar', label: `${anoAnterior}`, data: valoresAnoAnterior, backgroundColor: '#94a3b840', borderColor: '#94a3b8', borderWidth: 1, borderRadius: 4, yAxisID: 'y' },
+            { type: 'line', label: 'Acumulado ' + anoAtual, data: acumulado, borderColor: '#8b5cf6', borderWidth: 2, tension: 0.3, pointRadius: 3, fill: false, yAxisID: 'y1' },
+            { type: 'line', label: 'Média Mensal', data: Array(12).fill(media), borderColor: '#ef4444', borderDash: [5, 5], borderWidth: 1.5, pointRadius: 0, fill: false, yAxisID: 'y' }
+          ]
+        },
+        options: {
+          layout: { padding: { bottom: 32 } },
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'top', labels: { font: { size: 11 } } } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { ticks: { callback: v => formatarMoedaCompacta(v) }, grid: { display: false } },
+            y1: { position: 'right', display: false, grid: { drawOnChartArea: false } }
+          }
+        },
+        plugins: [pluginVariacaoPercentual]
       });
     }
-    
+
     function renderizarResumo() {
-      const dados = dadosFiltradosGlobal;
-      const tbody = document.getElementById('tabelaDados');
-      const colunaAgrupamento = document.getElementById('colunaAgrupamento').value;
-      document.getElementById('thAgrupamento').textContent = colunaAgrupamento;
+      const dados = dadosFiltradosGlobal, tbody = document.getElementById('tabelaDados');
+      const col = document.getElementById('colunaAgrupamento').value;
+      document.getElementById('thAgrupamento').textContent = col;
       tbody.innerHTML = '';
-      
-      if (dados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #64748b;">Nenhum registro encontrado.</td></tr>';
-        document.getElementById('totalAgrupamentos').textContent = '';
-        return;
-      }
-      
-      const agrupado = {};
-      let totalGeral = 0;
-      dados.forEach(item => {
-        const chave = getValor(item, colunaAgrupamento) || 'Não informado';
-        const valor = parseFloat(getValor(item, 'Valor (R$)', 'Valor')) || 0;
-        if (!agrupado[chave]) agrupado[chave] = { quantidade: 0, valor: 0 };
-        agrupado[chave].quantidade++;
-        agrupado[chave].valor += valor;
-        totalGeral += valor;
-      });
-      
-      const gruposOrdenados = Object.entries(agrupado).map(([nome, d]) => ({ nome, ...d })).sort((a, b) => b.valor - a.valor);
-      
+      if (dados.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;">Nenhum registro.</td></tr>'; document.getElementById('totalAgrupamentos').textContent = ''; return; }
+
+      const agrupado = {}; let totalG = 0;
+      dados.forEach(i => { const k = getValor(i, col) || 'Não informado'; const v = parseFloat(getValor(i, 'Valor (R$)', 'Valor')) || 0; if (!agrupado[k]) agrupado[k] = { qtd: 0, val: 0 }; agrupado[k].qtd++; agrupado[k].val += v; totalG += v; });
+      const grupos = Object.entries(agrupado).map(([n, d]) => ({ nome: n, ...d })).sort((a, b) => b.val - a.val);
+
       // Atualizar dados do resumo para exportação
-      dadosResumoGlobal = gruposOrdenados.map(g => ({
+      dadosResumoGlobal = grupos.map(g => ({
         'Agrupamento': g.nome,
-        'Qtd. Registros': g.quantidade,
-        'Valor Total': g.valor,
-        '% do Total': totalGeral > 0 ? ((g.valor / totalGeral * 100).toFixed(2) + '%') : '0%'
+        'Qtd. Registros': g.qtd,
+        'Valor Total': g.val,
+        '% do Total': totalG > 0 ? ((g.val / totalG * 100).toFixed(2) + '%') : '0%'
       }));
-      
-      gruposOrdenados.forEach(grupo => {
-        const pct = totalGeral > 0 ? (grupo.valor / totalGeral * 100) : 0;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td title="${grupo.nome}" style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${grupo.nome}</td>
-          <td style="text-align: center;"><span class="badge badge-info">${grupo.quantidade.toLocaleString()}</span></td>
-          <td class="value" style="text-align: right;"><strong>${formatarMoeda(grupo.valor)}</strong></td>
-          <td style="text-align: right;"><div style="display: flex; align-items: center; gap: 8px; justify-content: flex-end;"><div style="width: 60px; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;"><div style="width: ${Math.min(pct, 100)}%; height: 100%; background: #22c55e;"></div></div><span>${pct.toFixed(1)}%</span></div></td>
-        `;
-        tbody.appendChild(tr);
-      });
-      
-      const trTotal = document.createElement('tr');
-      trTotal.className = 'total-row';
-      trTotal.innerHTML = `<td><strong>TOTAL GERAL</strong></td><td style="text-align: center;"><strong>${dados.length.toLocaleString()}</strong></td><td class="value" style="text-align: right;"><strong>${formatarMoeda(totalGeral)}</strong></td><td style="text-align: right;"><strong>100%</strong></td>`;
-      tbody.appendChild(trTotal);
-      document.getElementById('totalAgrupamentos').textContent = `${gruposOrdenados.length} grupo(s)`;
+
+      grupos.forEach(g => { const pct = totalG > 0 ? g.val / totalG * 100 : 0; const tr = document.createElement('tr'); tr.innerHTML = `<td title="${g.nome}" style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${g.nome}</td><td style="text-align:center;"><span class="badge badge-info">${g.qtd.toLocaleString()}</span></td><td class="value" style="text-align:right;"><strong>${formatarMoeda(g.val)}</strong></td><td style="text-align:right;"><div style="display:flex;align-items:center;gap:8px;justify-content:flex-end;"><div style="width:60px;height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;"><div style="width:${Math.min(pct, 100)}%;height:100%;background:#f59e0b;"></div></div><span>${pct.toFixed(1)}%</span></div></td>`; tbody.appendChild(tr); });
+
+      const trT = document.createElement('tr'); trT.className = 'total-row'; trT.innerHTML = `<td><strong>TOTAL GERAL</strong></td><td style="text-align:center;"><strong>${dados.length.toLocaleString()}</strong></td><td class="value" style="text-align:right;"><strong>${formatarMoeda(totalG)}</strong></td><td style="text-align:right;"><strong>100%</strong></td>`; tbody.appendChild(trT);
+      document.getElementById('totalAgrupamentos').textContent = `${grupos.length} grupo(s)`;
     }
-    
+
     function renderizarDetalhado() {
       const dados = dadosFiltradosGlobal;
       const tbody = document.getElementById('tabelaDetalhado');
@@ -698,9 +877,12 @@
           let v = getValor(item, col);
           // Fallbacks para nomes alternativos
           if ((v === '-' || v === undefined) && col === 'CNPJ/CPF') v = getValor(item, 'CNPJ', 'CPF', 'CNPJ&CPF');
+          if ((v === '-' || v === undefined) && col === 'Nr Emp.') v = getValor(item, 'Nr emp.');
+          if ((v === '-' || v === undefined) && col === 'Seq. Liq.') v = getValor(item, 'Seq. liq.');
           if ((v === '-' || v === undefined) && col === 'Natureza da Despesa') v = getValor(item, 'Natureza Despesa');
           if ((v === '-' || v === undefined) && col === 'SubFunção') v = getValor(item, 'Subfunção');
-          if ((v === '-' || v === undefined) && col === 'Detalhamento despesa') v = getValor(item, 'Detalhamento');
+          if ((v === '-' || v === undefined) && col === 'Detalhamento') v = getValor(item, 'Detalhamento despesa');
+          if ((v === '-' || v === undefined) && col === 'Unidade Orçamentária') v = getValor(item, 'Unidade orçamentária');
           const s = String(v || '-');
           const isValor = col.toLowerCase().includes('valor') || col.includes('R$');
           const isData = col.toLowerCase() === 'data';
@@ -719,106 +901,81 @@
       document.getElementById('paginacaoInfo').textContent = `Exibindo ${inicio + 1}-${fim} de ${dados.length.toLocaleString()} | Total página: ${formatarMoeda(totalPag)}`;
       renderizarControlesPaginacao(totalPaginas);
     }
-    
-    function renderizarControlesPaginacao(totalPaginas) {
-      const container = document.getElementById('paginacaoControles');
-      container.innerHTML = '';
-      if (totalPaginas <= 1) return;
-      
-      const addBtn = (icon, disabled, action) => { const b = document.createElement('button'); b.className = 'btn btn-secondary btn-sm'; b.innerHTML = icon; b.disabled = disabled; b.onclick = action; container.appendChild(b); };
+
+    function renderizarControlesPaginacao(totalPag) {
+      const c = document.getElementById('paginacaoControles'); c.innerHTML = '';
+      if (totalPag <= 1) return;
+      const addBtn = (icon, dis, act) => { const b = document.createElement('button'); b.className = 'btn btn-secondary btn-sm'; b.innerHTML = icon; b.disabled = dis; b.onclick = act; c.appendChild(b); };
       addBtn('<i class="fas fa-angle-double-left"></i>', paginaAtual === 1, () => mudarPagina(1));
       addBtn('<i class="fas fa-angle-left"></i>', paginaAtual === 1, () => mudarPagina(paginaAtual - 1));
-      
-      let inicioP = Math.max(1, paginaAtual - 2), fimP = Math.min(totalPaginas, inicioP + 4);
-      if (fimP - inicioP < 4) inicioP = Math.max(1, fimP - 4);
-      for (let i = inicioP; i <= fimP; i++) { const b = document.createElement('button'); b.className = `btn btn-sm ${i === paginaAtual ? 'btn-primary' : 'btn-secondary'}`; b.textContent = i; b.onclick = () => mudarPagina(i); container.appendChild(b); }
-      
-      addBtn('<i class="fas fa-angle-right"></i>', paginaAtual === totalPaginas, () => mudarPagina(paginaAtual + 1));
-      addBtn('<i class="fas fa-angle-double-right"></i>', paginaAtual === totalPaginas, () => mudarPagina(totalPaginas));
-      
-      const span = document.createElement('span');
-      span.style.marginLeft = '16px';
-      span.innerHTML = `Ir para: <input type="number" min="1" max="${totalPaginas}" value="${paginaAtual}" style="width: 60px; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px;" onchange="mudarPagina(Math.min(Math.max(1, this.value), ${totalPaginas}))"> de ${totalPaginas}`;
-      container.appendChild(span);
+      let ini = Math.max(1, paginaAtual - 2), fim = Math.min(totalPag, ini + 4);
+      if (fim - ini < 4) ini = Math.max(1, fim - 4);
+      for (let i = ini; i <= fim; i++) { const b = document.createElement('button'); b.className = `btn btn-sm ${i === paginaAtual ? 'btn-primary' : 'btn-secondary'}`; b.textContent = i; b.onclick = () => mudarPagina(i); c.appendChild(b); }
+      addBtn('<i class="fas fa-angle-right"></i>', paginaAtual === totalPag, () => mudarPagina(paginaAtual + 1));
+      addBtn('<i class="fas fa-angle-double-right"></i>', paginaAtual === totalPag, () => mudarPagina(totalPag));
+      const sp = document.createElement('span'); sp.style.marginLeft = '16px'; sp.innerHTML = `Ir para: <input type="number" min="1" max="${totalPag}" value="${paginaAtual}" style="width:60px;padding:4px 8px;border:1px solid #d1d5db;border-radius:4px;" onchange="mudarPagina(Math.min(Math.max(1,this.value),${totalPag}))"> de ${totalPag}`; c.appendChild(sp);
     }
-    
+
     function mudarPagina(p) { paginaAtual = p; renderizarDetalhado(); }
-    
-    function atualizarEstatisticas(total, qtd, media, maior) {
+
+    function atualizarEst(t, q, media, maior) {
       const kpiTotal = document.getElementById('kpiTotal');
-      if (kpiTotal) { kpiTotal.textContent = formatarMoedaCompacta(total); kpiTotal.title = formatarMoeda(total); }
+      if (kpiTotal) { kpiTotal.textContent = formatarMoedaCompacta(t); kpiTotal.title = formatarMoeda(t); }
       const kpiQtd = document.getElementById('kpiQtd');
-      if (kpiQtd) kpiQtd.textContent = qtd.toLocaleString('pt-BR');
+      if (kpiQtd) kpiQtd.textContent = q.toLocaleString('pt-BR');
       const kpiMedia = document.getElementById('kpiMedia');
       if (kpiMedia) { kpiMedia.textContent = formatarMoedaCompacta(media); kpiMedia.title = formatarMoeda(media); }
       const kpiMaior = document.getElementById('kpiMaior');
       if (kpiMaior) { kpiMaior.textContent = formatarMoedaCompacta(maior); kpiMaior.title = formatarMoeda(maior); }
       atualizarDataUltimaImportacao();
     }
-    
+
     function buscarDados() {
-      const filtroExercicio = document.getElementById('filtroExercicio').value;
-      const filtroSeqLiq = document.getElementById('filtroSeqLiq').value.trim();
-      const filtroNumEmp = document.getElementById('filtroNumEmp').value.trim();
-      const filtroCredor = document.getElementById('filtroCredor').value.toLowerCase().trim();
-      const filtroEspecie = document.getElementById('filtroEspecie').value;
-      const filtroTipo = document.getElementById('filtroTipo').value;
-      const filtroUnidade = document.getElementById('filtroUnidade').value;
-      const filtroFuncao = document.getElementById('filtroFuncao').value;
-      const filtroDespesa = document.getElementById('filtroDespesa').value.toLowerCase().trim();
-      const filtroDataInicio = document.getElementById('filtroDataInicio').value;
-      const filtroDataFim = document.getElementById('filtroDataFim').value;
-      // Novos filtros
-      const filtroCnpjCpf = document.getElementById('filtroCnpjCpf').value.trim();
-      const filtroMunicipio = document.getElementById('filtroMunicipio').value;
-      const filtroAcao = document.getElementById('filtroAcao').value;
-      const filtroNatureza = document.getElementById('filtroNatureza').value;
-      const filtroSubFuncao = document.getElementById('filtroSubFuncao').value;
-      const filtroPrograma = document.getElementById('filtroPrograma').value;
-      const filtroDetalhamento = document.getElementById('filtroDetalhamento').value.toLowerCase().trim();
-      const filtroUnidadeGestora = document.getElementById('filtroUnidadeGestora').value;
-      
-      let dadosFiltrados = todosOsDados.filter(item => {
-        if (filtroExercicio && extrairAno(getValor(item, 'Data')) !== filtroExercicio) return false;
-        if (filtroSeqLiq && !String(getValor(item, 'Seq. liq.')).includes(filtroSeqLiq)) return false;
-        if (filtroNumEmp && !String(getValor(item, 'Nr emp.')).includes(filtroNumEmp)) return false;
-        if (filtroCredor && !String(getValor(item, 'Credor/Fornecedor')).toLowerCase().includes(filtroCredor)) return false;
-        if (filtroCnpjCpf) {
-          const cnpjcpf = String(getValor(item, 'CNPJ/CPF', 'CNPJ', 'CPF', 'CNPJ&CPF')).replace(/\D/g, '');
-          if (!cnpjcpf.includes(filtroCnpjCpf.replace(/\D/g, ''))) return false;
-        }
-        if (filtroMunicipio && getValor(item, 'Município') !== filtroMunicipio) return false;
-        if (filtroEspecie && getValor(item, 'Espécie') !== filtroEspecie) return false;
-        if (filtroTipo && getValor(item, 'Tipo') !== filtroTipo) return false;
-        if (filtroUnidadeGestora && getValor(item, 'Unidade gestora', 'Unidade Gestora') !== filtroUnidadeGestora) return false;
-        if (filtroUnidade && getValor(item, 'Unidade orçamentária') !== filtroUnidade) return false;
-        if (filtroAcao && getValor(item, 'Ação') !== filtroAcao) return false;
-        if (filtroNatureza && getValor(item, 'Natureza da Despesa', 'Natureza Despesa') !== filtroNatureza) return false;
-        if (filtroFuncao && getValor(item, 'Função') !== filtroFuncao) return false;
-        if (filtroSubFuncao && getValor(item, 'SubFunção', 'Subfunção') !== filtroSubFuncao) return false;
-        if (filtroPrograma && getValor(item, 'Programa') !== filtroPrograma) return false;
-        if (filtroDetalhamento && !String(getValor(item, 'Detalhamento despesa', 'Detalhamento')).toLowerCase().includes(filtroDetalhamento)) return false;
-        if (filtroDespesa && !String(getValor(item, 'Despesa')).toLowerCase().includes(filtroDespesa)) return false;
-        if (filtroDataInicio || filtroDataFim) {
-          const dataItem = parseData(getValor(item, 'Data'));
-          if (dataItem) {
-            if (filtroDataInicio && dataItem < new Date(filtroDataInicio)) return false;
-            if (filtroDataFim && dataItem > new Date(filtroDataFim)) return false;
-          }
-        }
+      const fExerc = document.getElementById('filtroExercicio').value;
+      const fSeq = document.getElementById('filtroSeqLiq').value.trim(), fEmp = document.getElementById('filtroNumEmp').value.trim();
+      const fCred = document.getElementById('filtroCredor').value.toLowerCase().trim(), fEsp = document.getElementById('filtroEspecie').value;
+      const fTipo = document.getElementById('filtroTipo').value.toLowerCase(), fFunc = document.getElementById('filtroFuncao').value;
+      const fDesp = document.getElementById('filtroDespesa').value.toLowerCase().trim();
+      const fUnidade = document.getElementById('filtroUnidade').value;
+      const fUnidadeGestora = document.getElementById('filtroUnidadeGestora').value;
+      const fDI = document.getElementById('filtroDataInicio').value, fDF = document.getElementById('filtroDataFim').value;
+      const fCnpjCpf = document.getElementById('filtroCnpjCpf').value.trim();
+      const fMunicipio = document.getElementById('filtroMunicipio').value;
+      const fAcao = document.getElementById('filtroAcao').value;
+      const fNatureza = document.getElementById('filtroNaturezaDespesa').value;
+      const fSubFuncao = document.getElementById('filtroSubFuncao').value;
+      const fPrograma = document.getElementById('filtroPrograma').value;
+      const fDetalhamento = document.getElementById('filtroDetalhamentoDespesa').value.toLowerCase().trim();
+
+      let df = todosOsDados.filter(i => {
+        if (fExerc && extrairAno(getValor(i, 'Data')) !== fExerc) return false;
+        if (fSeq && !String(getValor(i, 'Seq. Liq.')).includes(fSeq)) return false;
+        if (fEmp && !String(getValor(i, 'Nr Emp.', 'Nr emp.')).includes(fEmp)) return false;
+        if (fCred && !String(getValor(i, 'Credor/Fornecedor')).toLowerCase().includes(fCred)) return false;
+        if (fEsp && getValor(i, 'Espécie') !== fEsp) return false;
+        if (fTipo && !String(getValor(i, 'Tipo')).toLowerCase().includes(fTipo)) return false;
+        if (fFunc && getValor(i, 'Função') !== fFunc) return false;
+        if (fDesp && !String(getValor(i, 'Despesa')).toLowerCase().includes(fDesp)) return false;
+        if (fUnidade && getValor(i, 'Unidade orçamentária', 'Unidade Orçamentária') !== fUnidade) return false;
+        if (fUnidadeGestora && getValor(i, 'Unidade gestora', 'Unidade Gestora') !== fUnidadeGestora) return false;
+        if (fCnpjCpf) { const doc = String(getValor(i, 'CNPJ/CPF', 'CNPJ', 'CPF', 'CNPJ&CPF', 'CNPJ/CPF do Credor') || '').replace(/\D/g, ''); const filtroDoc = fCnpjCpf.replace(/\D/g, ''); if (!doc.includes(filtroDoc)) return false; }
+        if (fMunicipio && getValor(i, 'Município') !== fMunicipio) return false;
+        if (fAcao && getValor(i, 'Ação') !== fAcao) return false;
+        if (fNatureza && getValor(i, 'Natureza da Despesa') !== fNatureza) return false;
+        if (fSubFuncao && getValor(i, 'SubFunção') !== fSubFuncao) return false;
+        if (fPrograma && getValor(i, 'Programa') !== fPrograma) return false;
+        if (fDetalhamento && !String(getValor(i, 'Detalhamento')).toLowerCase().includes(fDetalhamento)) return false;
+        if (fDI || fDF) { const d = parseData(getValor(i, 'Data')); if (d) { if (fDI && d < new Date(fDI)) return false; if (fDF && d > new Date(fDF)) return false; } }
         return true;
       });
-      renderizarDados(dadosFiltrados);
+      renderizarDados(df);
     }
-    
-    function limparFiltros() {
-      ['filtroExercicio', 'filtroSeqLiq', 'filtroNumEmp', 'filtroCredor', 'filtroEspecie', 'filtroTipo', 'filtroUnidadeGestora', 'filtroUnidade', 'filtroFuncao', 'filtroDespesa', 'filtroDataInicio', 'filtroDataFim', 'filtroCnpjCpf', 'filtroMunicipio', 'filtroAcao', 'filtroNatureza', 'filtroSubFuncao', 'filtroPrograma', 'filtroDetalhamento'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-      renderizarDados(todosOsDados);
-    }
-    
-    document.addEventListener('DOMContentLoaded', async function() {
+
+    function limparFiltros() { ['filtroExercicio', 'filtroSeqLiq', 'filtroNumEmp', 'filtroCredor', 'filtroEspecie', 'filtroTipo', 'filtroFuncao', 'filtroDespesa', 'filtroUnidadeGestora', 'filtroUnidade', 'filtroDataInicio', 'filtroDataFim', 'filtroCnpjCpf', 'filtroMunicipio', 'filtroAcao', 'filtroNaturezaDespesa', 'filtroSubFuncao', 'filtroPrograma', 'filtroDetalhamentoDespesa'].forEach(id => document.getElementById(id).value = ''); renderizarDados(todosOsDados); }
+
+    document.addEventListener('DOMContentLoaded', async function () {
       try {
-        todosOsDados = await carregarDadosPortal(STORE_NAME);
+        todosOsDados = await carregarDadosComCache(STORE_NAME);
         console.log(`Carregados ${todosOsDados.length} registros de ${STORE_NAME}`);
       } catch (e) { console.error(e); todosOsDados = []; }
       if (todosOsDados.length === 0) {
@@ -835,24 +992,27 @@
       popularFiltros();
       listaCredoresUnicos = [...new Set(todosOsDados.map(d => getValor(d, 'Credor/Fornecedor')).filter(v => v !== '-'))].sort();
       listaDespesasUnicas = [...new Set(todosOsDados.map(d => getValor(d, 'Despesa')).filter(v => v !== '-' && v !== ''))].sort();
+      listaCnpjsCpfsUnicos = [...new Set(todosOsDados.map(d => getValor(d, 'CNPJ/CPF', 'CNPJ', 'CPF', 'CNPJ&CPF', 'CNPJ/CPF do Credor')).filter(v => v && v !== '-'))].sort();
+      listaNumEmpenhosUnicos = [...new Set(todosOsDados.map(d => String(getValor(d, 'Nr Emp.', 'Nr emp.'))).filter(v => v && v !== '-' && v !== 'null' && v !== 'undefined'))].sort();
+      listaSeqLiqUnicos = [...new Set(todosOsDados.map(d => String(getValor(d, 'Seq. Liq.', 'Seq. liq.'))).filter(v => v && v !== '-' && v !== 'null' && v !== 'undefined'))].sort();
+      listaDetalhamentosUnicos = [...new Set(todosOsDados.map(d => String(getValor(d, 'Detalhamento', 'Detalhamento despesa', 'Detalhamento Despesa'))).filter(v => v && v !== '-' && v !== 'null' && v !== 'undefined'))].sort();
       renderizarDados(todosOsDados);
     });
-    
+
     // Dados do resumo para exportação
     let dadosResumoGlobal = [];
 
     // =====================================================
     // Seletor de colunas dinâmico
     // =====================================================
-    const COLUNAS_PADRAO = ['Seq. liq.', 'Data', 'Nr emp.', 'Município', 'CNPJ/CPF', 'Credor/Fornecedor', 'Ação', 'Natureza da Despesa', 'Função', 'SubFunção', 'Programa', 'Detalhamento despesa', 'Unidade orçamentária', 'Tipo', 'Valor (R$)'];
-    let colunasDisponiveis = []; // todas as colunas dos dados
+    const COLUNAS_PADRAO = ['Nr Emp.', 'Seq. Liq.', 'Data', 'Credor/Fornecedor', 'Município', 'CNPJ/CPF', 'Ação', 'Natureza da Despesa', 'Unidade Orçamentária', 'Função', 'SubFunção', 'Programa', 'Detalhamento', 'Espécie', 'Tipo', 'Valor (R$)'];
+    let colunasDisponiveis = [];
     let colunasSelecionadas = new Set(COLUNAS_PADRAO);
     const STORAGE_KEY = 'cols-despesas-liquidados';
 
     function detectarColunasDosDados(dados) {
       if (!dados || dados.length === 0) return;
       const keys = new Set();
-      // Pegar chaves dos primeiros 100 registros (performance)
       const amostra = dados.slice(0, 100);
       amostra.forEach(item => {
         Object.keys(item).forEach(k => {
@@ -861,7 +1021,6 @@
       });
       colunasDisponiveis = Array.from(keys);
 
-      // Carregar seleção salva do localStorage
       try {
         const salvo = localStorage.getItem(STORAGE_KEY);
         if (salvo) {
@@ -870,9 +1029,8 @@
             colunasSelecionadas = new Set(arr.filter(c => colunasDisponiveis.includes(c)));
           }
         }
-      } catch(e) {}
+      } catch (e) { }
 
-      // Se nenhuma coluna salva válida, usar padrão
       if (colunasSelecionadas.size === 0) {
         colunasSelecionadas = new Set(COLUNAS_PADRAO.filter(c => colunasDisponiveis.includes(c)));
       }
@@ -897,8 +1055,7 @@
       dd.classList.toggle('show');
     }
 
-    // Fechar dropdown ao clicar fora
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       const dd = document.getElementById('colSelectorDropdown');
       if (dd && !e.target.closest('.col-selector-wrap')) dd.classList.remove('show');
     });
@@ -936,7 +1093,6 @@
     }
 
     function getColunasAtivas() {
-      // Manter ordem original das colunas disponíveis
       return colunasDisponiveis.filter(c => colunasSelecionadas.has(c));
     }
 
@@ -977,20 +1133,21 @@
         exportarPDF(dadosFiltradosGlobal, 'despesas-liquidados-detalhado', 'Despesas Liquidadas - Detalhado', getColunasAtivas());
       }
     }
-    
+
+    // Controlar visibilidade dos filtros e KPIs por aba
     // Controlar visibilidade dos filtros e KPIs por aba
     function atualizarVisibilidadeFiltros(tabId) {
       const filtrosSection = document.getElementById('filtrosSection');
       const kpisSection = document.getElementById('kpisSection');
       const mostrar = tabId !== 'resumo';
-      if (filtrosSection) filtrosSection.style.display = mostrar ? 'block' : 'none';
+      if (filtrosSection) filtrosSection.style.display = 'block';
       if (kpisSection) kpisSection.style.display = mostrar ? 'grid' : 'none';
     }
-    
+
     // Sobrescrever comportamento das tabs para controlar filtros
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
           const tabId = this.getAttribute('data-tab');
           document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
           document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -1003,7 +1160,53 @@
           }
         });
       });
+      atualizarVisibilidadeFiltros('resumo');
     });
+
+    // Função para alternar tela cheia
+    function toggleFullscreen(containerId) {
+      const container = document.getElementById(containerId);
+      const btn = container.querySelector('.btn-fullscreen i');
+
+      if (!container.classList.contains('fullscreen-mode')) {
+        container.classList.add('fullscreen-mode');
+        // Ajustar padding no modo tela cheia
+        container.style.paddingTop = '60px';
+        btn.classList.remove('fa-expand');
+        btn.classList.add('fa-compress');
+
+        // Redimensionar gráfico após entrar em tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      } else {
+        container.classList.remove('fullscreen-mode');
+        container.style.paddingTop = '40px';
+        btn.classList.remove('fa-compress');
+        btn.classList.add('fa-expand');
+
+        // Redimensionar gráfico após sair de tela cheia
+        setTimeout(() => {
+          const canvas = container.querySelector('canvas');
+          if (canvas) {
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+          }
+        }, 100);
+      }
+
+      // Fechar tela cheia com ESC
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && container.classList.contains('fullscreen-mode')) {
+          toggleFullscreen(containerId);
+        }
+      });
+    }
   </script>
 </body>
+
 </html>

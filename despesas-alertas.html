@@ -1,0 +1,211 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGEF | Alertas e Anomalias - Caruaru</title>
+  <link rel="icon" type="image/png" href="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/portal-transparencia.css">
+    <script src="js/auth-check.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><img src="https://caruaru.pe.gov.br/wp-content/uploads/2018/08/Brasao-231x300.png" alt="Brasão Caruaru"></div>
+      <h1 class="sidebar-title">Secretaria da Fazenda</h1>
+      <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    <nav class="sidebar-menu" id="sidebarMenu"></nav>
+  </aside>
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <nav class="breadcrumb"><span>Análises</span><i class="fas fa-chevron-right"></i><span>Alertas e Anomalias</span></nav>
+      </div>
+      <div class="header-actions"><div class="user-menu"><div class="user-avatar">AD</div><div class="user-info"><span class="user-name">Administrador</span><span class="user-role">SIGEF</span></div></div></div>
+    </header>
+    <section class="page-header">
+      <div class="page-header-content">
+        <h1 class="page-title"><i class="fas fa-exclamation-triangle"></i> Alertas e Anomalias</h1>
+        <p class="page-subtitle">Identificação automática de valores atípicos e situações de atenção</p>
+      </div>
+    </section>
+    <main class="content-area">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon red"><i class="fas fa-exclamation-circle"></i></div><div class="stat-content"><div class="stat-label">Alertas Críticos</div><div class="stat-value" id="kpiCriticos" style="color: #ef4444;">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-exclamation-triangle"></i></div><div class="stat-content"><div class="stat-label">Alertas de Atenção</div><div class="stat-value" id="kpiAtencao" style="color: #f59e0b;">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-info-circle"></i></div><div class="stat-content"><div class="stat-label">Informativos</div><div class="stat-value" id="kpiInfo">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div><div class="stat-content"><div class="stat-label">Total de Alertas</div><div class="stat-value" id="kpiTotal">0</div></div></div>
+      </div>
+
+      <!-- Configuração de limites -->
+      <div class="filter-section">
+        <div class="filter-title"><i class="fas fa-cog"></i> Configuração de Alertas</div>
+        <div class="filter-grid">
+          <div class="filter-group"><label class="filter-label">Exercício</label><select id="filtroAno" class="filter-select"></select></div>
+          <div class="filter-group"><label class="filter-label">Valor mínimo (alerta alto)</label><input type="number" id="limiteValorAlto" class="filter-input" value="1000000" placeholder="Ex: 1000000"></div>
+          <div class="filter-group"><label class="filter-label">% cresc. credor (alerta)</label><input type="number" id="limiteCrescCredor" class="filter-input" value="50" placeholder="Ex: 50"></div>
+          <div class="filter-group"><label class="filter-label">% exec. unidade (alerta)</label><input type="number" id="limiteExecUnidade" class="filter-input" value="90" placeholder="Ex: 90"></div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
+          <button class="btn btn-primary" onclick="gerarAlertas()"><i class="fas fa-sync-alt"></i> Gerar Alertas</button>
+        </div>
+      </div>
+
+      <!-- Lista de alertas -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-bell"></i> Painel de Alertas</h2>
+          <div class="card-actions"><span class="badge badge-success" id="dataAtualizacao"><i class="fas fa-sync-alt"></i> Carregando...</span></div>
+        </div>
+        <div class="card-body">
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="todos">Todos</button>
+            <button class="tab-btn" data-tab="criticos">Críticos</button>
+            <button class="tab-btn" data-tab="atencao">Atenção</button>
+            <button class="tab-btn" data-tab="info">Informativos</button>
+          </div>
+          <div class="tab-content active" id="todos"><div id="alertasTodos"></div></div>
+          <div class="tab-content" id="criticos"><div id="alertasCriticos"></div></div>
+          <div class="tab-content" id="atencao"><div id="alertasAtencao"></div></div>
+          <div class="tab-content" id="info"><div id="alertasInfo"></div></div>
+          <div class="export-section">
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportarDadosExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer class="main-footer"><div class="footer-content"><p class="footer-text">© 2026 Prefeitura Municipal de Caruaru - SIGEF. Todos os direitos reservados.</p></div></footer>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="js/portal-transparencia.js"></script>
+  <script src="js/indexeddb-utils.js"></script>
+  <script src="js/exportar-dados.js"></script>
+  <script src="js/sidebar-menu.js"></script>
+  <script>
+    let dados = { empenhados: [], liquidados: [], pagos: [] };
+    let alertas = [];
+    let dadosExportacao = [];
+
+    function formatarMoeda(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
+    function getValor(item, ...c) { for (let k of c) if (item[k] !== undefined && item[k] !== null && item[k] !== '') return item[k]; return null; }
+    function extrairAno(d) { if (!d) return null; const s = String(d).trim(); const m = s.match(/^\d{2}\s+\d{2}:\d{2}:\d{2}\/\d{2}\/(\d{4})$/); if (m) return m[1]; if (s.includes('/')) { const p = s.split('/'); if (p.length===3) return p[2].substring(0,4); } if (s.includes('-')&&!s.includes('/')) return s.substring(0,4); return null; }
+
+    async function carregarDados() {
+      const [emp, liq, pag] = await Promise.all([carregarDadosPortal('despesas-empenhados'), carregarDadosPortal('despesas-liquidados'), carregarDadosPortal('despesas-pagos')]);
+      dados.empenhados = emp || []; dados.liquidados = liq || []; dados.pagos = pag || [];
+      const anos = new Set();
+      dados.empenhados.forEach(d => { const a = extrairAno(getValor(d, 'Data')); if (a) anos.add(a); });
+      const sel = document.getElementById('filtroAno'); sel.innerHTML = '';
+      [...anos].sort().reverse().forEach((a,i) => sel.innerHTML += `<option value="${a}" ${i===0?'selected':''}>${a}</option>`);
+      gerarAlertas(); atualizarDataUltimaImportacao();
+    }
+
+    function gerarAlertas() {
+      const ano = document.getElementById('filtroAno').value;
+      const limiteValor = parseFloat(document.getElementById('limiteValorAlto').value) || 1000000;
+      const limiteCrescCredor = parseFloat(document.getElementById('limiteCrescCredor').value) || 50;
+      const limiteExecUnidade = parseFloat(document.getElementById('limiteExecUnidade').value) || 90;
+      alertas = [];
+
+      const empDoAno = dados.empenhados.filter(d => extrairAno(getValor(d, 'Data')) === ano);
+      const anosDisp = [...new Set(dados.empenhados.map(d => extrairAno(getValor(d, 'Data'))).filter(Boolean))].sort();
+      const anoAnterior = anosDisp[anosDisp.indexOf(ano) - 1];
+
+      // 1. Empenhos com valor alto
+      empDoAno.forEach(d => {
+        const v = parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0;
+        if (v >= limiteValor) {
+          alertas.push({ tipo: 'danger', titulo: 'Empenho de alto valor', descricao: `Empenho ${getValor(d,'Nr emp.','Nr Emp.')||'-'} para ${getValor(d,'Credor/Fornecedor')||'-'}: ${formatarMoeda(v)}`, categoria: 'valor-alto' });
+        }
+      });
+
+      // 2. Crescimento de credores entre exercícios
+      if (anoAnterior) {
+        const empAnterior = dados.empenhados.filter(d => extrairAno(getValor(d, 'Data')) === anoAnterior);
+        const porCredorAtual = {}, porCredorAnterior = {};
+        empDoAno.forEach(d => { const c = getValor(d, 'Credor/Fornecedor') || '-'; porCredorAtual[c] = (porCredorAtual[c] || 0) + (parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0); });
+        empAnterior.forEach(d => { const c = getValor(d, 'Credor/Fornecedor') || '-'; porCredorAnterior[c] = (porCredorAnterior[c] || 0) + (parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0); });
+        Object.entries(porCredorAtual).forEach(([credor, valAtual]) => {
+          const valAnterior = porCredorAnterior[credor] || 0;
+          if (valAnterior > 0) {
+            const cresc = ((valAtual - valAnterior) / valAnterior) * 100;
+            if (cresc >= limiteCrescCredor) {
+              alertas.push({ tipo: 'warning', titulo: 'Crescimento atípico de credor', descricao: `${credor}: cresceu ${cresc.toFixed(0)}% (de ${formatarMoeda(valAnterior)} para ${formatarMoeda(valAtual)})`, categoria: 'cresc-credor' });
+            }
+          }
+        });
+      }
+
+      // 3. Unidades com alta execução
+      const porUnidade = {};
+      empDoAno.forEach(d => {
+        const u = getValor(d, 'Unidade orçamentária', 'Unidade Orçamentária') || '-';
+        porUnidade[u] = (porUnidade[u] || 0) + (parseFloat(getValor(d, 'Valor (R$)', 'Valor')) || 0);
+      });
+      const totalGeral = Object.values(porUnidade).reduce((s, v) => s + v, 0);
+      Object.entries(porUnidade).forEach(([unidade, valor]) => {
+        const pct = totalGeral > 0 ? (valor / totalGeral * 100) : 0;
+        if (pct >= limiteExecUnidade / 10) { // Usando proporção do total
+          alertas.push({ tipo: 'info', titulo: 'Unidade com alta concentração', descricao: `${unidade}: concentra ${pct.toFixed(1)}% do total empenhado (${formatarMoeda(valor)})`, categoria: 'exec-unidade' });
+        }
+      });
+
+      // 4. Empenhos sem liquidação (informativos)
+      const nrLiquidados = new Set();
+      dados.liquidados.filter(d => extrairAno(getValor(d, 'Data')) === ano).forEach(d => {
+        const nr = getValor(d, 'Nr emp.', 'Nr Emp.', 'Seq liq.'); if (nr) nrLiquidados.add(nr);
+      });
+      let semLiq = 0;
+      empDoAno.forEach(d => { const nr = getValor(d, 'Nr emp.', 'Nr Emp.'); if (nr && !nrLiquidados.has(nr)) semLiq++; });
+      if (semLiq > 0) {
+        alertas.push({ tipo: 'info', titulo: 'Empenhos sem liquidação', descricao: `${semLiq.toLocaleString()} empenho(s) de ${ano} ainda não foram liquidados`, categoria: 'sem-liq' });
+      }
+
+      // Ordenar: danger > warning > info
+      const ordem = { danger: 0, warning: 1, info: 2 };
+      alertas.sort((a, b) => ordem[a.tipo] - ordem[b.tipo]);
+
+      // KPIs
+      document.getElementById('kpiCriticos').textContent = alertas.filter(a => a.tipo === 'danger').length;
+      document.getElementById('kpiAtencao').textContent = alertas.filter(a => a.tipo === 'warning').length;
+      document.getElementById('kpiInfo').textContent = alertas.filter(a => a.tipo === 'info').length;
+      document.getElementById('kpiTotal').textContent = alertas.length;
+
+      // Renderizar
+      const renderAlertaHTML = (a) => {
+        const icon = a.tipo === 'danger' ? 'fa-exclamation-circle' : a.tipo === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+        const cor = a.tipo === 'danger' ? '#ef4444' : a.tipo === 'warning' ? '#f59e0b' : '#3b82f6';
+        return `<div class="alert-card alert-${a.tipo}"><div class="alert-title"><i class="fas ${icon}" style="color: ${cor};"></i> ${a.titulo}</div><div class="alert-description">${a.descricao}</div></div>`;
+      };
+      
+      document.getElementById('alertasTodos').innerHTML = alertas.length > 0 ? alertas.map(renderAlertaHTML).join('') : '<div style="text-align:center;padding:40px;color:var(--text-muted);"><i class="fas fa-check-circle" style="font-size:48px;color:#2D9846;margin-bottom:16px;display:block;"></i>Nenhum alerta encontrado!</div>';
+      document.getElementById('alertasCriticos').innerHTML = alertas.filter(a => a.tipo === 'danger').map(renderAlertaHTML).join('') || '<p style="text-align:center;padding:40px;color:var(--text-muted);">Nenhum alerta crítico</p>';
+      document.getElementById('alertasAtencao').innerHTML = alertas.filter(a => a.tipo === 'warning').map(renderAlertaHTML).join('') || '<p style="text-align:center;padding:40px;color:var(--text-muted);">Nenhum alerta de atenção</p>';
+      document.getElementById('alertasInfo').innerHTML = alertas.filter(a => a.tipo === 'info').map(renderAlertaHTML).join('') || '<p style="text-align:center;padding:40px;color:var(--text-muted);">Nenhum informativo</p>';
+
+      dadosExportacao = alertas.map(a => ({ 'Tipo': a.tipo === 'danger' ? 'Crítico' : a.tipo === 'warning' ? 'Atenção' : 'Informativo', 'Título': a.titulo, 'Descrição': a.descricao }));
+    }
+
+    function exportarDadosExcel() { exportarExcel(dadosExportacao, 'alertas-anomalias'); }
+    function exportarDadosPDF() { exportarPDF(dadosExportacao, 'alertas-anomalias', 'Alertas e Anomalias'); }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof renderSidebarMenu === 'function') renderSidebarMenu('despesas-alertas.html');
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', function() { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); this.classList.add('active'); document.getElementById(this.dataset.tab).classList.add('active'); }));
+      carregarDados();
+    });
+  </script>
+</body>
+</html>
+

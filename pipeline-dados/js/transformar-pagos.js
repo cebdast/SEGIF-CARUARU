@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Transformação: Empenhos Pagos
  * Port de "Empenhos pagos.py"
  *
@@ -7,7 +7,7 @@
  * 2. Excluir linha 2 (subtítulo do relatório SIGEF)
  * 3. Remover linhas de totais (Total do empenho, Total da UG, Total Geral)
  * 4. Fill-down coluna C (Credor/Fornecedor)
- * 5. Seq. Liq. → apenas dígitos, máximo 7 caracteres
+ * 5. Seq. Liq. â†’ apenas dígitos, máximo 7 caracteres
  * 6. Formatar coluna Data como DD/MM/AAAA
  * 7. Remover linhas vazias
  */
@@ -48,6 +48,13 @@ function transformarPagos(workbook) {
   }
   normalizeMatrix(matrix);
 
+  // Detectar linha de cabeçalho (pula títulos extras)
+  const headerRowIdx = detectHeaderRow(matrix);
+  if (headerRowIdx > 0) {
+    console.log(`[Pagos] Removendo ${headerRowIdx} linhas de título`);
+    matrix.splice(0, headerRowIdx);
+  }
+
   const header = matrix[0];
 
   // Localizar colunas
@@ -72,7 +79,7 @@ function transformarPagos(workbook) {
   const colDataFill = findColumn(filtered[0], 'data', true);
   fillDown(filtered, colDataFill >= 0 ? colDataFill : 2, 1);
 
-  // 4) Seq. Liq. → extrair dígitos, máximo 7 caracteres
+  // 4) Seq. Liq. â†’ extrair dígitos, máximo 7 caracteres
   if (colSeqLiq >= 0) {
     for (let r = 1; r < filtered.length; r++) {
       const val = safeGet(filtered, r, colSeqLiq);
@@ -96,7 +103,7 @@ function transformarPagos(workbook) {
   // 6) Remover linhas completamente vazias
   filtered = removeEmptyRows(filtered, 1);
 
-  // 7) Nr emp. → adicionar /ANO extraído da coluna Data (ex: 235 → 235/2025)
+  // 7) Nr emp. â†’ adicionar /ANO extraído da coluna Data (ex: 235 â†’ 235/2025)
   {
     const colNrEmp = findColumn(filtered[0], 'nr emp');
     const colDataNr = findColumn(filtered[0], 'data', true);
@@ -131,3 +138,5 @@ function transformarPagos(workbook) {
     }
   };
 }
+
+
