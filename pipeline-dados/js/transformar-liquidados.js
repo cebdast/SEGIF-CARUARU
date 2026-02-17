@@ -246,24 +246,12 @@ function transformarLiquidados(workbook) {
   // Steps 13-34: Extração complexa de colunas (apenas formato antigo com colunas vazias)
   if (!_isNewFormat) {
 
+  // Steps 13-17 OTIMIZADO: Inserir todas as colunas e depois fazer um único loop
   // Step 13: Inserir coluna auxiliar antes de "Seq. liq." para dados extraídos
   {
     const seqIdx = ct.idx('Seq. liq.');
     insertColumn(matrix, seqIdx);
     ct.insertAt(seqIdx, '_aux_seq_liq');
-  }
-
-  // Step 14: Valor não-vazio E Seq.liq. não-vazio â†’ _aux_seq_liq = Seq.liq., Seq.liq. = null
-  {
-    const iValor = ct.idx('Valor (R$)');
-    const iSeq = ct.idx('Seq. liq.');
-    const iAux = ct.idx('_aux_seq_liq');
-    for (let r = 0; r < matrix.length; r++) {
-      if (!isEmptyCell(safeGet(matrix, r, iValor)) && !isEmptyCell(safeGet(matrix, r, iSeq))) {
-        safeSet(matrix, r, iAux, safeGet(matrix, r, iSeq));
-        safeSet(matrix, r, iSeq, null);
-      }
-    }
   }
 
   // Step 15: Inserir coluna auxiliar antes de "Seq. liq." para doc
@@ -273,28 +261,40 @@ function transformarLiquidados(workbook) {
     ct.insertAt(seqIdx, '_aux_doc');
   }
 
-  // Step 16: _empty_0 não-vazio E Seq.liq. não-vazio â†’ _aux_doc = Seq.liq., Seq.liq. = null
+  // Step 17 (insert): Inserir coluna _work_hist_emp no final
   {
-    const iEmpty0 = ct.idx('_empty_0');
-    const iSeq = ct.idx('Seq. liq.');
-    const iDoc = ct.idx('_aux_doc');
-    for (let r = 0; r < matrix.length; r++) {
-      if (!isEmptyCell(safeGet(matrix, r, iEmpty0)) && !isEmptyCell(safeGet(matrix, r, iSeq))) {
-        safeSet(matrix, r, iDoc, safeGet(matrix, r, iSeq));
-        safeSet(matrix, r, iSeq, null);
-      }
-    }
+    const iHist = ct.length();
+    ct.insertAt(iHist, '_work_hist_emp');
   }
 
-  // Step 17: Valor vazio E Seq.liq. não-vazio â†’ coluna trabalho = Seq.liq., Seq.liq. = null
+  // Steps 14+16+17 COMBINADOS: um único loop em vez de 3
   {
     const iValor = ct.idx('Valor (R$)');
     const iSeq = ct.idx('Seq. liq.');
-    const iHist = ct.length();
-    ct.insertAt(iHist, '_work_hist_emp');
-    for (let r = 0; r < matrix.length; r++) {
-      if (isEmptyCell(safeGet(matrix, r, iValor)) && !isEmptyCell(safeGet(matrix, r, iSeq))) {
-        safeSet(matrix, r, iHist, safeGet(matrix, r, iSeq));
+    const iAux = ct.idx('_aux_seq_liq');
+    const iEmpty0 = ct.idx('_empty_0');
+    const iDoc = ct.idx('_aux_doc');
+    const iHist = ct.idx('_work_hist_emp');
+    const matLen = matrix.length;
+
+    for (let r = 0; r < matLen; r++) {
+      const seq = safeGet(matrix, r, iSeq);
+      if (isEmptyCell(seq)) continue; // seq vazio = pular
+
+      const valor = safeGet(matrix, r, iValor);
+      const empty0 = safeGet(matrix, r, iEmpty0);
+
+      if (!isEmptyCell(valor)) {
+        // Step 14: valor E seq ambos não-vazios
+        safeSet(matrix, r, iAux, seq);
+        safeSet(matrix, r, iSeq, null);
+      } else if (!isEmptyCell(empty0)) {
+        // Step 16: empty0 E seq ambos não-vazios (valor é vazio)
+        safeSet(matrix, r, iDoc, seq);
+        safeSet(matrix, r, iSeq, null);
+      } else {
+        // Step 17: valor E empty0 vazios, seq não-vazio
+        safeSet(matrix, r, iHist, seq);
         safeSet(matrix, r, iSeq, null);
       }
     }

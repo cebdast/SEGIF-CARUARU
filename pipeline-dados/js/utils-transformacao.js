@@ -179,17 +179,47 @@ function normalizeMatrix(matrix) {
   return matrix;
 }
 
-/** Preenche merged cells no sheet do SheetJS (desmescla preenchendo) */
+/** Converte indice de coluna para letra(s) Excel (0=A, 1=B, 25=Z, 26=AA, etc.) */
+function _colToLetter(c) {
+  var s = '';
+  c++;
+  while (c > 0) {
+    c--;
+    s = String.fromCharCode(65 + (c % 26)) + s;
+    c = Math.floor(c / 26);
+  }
+  return s;
+}
+
+/** Preenche merged cells no sheet do SheetJS (desmescla preenchendo)
+ *  OTIMIZADO: calculo manual de endereco em vez de XLSX.utils.encode_cell()
+ */
 function fillMergedCells(sheet) {
-  if (!sheet['!merges']) return;
-  for (const merge of sheet['!merges']) {
-    const addr0 = XLSX.utils.encode_cell({ r: merge.s.r, c: merge.s.c });
-    const val = sheet[addr0] ? sheet[addr0].v : undefined;
+  if (!sheet['!merges'] || sheet['!merges'].length === 0) return;
+
+  // Pre-calcular letras de colunas para evitar recalculo repetido
+  var maxCol = 0;
+  var merges = sheet['!merges'];
+  for (var m = 0; m < merges.length; m++) {
+    if (merges[m].e.c > maxCol) maxCol = merges[m].e.c;
+  }
+  var colLetters = new Array(maxCol + 1);
+  for (var ci = 0; ci <= maxCol; ci++) {
+    colLetters[ci] = _colToLetter(ci);
+  }
+
+  for (var m = 0; m < merges.length; m++) {
+    var merge = merges[m];
+    var addr0 = colLetters[merge.s.c] + (merge.s.r + 1);
+    var val = sheet[addr0] ? sheet[addr0].v : undefined;
     if (val === undefined) continue;
-    for (let r = merge.s.r; r <= merge.e.r; r++) {
-      for (let c = merge.s.c; c <= merge.e.c; c++) {
-        const addr = XLSX.utils.encode_cell({ r, c });
-        if (!sheet[addr]) sheet[addr] = { t: 's', v: val };
+
+    var cellTemplate = { t: 's', v: val };
+    for (var r = merge.s.r; r <= merge.e.r; r++) {
+      var rowStr = String(r + 1);
+      for (var c = merge.s.c; c <= merge.e.c; c++) {
+        var addr = colLetters[c] + rowStr;
+        if (!sheet[addr]) sheet[addr] = { t: cellTemplate.t, v: cellTemplate.v };
       }
     }
   }
