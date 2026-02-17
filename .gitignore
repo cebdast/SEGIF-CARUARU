@@ -21,3 +21,26 @@ Desktop.ini
 .idea/
 *.swp
 *.swo
+
+# Scripts temporários e utilitários
+fix_analise_vertical.py
+inspect_columns.py
+inspect_columns_2.py
+check_analise.py
+extract_pdf.py
+aplicar-otimizacoes.py
+pipeline-dados/aplicar-detectheader.py
+inspect_columns_3.py
+
+# Backups e arquivos temporários
+*.bak
+Nova pasta/
+pipeline-dados/Nova pasta/
+
+# Exportações de texto
+relatorio_auditoria_text.txt
+parecer_previo_text.txt
+*.txt
+
+# Arquivos de teste
+test-auth.html

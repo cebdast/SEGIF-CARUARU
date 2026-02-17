@@ -784,6 +784,7 @@
       // Dados mensais por ano
       const valoresAnoAtual = nomesMeses.map((_, i) => porMesAno[`${anoAtual}-${(i + 1).toString().padStart(2, '0')}`] || 0);
       const valoresAnoAnterior = nomesMeses.map((_, i) => porMesAno[`${anoAnterior}-${(i + 1).toString().padStart(2, '0')}`] || 0);
+      const temAnoAnterior = valoresAnoAnterior.some(v => v > 0);
 
       // Acumulado no ano
       let acum = 0;
@@ -793,17 +794,27 @@
       const mesesComValor = valoresAnoAtual.filter(v => v > 0);
       const media = mesesComValor.length > 0 ? mesesComValor.reduce((a, b) => a + b, 0) / mesesComValor.length : 0;
 
+      // Montar datasets
+      const datasets = [
+        { type: 'bar', label: `${anoAtual}`, data: valoresAnoAtual, backgroundColor: '#f59e0b80', borderColor: '#f59e0b', borderWidth: 1, borderRadius: 4, yAxisID: 'y' }
+      ];
+
+      // Adicionar ano anterior apenas se tiver dados
+      if (temAnoAnterior) {
+        datasets.push({ type: 'bar', label: `${anoAnterior}`, data: valoresAnoAnterior, backgroundColor: '#94a3b840', borderColor: '#94a3b8', borderWidth: 1, borderRadius: 4, yAxisID: 'y' });
+      }
+
+      datasets.push(
+        { type: 'line', label: 'Acumulado ' + anoAtual, data: acumulado, borderColor: '#8b5cf6', borderWidth: 2, tension: 0.3, pointRadius: 3, fill: false, yAxisID: 'y1' },
+        { type: 'line', label: 'Média Mensal', data: Array(12).fill(media), borderColor: '#ef4444', borderDash: [5, 5], borderWidth: 1.5, pointRadius: 0, fill: false, yAxisID: 'y' }
+      );
+
       if (charts.mensal) charts.mensal.destroy();
       charts.mensal = new Chart(document.getElementById('chartMensal'), {
         type: 'bar',
         data: {
           labels: nomesMeses,
-          datasets: [
-            { type: 'bar', label: `${anoAtual}`, data: valoresAnoAtual, backgroundColor: '#f59e0b80', borderColor: '#f59e0b', borderWidth: 1, borderRadius: 4, yAxisID: 'y' },
-            { type: 'bar', label: `${anoAnterior}`, data: valoresAnoAnterior, backgroundColor: '#94a3b840', borderColor: '#94a3b8', borderWidth: 1, borderRadius: 4, yAxisID: 'y' },
-            { type: 'line', label: 'Acumulado ' + anoAtual, data: acumulado, borderColor: '#8b5cf6', borderWidth: 2, tension: 0.3, pointRadius: 3, fill: false, yAxisID: 'y1' },
-            { type: 'line', label: 'Média Mensal', data: Array(12).fill(media), borderColor: '#ef4444', borderDash: [5, 5], borderWidth: 1.5, pointRadius: 0, fill: false, yAxisID: 'y' }
-          ]
+          datasets: datasets
         },
         options: {
           layout: { padding: { bottom: 32 } },

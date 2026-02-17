@@ -33,9 +33,22 @@ const pluginVariacaoPercentual = {
       const newer = barMetas[p];
       const older = barMetas[p + 1];
 
+      // Verificar se o dataset "anterior" tem dados (Caso Ano vs Ano)
+      const temDadosAnoAnterior = older.ds.data.some(v => (parseFloat(v) || 0) > 0);
+
       for (let i = 0; i < data.labels.length; i++) {
-        const val1 = newer.ds.data[i] || 0;
-        const val2 = older.ds.data[i] || 0;
+        let val1, val2;
+
+        if (temDadosAnoAnterior) {
+          // COMPARAÇÃO ANO VS ANO (Comportamento original)
+          val1 = newer.ds.data[i] || 0;
+          val2 = older.ds.data[i] || 0;
+        } else {
+          // COMPARAÇÃO MÊS VS MÊS ANTERIOR (Novo comportamento para ano único)
+          if (i === 0) continue; // Pula Janeiro (não tem mês anterior)
+          val1 = newer.ds.data[i] || 0;
+          val2 = newer.ds.data[i - 1] || 0;
+        }
 
         if (val2 === 0 && val1 === 0) continue;
 
@@ -44,10 +57,12 @@ const pluginVariacaoPercentual = {
           : (val1 > 0 ? 100 : 0);
 
         const bar1 = newer.meta.data[i];
-        const bar2 = older.meta.data[i];
-        if (!bar1 || !bar2) continue;
-
-        const centerX = (bar1.x + bar2.x) / 2;
+        // Se for comparação Ano vs Ano, usa as duas barras. Se for MoM, usa apenas a atual.
+        const centerX = temDadosAnoAnterior 
+          ? (bar1.x + older.meta.data[i].x) / 2 
+          : bar1.x;
+        
+        if (!bar1 || (temDadosAnoAnterior && !older.meta.data[i])) continue;
         const bottomY = chartArea.bottom;
 
         const text = (variacao >= 0 ? '+' : '') + Math.round(variacao) + '%';
