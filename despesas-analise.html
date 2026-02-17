@@ -314,8 +314,7 @@
           <label style="white-space: nowrap;"><i class="fas fa-layer-group"></i> Agrupar por:</label>
           <select id="agrupamento" class="filter-select" style="min-width: 180px; max-width: 200px;"
             onchange="atualizarAnalise()">
-            <option value="Elemento">Elemento</option>
-            <option value="Função">Função</option>
+            <option value="Função" selected>Função</option>
             <option value="Unidade orçamentária">Unidade Orçamentária</option>
             <option value="Programa">Programa</option>
             <option value="Natureza da Despesa">Natureza da Despesa</option>
@@ -324,8 +323,7 @@
 
         <div style="display: flex; align-items: center; gap: 12px;">
           <label style="white-space: nowrap;"><i class="fas fa-chart-line"></i> Métrica:</label>
-          <select id="metricaAnalise" class="filter-select" style="min-width: 130px;"
-            onchange="atualizarAnalise()">
+          <select id="metricaAnalise" class="filter-select" style="min-width: 130px;" onchange="atualizarAnalise()">
             <option value="empenhado">Empenhado</option>
             <option value="liquidado">Liquidado</option>
             <option value="pago">Pago</option>
@@ -945,7 +943,7 @@
 
       // Construir cabeçalho dinâmico: todos os anos primeiro, depois variações
       const metricaNome = metrica === 'empenhado' ? 'Empenhado' : metrica === 'liquidado' ? 'Liquidado' : 'Pago';
-      let headerHtml = `<tr><th>Elemento de Despesa</th>`;
+      let headerHtml = `<tr><th>${agrupamento}</th>`;
       anos.forEach(ano => {
         headerHtml += `<th style="text-align: right;">${metricaNome} (${ano})</th>`;
       });
